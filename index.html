@@ -3,25 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NourishAI – Smart Meal Planner</title>
+<title>Forma – Smart Meal Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --primary: #10b981; --primary-hover: #059669; --primary-light: #ecfdf5; --primary-dark: #065f46;
-  --protein: #6366f1; --carbs: #f59e0b; --fat: #f43f5e;
-  --bg: #f8fafc; --surface: #ffffff; --surface-2: #f1f5f9;
-  --border: #e2e8f0; --border-focus: #10b981;
-  --text: #0f172a; --text-2: #475569; --text-3: #94a3b8;
+  --primary: #2a6049; --primary-hover: #1e4835; --primary-light: #eef7f2; --primary-dark: #0f2a1e;
+  --accent: #c4622d; --accent-light: #fef3eb;
+  --protein: #4f46e5; --carbs: #b45309; --fat: #be185d;
+  --bg: #f8f6f3; --surface: #ffffff; --surface-2: #f2eeea;
+  --border: #e5ddd4; --border-focus: #2a6049;
+  --text: #1a1816; --text-2: #5c5550; --text-3: #a89e98;
   --radius: 14px; --radius-sm: 8px; --radius-lg: 20px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+  --shadow: 0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 32px rgba(0,0,0,0.12);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
-button{cursor:pointer;font-family:'Inter',sans-serif;border:none;outline:none}
-input,select,textarea{font-family:'Inter',sans-serif;outline:none}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+button{cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;border:none;outline:none}
+input,select,textarea{font-family:'Plus Jakarta Sans',sans-serif;outline:none}
 a{color:inherit;text-decoration:none}
 
 /* ── Layout ── */
@@ -35,9 +36,9 @@ a{color:inherit;text-decoration:none}
 .page-content.with-topnav{padding-top:72px}
 
 /* ── Onboarding ── */
-.onboard-wrap{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(160deg,#ecfdf5 0%,#f0f9ff 100%)}
+.onboard-wrap{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(160deg,#f8f6f3 0%,#eef7f2 100%)}
 .onboard-header{padding:48px 24px 24px;text-align:center}
-.onboard-logo{font-size:28px;font-weight:800;color:var(--primary);letter-spacing:-1px;margin-bottom:8px}
+.onboard-logo{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
 .onboard-body{flex:1;padding:0 24px 32px;max-width:500px;margin:0 auto;width:100%}
 .step-indicator{display:flex;gap:6px;justify-content:center;margin-bottom:32px}
 .step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s}
@@ -76,20 +77,20 @@ a{color:inherit;text-decoration:none}
 .macro-field .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 .macro-field input{width:100%;border:none;font-size:22px;font-weight:700;color:var(--text);background:none;padding:0}
 .macro-field .unit{font-size:13px;color:var(--text-3);margin-top:2px}
-.macro-field.calories{grid-column:1/-1;background:linear-gradient(135deg,var(--primary-light),#f0fdf4)}
+.macro-field.calories{grid-column:1/-1;background:linear-gradient(135deg,var(--primary-light),#dff0e8)}
 .macro-field.calories input{color:var(--primary);font-size:28px}
 
 /* ── Cards & Surfaces ── */
 .card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;border:1px solid var(--border)}
 .card-title{font-size:16px;font-weight:700;margin-bottom:4px}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
-.chip-cal{background:#fef9c3;color:#854d0e}
-.chip-protein{background:#eef2ff;color:#4338ca}
-.chip-carbs{background:#fffbeb;color:#92400e}
-.chip-fat{background:#fff1f2;color:#be123c}
+.chip-cal{background:#fef3eb;color:#9a3412}
+.chip-protein{background:#ede9fe;color:#3730a3}
+.chip-carbs{background:#fef9c3;color:#7c4700}
+.chip-fat{background:#fce7f3;color:#9d174d}
 
 /* ── Macro Ring ── */
-.summary-section{background:linear-gradient(135deg,#10b981,#059669);border-radius:var(--radius-lg);padding:20px;color:#fff;margin-bottom:16px}
+.summary-section{background:linear-gradient(135deg,#2a6049,#1a3d2e);border-radius:var(--radius-lg);padding:20px;color:#fff;margin-bottom:16px}
 .summary-top{display:flex;align-items:center;gap:16px;margin-bottom:16px}
 .ring-wrap{position:relative;width:100px;height:100px;flex-shrink:0}
 .ring-wrap svg{transform:rotate(-90deg);width:100%;height:100%}
@@ -138,7 +139,7 @@ a{color:inherit;text-decoration:none}
 
 /* ── Recipe Card ── */
 .recipe-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
-.recipe-header{padding:14px 16px;background:linear-gradient(135deg,var(--primary-light),#f0fdf4);border-bottom:1px solid var(--border)}
+.recipe-header{padding:14px 16px;background:linear-gradient(135deg,var(--primary-light),#e8f4ed);border-bottom:1px solid var(--border)}
 .recipe-name{font-size:16px;font-weight:700;margin-bottom:6px}
 .recipe-desc{font-size:13px;color:var(--text-2);line-height:1.5}
 .recipe-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
@@ -243,6 +244,25 @@ a{color:inherit;text-decoration:none}
 
 /* ── Responsive ── */
 @media(min-width:500px){.week-grid{grid-template-columns:repeat(4,1fr)}.form-row{grid-template-columns:1fr 1fr 1fr}}
+
+/* ── Forma brand polish ── */
+.onboard-logo span{font-weight:800;letter-spacing:-0.5px}
+.step-title{font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px}
+.section-title{font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1px}
+.slot-title{font-size:14px;font-weight:700;letter-spacing:-0.2px}
+.recipe-name{font-size:15px;font-weight:700;letter-spacing:-0.3px}
+.day-card{transition:all .15s}
+.form-input{border-radius:var(--radius-sm);transition:border-color .15s,box-shadow .15s}
+.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(42,96,73,0.1)}
+.btn-primary{background:var(--primary);letter-spacing:0.1px}
+.btn-primary:hover{background:var(--primary-hover);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn-generate{background:var(--primary);border-radius:var(--radius-sm)}
+.btn-generate:hover{background:var(--primary-hover)}
+.meal-slot{transition:box-shadow .15s}
+.meal-slot:hover{box-shadow:var(--shadow-md)}
+.saved-card:hover{border-color:var(--primary)}
+.radio-card.selected{border-color:var(--primary);background:var(--primary-light)}
+.radio-card:hover{border-color:var(--primary)}
 </style>
 </head>
 <body>
@@ -252,7 +272,7 @@ a{color:inherit;text-decoration:none}
 // ═══════════════════════════════════════════════════
 // STATE & STORAGE
 // ═══════════════════════════════════════════════════
-const STORAGE_KEY = 'nourishai_v1';
+const STORAGE_KEY = 'forma_v1';
 
 function defaultState() {
   return {
@@ -1046,7 +1066,11 @@ function render() {
 function renderApp() {
   const v = STATE.currentView;
   return `
-    <div class="nav-bar top">
+    <div class="nav-bar top" style="padding:0 4px">
+      <div style="display:flex;align-items:center;padding:0 12px;gap:6px;flex-shrink:0;border-right:1px solid var(--border)">
+        ${LOGO_SVG}
+        <span style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.5px">Forma</span>
+      </div>
       ${['today','week','saved','settings'].map(tab => `
         <button class="nav-item ${v===tab?'active':''}" onclick="navigate('${tab}')">
           ${NAV_ICONS[tab]}
@@ -1070,6 +1094,27 @@ const NAV_ICONS = {
   settings:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`
 };
 
+const IC = {
+  flame:    `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-1px"><path d="M12 2c-.5 2.5-2 3.5-3 5-1 1.5-1 3 .5 4.5-.5-1 0-2.5 1-3 .5 2 2.5 3 2.5 5.5 1.5-1 2-3 1-5 1 1 1.5 2.5 1.5 4 1.5-1.5 2-4 .5-6.5C15 8.5 12.5 7 12 2z"/></svg>`,
+  protein:  `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px"><path d="M6 4v16M18 4v16M6 12h12"/></svg>`,
+  grain:    `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-1px"><circle cx="12" cy="5" r="2"/><circle cx="7" cy="9" r="2"/><circle cx="17" cy="9" r="2"/><circle cx="5" cy="14" r="2"/><circle cx="12" cy="14" r="2"/><circle cx="19" cy="14" r="2"/><path d="M12 16v5"/></svg>`,
+  droplet:  `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-1px"><path d="M12 2L5.5 10a7 7 0 1 0 13 0L12 2z"/></svg>`,
+  clock:    `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`,
+  pan:      `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M3 12h14a4 4 0 0 0 0-8H3v8z"/><path d="M19 6l2-2"/><line x1="3" y1="12" x2="3" y2="20"/><line x1="7" y1="20" x2="3" y2="20"/></svg>`,
+  sparkle:  `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px"><path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2zM5 17l.8 2.7L8.5 20.5l-2.7.8L5 24l-.8-2.7L1.5 20.5l2.7-.8L5 17zM19 2l.5 1.8 1.8.5-1.8.5L19 6.5l-.5-1.7L16.7 4.3l1.8-.5L19 2z"/></svg>`,
+  bookmark: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
+  cart:     `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>`,
+  printer:  `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>`,
+  search:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
+  warn:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M10.3 3.5L1.5 19a1.7 1.7 0 0 0 1.5 2.5h19a1.7 1.7 0 0 0 1.5-2.5L14.7 3.5a2.7 2.7 0 0 0-4.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  pin:      `<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-1px"><circle cx="12" cy="12" r="4"/></svg>`,
+  check:    `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="vertical-align:-1px"><path d="M20 6L9 17l-5-5"/></svg>`,
+  unlock:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`,
+  refresh:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.8-3.4L23 10"/><path d="M20.5 15a9 9 0 0 1-14.8 3.4L1 14"/></svg>`,
+};
+
+const LOGO_SVG = `<svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2a6049"/><path d="M16 8c0 0-6 4-6 9a6 6 0 0 0 12 0c0-5-6-9-6-9z" fill="white" opacity="0.9"/><path d="M16 14v9" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+
 // ═══════════════════════════════════════════════════
 // ONBOARDING
 // ═══════════════════════════════════════════════════
@@ -1089,8 +1134,8 @@ function renderOnboarding() {
 
   return `<div class="onboard-wrap">
     <div class="onboard-header">
-      <div class="onboard-logo">🥗 NourishAI</div>
-      <p style="color:var(--text-2);font-size:14px">Your AI-powered meal planner</p>
+      <div class="onboard-logo">${LOGO_SVG}<span>Forma</span></div>
+      <p style="color:var(--text-3);font-size:13px;letter-spacing:0.3px">Shape your nutrition.</p>
     </div>
     <div class="onboard-body">
       <div class="step-indicator">${dots}</div>
@@ -1102,7 +1147,7 @@ function renderOnboarding() {
 function renderOB1() {
   const p = STATE.profile;
   return `
-    <div class="step-title">Let's get started 👋</div>
+    <div class="step-title">Let's get started</div>
     <div class="step-sub">Tell us a bit about yourself so we can personalize your nutrition plan.</div>
     <div class="form-group">
       <label class="form-label">Your name</label>
@@ -1145,17 +1190,17 @@ function renderOB1() {
 function renderOB2() {
   const p = STATE.profile;
   const goals = [
-    { val:'lose', icon:'⬇️', title:'Lose Weight', sub:'Calorie deficit to shed fat' },
-    { val:'maintain', icon:'⚖️', title:'Maintain', sub:'Stay at current weight' },
-    { val:'gain', icon:'💪', title:'Build Muscle', sub:'Lean bulk with moderate surplus' },
-    { val:'bulk', icon:'🏋️', title:'Bulk', sub:'Significant calorie surplus' }
+    { val:'lose', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>`, title:'Lose Weight', sub:'Calorie deficit to shed fat' },
+    { val:'maintain', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`, title:'Maintain', sub:'Stay at current weight' },
+    { val:'gain', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`, title:'Build Muscle', sub:'Lean bulk with moderate surplus' },
+    { val:'bulk', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v16M18 4v16M6 12h12M3 9h3M18 9h3M3 15h3M18 15h3"/></svg>`, title:'Bulk', sub:'Significant calorie surplus' }
   ];
   const activities = [
-    { val:'sedentary', icon:'🛋️', title:'Sedentary', sub:'Little to no exercise' },
-    { val:'light', icon:'🚶', title:'Lightly Active', sub:'1-3 days/week exercise' },
-    { val:'moderate', icon:'🏃', title:'Moderately Active', sub:'3-5 days/week exercise' },
-    { val:'active', icon:'⚡', title:'Very Active', sub:'6-7 days/week hard exercise' },
-    { val:'very', icon:'🔥', title:'Extremely Active', sub:'Athlete / physical job' }
+    { val:'sedentary', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`, title:'Sedentary', sub:'Little to no exercise' },
+    { val:'light', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><path d="M9 19l1-5 2 2 1-4"/><path d="M7.5 14l2-3.5 3 1.5 2-3.5"/></svg>`, title:'Lightly Active', sub:'1-3 days/week exercise' },
+    { val:'moderate', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`, title:'Moderately Active', sub:'3-5 days/week exercise' },
+    { val:'active', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/><polygon points="19 2 14 9 17 9 16 14 21 7 18 7 19 2" fill="currentColor" opacity="0.3"/></svg>`, title:'Very Active', sub:'6-7 days/week hard exercise' },
+    { val:'very', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-.5 2.5-2 3.5-3 5-1 1.5-1 3 .5 4.5-.5-1 0-2.5 1-3 .5 2 2.5 3 2.5 5.5 1.5-1 2-3 1-5 1 1 1.5 2.5 1.5 4 1.5-1.5 2-4 .5-6.5C15 8.5 12.5 7 12 2z"/></svg>`, title:'Extremely Active', sub:'Athlete / physical job' }
   ];
   return `
     <div class="step-title">Your goals</div>
@@ -1192,22 +1237,22 @@ function renderOB3() {
     <div class="step-sub">We calculated these based on your profile. Edit any number — everything adjusts automatically.</div>
     <div class="macro-edit-grid" id="macro-grid">
       <div class="macro-field calories">
-        <label><span class="dot" style="background:#10b981"></span>Calories</label>
+        <label><span class="dot" style="background:#2a6049"></span>Calories</label>
         <input type="number" id="me-calories" value="${m.calories}" data-field="calories">
         <div class="unit">kcal / day</div>
       </div>
       <div class="macro-field">
-        <label><span class="dot" style="background:#6366f1"></span>Protein</label>
+        <label><span class="dot" style="background:#4f46e5"></span>Protein</label>
         <input type="number" id="me-protein" value="${m.protein}" data-field="protein">
         <div class="unit">grams — ${Math.round(m.protein*4/m.calories*100)}% of cals</div>
       </div>
       <div class="macro-field">
-        <label><span class="dot" style="background:#f59e0b"></span>Carbs</label>
+        <label><span class="dot" style="background:#b45309"></span>Carbs</label>
         <input type="number" id="me-carbs" value="${m.carbs}" data-field="carbs">
         <div class="unit">grams — ${Math.round(m.carbs*4/m.calories*100)}% of cals</div>
       </div>
       <div class="macro-field">
-        <label><span class="dot" style="background:#f43f5e"></span>Fat</label>
+        <label><span class="dot" style="background:#be185d"></span>Fat</label>
         <input type="number" id="me-fat" value="${m.fat}" data-field="fat">
         <div class="unit">grams — ${Math.round(m.fat*9/m.calories*100)}% of cals</div>
       </div>
@@ -1241,7 +1286,7 @@ function renderOB4() {
     </div>
     <div class="nav-btns">
       <button class="btn btn-secondary" onclick="STATE.onboardingStep=3;render()">← Back</button>
-      <button class="btn btn-primary" id="ob-next4" style="flex:1">Start planning! 🚀</button>
+      <button class="btn btn-primary" id="ob-next4" style="flex:1">Start planning →</button>
     </div>
   `;
 }
@@ -1416,17 +1461,17 @@ function renderToday() {
         <div class="summary-right">
           <div class="label">Remaining calories</div>
           <div class="big-num">${remaining.calories}</div>
-          <div class="sub">${consumed.calories > target.calories ? '⚠️ Over target' : `${Math.round(calPct*100)}% of daily goal`}</div>
+          <div class="sub">${consumed.calories > target.calories ? `${IC.warn} Over target` : `${Math.round(calPct*100)}% of daily goal`}</div>
         </div>
       </div>
       <div class="macro-bars">
         ${[
-          { label:'Protein', val:consumed.protein, tgt:target.protein, unit:'g' },
-          { label:'Carbs', val:consumed.carbs, tgt:target.carbs, unit:'g' },
-          { label:'Fat', val:consumed.fat, tgt:target.fat, unit:'g' }
+          { label:'Protein', val:consumed.protein, tgt:target.protein, unit:'g', color:'rgba(255,255,255,0.9)' },
+          { label:'Carbs', val:consumed.carbs, tgt:target.carbs, unit:'g', color:'rgba(255,255,255,0.75)' },
+          { label:'Fat', val:consumed.fat, tgt:target.fat, unit:'g', color:'rgba(255,255,255,0.6)' }
         ].map(m => `<div class="macro-bar-item">
           <label>${m.label}</label>
-          <div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.min(100,m.val/m.tgt*100).toFixed(1)}%"></div></div>
+          <div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.min(100,m.val/m.tgt*100).toFixed(1)}%;background:${m.color}"></div></div>
           <div class="macro-bar-nums">${m.val}/${m.tgt}${m.unit}</div>
         </div>`).join('')}
       </div>
@@ -1503,7 +1548,7 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
       <div class="slot-actions">
         ${slot.meal ? `
           <button class="btn btn-secondary btn-sm" onclick="regenerateSlot('${dateStr}','${slot.id}')">↺ New</button>
-          <button class="btn btn-secondary btn-sm" onclick="saveSlotMeal('${slot.id}')">🔖 Save</button>
+          <button class="btn btn-secondary btn-sm" onclick="saveSlotMeal('${slot.id}')">${IC.bookmark} Save</button>
         ` : !slot.open ? `
           <button class="pill" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Leave open</button>
         ` : ''}
@@ -1512,12 +1557,12 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
     </div>
     <div class="slot-body">
       ${slot.open ? `
-        <div class="slot-open-badge">🔓 Open calories — logged as flex<button style="background:none;border:none;cursor:pointer;margin-left:8px;color:#854d0e;font-size:12px" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Undo</button></div>
+        <div class="slot-open-badge">${IC.unlock} Open slot — logged as flex<button style="background:none;border:none;cursor:pointer;margin-left:8px;color:#854d0e;font-size:12px" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Undo</button></div>
       ` : slot.meal ? renderRecipeCard(slot.meal, slot.id) : `
         <div class="slot-empty">
           <input class="pref-input" id="pref-${slot.id}" placeholder="${isSnack?'Any snack preference? (e.g. chips and dip)':'What would you like? (e.g. overnight oats)'}" value="${slot.preference||''}">
           <button class="btn-generate" id="gen-${slot.id}" onclick="generateSlot('${dateStr}','${slot.id}')">
-            ✨ Generate
+            ${IC.sparkle} Generate
           </button>
         </div>
         ${STATE.savedMeals.length ? `<div style="margin-top:8px"><button class="btn btn-secondary btn-sm" onclick="showUseSaved('${dateStr}','${slot.id}')">Use saved meal</button></div>` : ''}
@@ -1533,15 +1578,15 @@ function renderRecipeCard(meal, slotId) {
       <div class="recipe-name">${meal.name}</div>
       ${meal.description ? `<div class="recipe-desc">${meal.description}</div>` : ''}
       <div class="recipe-meta">
-        ${meal.prepTime ? `<span class="recipe-time">⏱ Prep ${meal.prepTime}</span>` : ''}
-        ${meal.cookTime ? `<span class="recipe-time">🍳 Cook ${meal.cookTime}</span>` : ''}
+        ${meal.prepTime ? `<span class="recipe-time">${IC.clock} Prep ${meal.prepTime}</span>` : ''}
+        ${meal.cookTime ? `<span class="recipe-time">${IC.pan} Cook ${meal.cookTime}</span>` : ''}
       </div>
     </div>
     <div class="recipe-macro-chips">
-      <span class="chip chip-cal">🔥 ${meal.calories} cal</span>
-      <span class="chip chip-protein">💪 ${meal.protein}g protein</span>
-      <span class="chip chip-carbs">🌾 ${meal.carbs}g carbs</span>
-      <span class="chip chip-fat">🥑 ${meal.fat}g fat</span>
+      <span class="chip chip-cal">${IC.flame} ${meal.calories} cal</span>
+      <span class="chip chip-protein">${IC.protein} ${meal.protein}g protein</span>
+      <span class="chip chip-carbs">${IC.grain} ${meal.carbs}g carbs</span>
+      <span class="chip chip-fat">${IC.droplet} ${meal.fat}g fat</span>
     </div>
     ${meal.ingredients?.length ? `
     <div class="recipe-section">
@@ -1555,7 +1600,7 @@ function renderRecipeCard(meal, slotId) {
               <span class="ingredient-amount">${ing.amount}</span>
             </div>
             ${hasMacros ? `<div class="ing-macros">
-              <span class="ing-mac-chip imc-cal">🔥 ${ing.cal} cal</span>
+              <span class="ing-mac-chip imc-cal">${IC.flame} ${ing.cal} cal</span>
               <span class="ing-mac-chip imc-p">P ${ing.p}g</span>
               <span class="ing-mac-chip imc-c">C ${ing.c}g</span>
               <span class="ing-mac-chip imc-f">F ${ing.f}g</span>
@@ -1653,7 +1698,7 @@ async function generateSlot(dateStr, slotId) {
   const genBtn = document.getElementById(`gen-${slotId}`);
   if (genBtn) {
     genBtn.disabled = true;
-    genBtn.innerHTML = `✨ Building...`;
+    genBtn.innerHTML = '<span class="spinner"></span> Building...';
   }
 
   // Compute target macros for this slot
@@ -1692,7 +1737,7 @@ async function generateSlot(dateStr, slotId) {
     showToast(`Error: ${err.message}`, 4000);
     if (genBtn) {
       genBtn.disabled = false;
-      genBtn.innerHTML = '✨ Generate';
+      genBtn.innerHTML = IC.sparkle + ' Generate';
     }
   }
 }
@@ -1792,7 +1837,7 @@ function renderWeek() {
         <div style="font-size:20px;font-weight:800;letter-spacing:-.5px">This Week</div>
         <div style="font-size:13px;color:var(--text-2)">${formatDate(dates[0])} – ${formatDate(dates[6])}</div>
       </div>
-      <button class="btn btn-secondary btn-sm" onclick="planWholeWeek()" id="plan-week-btn">✨ Plan Week</button>
+      <button class="btn btn-secondary btn-sm" onclick="planWholeWeek()" id="plan-week-btn">${IC.sparkle} Plan Week</button>
     </div>
 
     <div class="week-grid">
@@ -1809,7 +1854,7 @@ function renderWeek() {
         const [, mm, dd] = d.split('-');
         const dayName = new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'short'});
         return `<div class="day-card ${isActive?'active':''} ${status==='planned'?'planned':''}" onclick="selectWeekDay('${d}')">
-          <div class="day-name">${dayName}${isToday?' 📍':''}</div>
+          <div class="day-name">${dayName}${isToday ? ' <span style="display:inline-block;width:6px;height:6px;background:var(--primary);border-radius:50%;vertical-align:2px;margin-left:2px"></span>' : ''}</div>
           <div class="day-date">${parseInt(mm)}/${parseInt(dd)}</div>
           ${plannedCals > 0 ? `<div class="day-cals">${plannedCals}</div><div style="font-size:10px;opacity:.6">cal planned</div>` : '<div class="day-cals" style="color:var(--text-3)">—</div>'}
           <div class="day-status ${status}">${statusText}</div>
@@ -1821,7 +1866,7 @@ function renderWeek() {
 
     ${dates.some(d => STATE.dailyPlans[d] && getPlanTotals(STATE.dailyPlans[d]).calories > 0) ? `
       <button class="btn btn-primary" onclick="weekState.groceryMode=true;render()" style="margin-top:8px">
-        🛒 Generate Grocery List
+        ${IC.cart} Generate Grocery List
       </button>
     ` : ''}
   `;
@@ -1833,7 +1878,7 @@ function renderWeekDayDetail(dateStr) {
   return `<div class="day-detail">
     <div class="day-detail-header">
       <div style="font-size:16px;font-weight:700">${label}</div>
-      <button class="btn btn-secondary btn-sm" onclick="planDay('${dateStr}')">✨ Plan day</button>
+      <button class="btn btn-secondary btn-sm" onclick="planDay('${dateStr}')">${IC.sparkle} Plan day</button>
     </div>
     ${plan.slots.map(slot => `
       <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
@@ -1861,7 +1906,7 @@ function clearWeekSlot(dateStr, slotId) {
 
 async function planDay(dateStr) {
   const btn = document.querySelector(`[onclick="planDay('${dateStr}')"]`);
-  if (btn) { btn.disabled=true; btn.innerHTML='✨ Generating...'; }
+  if (btn) { btn.disabled=true; btn.innerHTML='<span class="spinner spinner-dark"></span> Generating...'; }
 
   const plan = getOrCreatePlan(dateStr);
   const { totals: fixedTotals } = getActiveFixedTotals(dateStr);
@@ -1904,7 +1949,7 @@ async function planWholeWeek() {
   for (const d of dates) {
     await planDay(d);
   }
-  showToast('Week planned! Check the grocery list 🛒');
+  showToast('Week planned! Check the grocery list.');
   render();
 }
 
@@ -1938,7 +1983,7 @@ function renderGroceryList(dates) {
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
       <button class="btn btn-secondary btn-sm" onclick="weekState.groceryMode=false;render()">← Back to Week</button>
       <div style="font-size:20px;font-weight:800;flex:1">Grocery List</div>
-      <button class="btn btn-secondary btn-sm" onclick="printGroceryList()">🖨️ Print</button>
+      <button class="btn btn-secondary btn-sm" onclick="printGroceryList()">${IC.printer} Print</button>
     </div>
     <div class="grocery-wrap" id="grocery-list">
       ${items.length ? items.map((item,i) => `
@@ -1981,7 +2026,7 @@ function renderSaved() {
     <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">${STATE.savedMeals.length} saved · Filter by macros</div>
 
     <div class="filter-row">
-      <input class="filter-input" placeholder="🔍 Search..." style="flex:1;width:auto" value="${savedFilters.search}" oninput="savedFilters.search=this.value;renderSavedInPlace()">
+      <input class="filter-input" placeholder="Search..." style="flex:1;width:auto" value="${savedFilters.search}" oninput="savedFilters.search=this.value;renderSavedInPlace()">
       <input class="filter-input" type="number" placeholder="Min cal" value="${savedFilters.minCal}" oninput="savedFilters.minCal=this.value;renderSavedInPlace()">
       <input class="filter-input" type="number" placeholder="Max cal" value="${savedFilters.maxCal}" oninput="savedFilters.maxCal=this.value;renderSavedInPlace()">
       <input class="filter-input" type="number" placeholder="Min protein" value="${savedFilters.minProtein}" oninput="savedFilters.minProtein=this.value;renderSavedInPlace()">
@@ -1997,15 +2042,15 @@ function renderSaved() {
             </div>
             ${m.description ? `<div class="saved-card-desc">${m.description}</div>` : ''}
             <div class="saved-card-chips">
-              <span class="chip chip-cal">🔥 ${m.calories} cal</span>
-              <span class="chip chip-protein">💪 ${m.protein}g P</span>
-              <span class="chip chip-carbs">🌾 ${m.carbs}g C</span>
-              <span class="chip chip-fat">🥑 ${m.fat}g F</span>
+              <span class="chip chip-cal">${IC.flame} ${m.calories} cal</span>
+              <span class="chip chip-protein">${IC.protein} ${m.protein}g P</span>
+              <span class="chip chip-carbs">${IC.grain} ${m.carbs}g C</span>
+              <span class="chip chip-fat">${IC.droplet} ${m.fat}g F</span>
             </div>
             <div style="margin-top:8px"><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();addSavedToToday('${m.id}')">+ Add to today</button></div>
           </div>
         `).join('')}
-      </div>` : `<div class="empty-state"><div class="icon">🔖</div><p>${STATE.savedMeals.length ? 'No meals match your filters' : 'Save meals from the Today view to see them here'}</p></div>`}
+      </div>` : `<div class="empty-state"><div class="icon" style="color:var(--text-3)">${IC.bookmark.replace('width="14" height="14"','width="40" height="40"')}</div><p>${STATE.savedMeals.length ? 'No meals match your filters' : 'Save meals from the Today view to see them here'}</p></div>`}
     </div>
   `;
 }
@@ -2088,27 +2133,27 @@ function renderSettings() {
       <div class="settings-section-title">Daily Macro Targets</div>
       <div class="macro-edit-grid" id="s-macro-grid">
         <div class="macro-field calories">
-          <label><span class="dot" style="background:#10b981"></span>Calories</label>
+          <label><span class="dot" style="background:#2a6049"></span>Calories</label>
           <input type="number" id="sm-calories" value="${p.calories}" data-field="calories">
           <div class="unit">kcal / day</div>
         </div>
         <div class="macro-field">
-          <label><span class="dot" style="background:#6366f1"></span>Protein</label>
+          <label><span class="dot" style="background:#4f46e5"></span>Protein</label>
           <input type="number" id="sm-protein" value="${p.protein}" data-field="protein">
           <div class="unit">grams</div>
         </div>
         <div class="macro-field">
-          <label><span class="dot" style="background:#f59e0b"></span>Carbs</label>
+          <label><span class="dot" style="background:#b45309"></span>Carbs</label>
           <input type="number" id="sm-carbs" value="${p.carbs}" data-field="carbs">
           <div class="unit">grams</div>
         </div>
         <div class="macro-field">
-          <label><span class="dot" style="background:#f43f5e"></span>Fat</label>
+          <label><span class="dot" style="background:#be185d"></span>Fat</label>
           <input type="number" id="sm-fat" value="${p.fat}" data-field="fat">
           <div class="unit">grams</div>
         </div>
       </div>
-      <button class="btn btn-secondary btn-sm" onclick="recalcTDEE()" style="margin-top:10px">↺ Recalculate from profile</button>
+      <button class="btn btn-secondary btn-sm" onclick="recalcTDEE()" style="margin-top:10px">${IC.refresh} Recalculate from profile</button>
     </div>
 
     <div class="settings-section">
@@ -2129,7 +2174,7 @@ function renderSettings() {
 
 <button class="btn btn-primary" id="save-settings-btn">Save Settings</button>
     <div style="margin-top:12px">
-      <button class="btn btn-danger btn-sm" onclick="resetApp()">⚠️ Reset all data</button>
+      <button class="btn btn-danger btn-sm" onclick="resetApp()">Reset all data</button>
     </div>
   `;
 }
