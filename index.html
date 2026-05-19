@@ -8,16 +8,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --primary: #2a6049; --primary-hover: #1e4835; --primary-light: #eef7f2; --primary-dark: #0f2a1e;
-  --accent: #c4622d; --accent-light: #fef3eb;
-  --protein: #4f46e5; --carbs: #b45309; --fat: #be185d;
-  --bg: #f8f6f3; --surface: #ffffff; --surface-2: #f2eeea;
-  --border: #e5ddd4; --border-focus: #2a6049;
-  --text: #1a1816; --text-2: #5c5550; --text-3: #a89e98;
-  --radius: 14px; --radius-sm: 8px; --radius-lg: 20px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-  --shadow-lg: 0 10px 32px rgba(0,0,0,0.12);
+  --primary: #5e9080; --primary-hover: #4d7d6e; --primary-light: #edf7f4; --primary-dark: #2d5c4d;
+  --accent: #f08060; --accent-light: #fff5f2;
+  --protein: #7c6fe0; --carbs: #d4900a; --fat: #e05880;
+  --bg: #faf8f5; --surface: #ffffff; --surface-2: #f5f0eb;
+  --border: #e6dcd2; --border-focus: #5e9080;
+  --text: #282018; --text-2: #6b5f58; --text-3: #b0a49c;
+  --radius: 16px; --radius-sm: 10px; --radius-lg: 22px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.07);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.09);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
@@ -36,7 +36,7 @@ a{color:inherit;text-decoration:none}
 .page-content.with-topnav{padding-top:72px}
 
 /* ── Onboarding ── */
-.onboard-wrap{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(160deg,#f8f6f3 0%,#eef7f2 100%)}
+.onboard-wrap{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(160deg,#faf8f5 0%,#edf7f4 100%)}
 .onboard-header{padding:48px 24px 24px;text-align:center}
 .onboard-logo{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
 .onboard-body{flex:1;padding:0 24px 32px;max-width:500px;margin:0 auto;width:100%}
@@ -77,7 +77,7 @@ a{color:inherit;text-decoration:none}
 .macro-field .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 .macro-field input{width:100%;border:none;font-size:22px;font-weight:700;color:var(--text);background:none;padding:0}
 .macro-field .unit{font-size:13px;color:var(--text-3);margin-top:2px}
-.macro-field.calories{grid-column:1/-1;background:linear-gradient(135deg,var(--primary-light),#dff0e8)}
+.macro-field.calories{grid-column:1/-1;background:linear-gradient(135deg,var(--primary-light),#d8f0e8)}
 .macro-field.calories input{color:var(--primary);font-size:28px}
 
 /* ── Cards & Surfaces ── */
@@ -90,7 +90,7 @@ a{color:inherit;text-decoration:none}
 .chip-fat{background:#fce7f3;color:#9d174d}
 
 /* ── Macro Ring ── */
-.summary-section{background:linear-gradient(135deg,#2a6049,#1a3d2e);border-radius:var(--radius-lg);padding:20px;color:#fff;margin-bottom:16px}
+.summary-section{background:linear-gradient(135deg,#5e9080,#3b6b5a);border-radius:var(--radius-lg);padding:20px;color:#fff;margin-bottom:16px}
 .summary-top{display:flex;align-items:center;gap:16px;margin-bottom:16px}
 .ring-wrap{position:relative;width:100px;height:100px;flex-shrink:0}
 .ring-wrap svg{transform:rotate(-90deg);width:100%;height:100%}
@@ -253,7 +253,7 @@ a{color:inherit;text-decoration:none}
 .recipe-name{font-size:15px;font-weight:700;letter-spacing:-0.3px}
 .day-card{transition:all .15s}
 .form-input{border-radius:var(--radius-sm);transition:border-color .15s,box-shadow .15s}
-.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(42,96,73,0.1)}
+.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(94,144,128,0.12)}
 .btn-primary{background:var(--primary);letter-spacing:0.1px}
 .btn-primary:hover{background:var(--primary-hover);transform:translateY(-1px);box-shadow:var(--shadow-md)}
 .btn-generate{background:var(--primary);border-radius:var(--radius-sm)}
@@ -456,12 +456,12 @@ function defaultSlots() {
   const cal = STATE.profile.calories;
   const snacks = cal < 1600 ? 1 : cal < 2400 ? 2 : 3;
   const slots = [
-    { id: uid(), type:'meal', label:'Breakfast', preference:'', meal:null, open:false },
-    { id: uid(), type:'meal', label:'Lunch', preference:'', meal:null, open:false },
-    { id: uid(), type:'meal', label:'Dinner', preference:'', meal:null, open:false }
+    { id: uid(), type:'meal', label:'Breakfast', preference:'', meal:null, open:false, seenNames:[] },
+    { id: uid(), type:'meal', label:'Lunch', preference:'', meal:null, open:false, seenNames:[] },
+    { id: uid(), type:'meal', label:'Dinner', preference:'', meal:null, open:false, seenNames:[] }
   ];
   for (let i = 0; i < snacks; i++) {
-    slots.push({ id: uid(), type:'snack', label:`Snack ${i+1}`, preference:'', meal:null, open:false });
+    slots.push({ id: uid(), type:'snack', label:`Snack ${i+1}`, preference:'', meal:null, open:false, seenNames:[] });
   }
   return slots;
 }
@@ -832,7 +832,29 @@ const RECIPE_DB = [
     description:'A handful of lightly spiced mixed nuts for a satisfying, healthy-fat-rich snack that keeps hunger at bay.',
     prepTime:'1 min', cookTime:'0 min', baseCal:210, baseP:6, baseC:8, baseF:18,
     ingredients:[{item:'Raw almonds',amount:20,unit:'g'},{item:'Cashews',amount:15,unit:'g'},{item:'Pumpkin seeds',amount:10,unit:'g'}],
-    instructions:['Combine nuts and seeds in a small bowl.','Optional: toast in a dry pan 2-3 min with a pinch of salt and smoked paprika.','Portion into 45g serving. Enjoy as a portable snack.']}
+    instructions:['Combine nuts and seeds in a small bowl.','Optional: toast in a dry pan 2-3 min with a pinch of salt and smoked paprika.','Portion into 45g serving. Enjoy as a portable snack.']},
+
+  // ─── SPECIAL RECIPES ───
+  { id:'chicken-crust-pizza', name:'Chicken Crust Pizza', keywords:['chicken crust pizza','pizza','keto pizza','chicken pizza','low carb pizza'], mealTypes:['lunch','dinner'],
+    description:'A genius low-carb pizza where the crust is made from seasoned ground chicken. Topped with marinara and bubbling mozzarella for all the pizza vibes.',
+    prepTime:'15 min', cookTime:'25 min', baseCal:520, baseP:52, baseC:14, baseF:28,
+    ingredients:[{item:'Ground chicken',amount:250,unit:'g'},{item:'Egg',amount:1,unit:'egg'},{item:'Parmesan cheese, grated',amount:20,unit:'g'},{item:'Garlic powder',amount:2,unit:'g'},{item:'Italian seasoning',amount:2,unit:'g'},{item:'Marinara sauce',amount:60,unit:'g'},{item:'Part-skim mozzarella',amount:60,unit:'g'},{item:'Bell pepper, sliced',amount:50,unit:'g'},{item:'Cherry tomatoes, halved',amount:40,unit:'g'}],
+    instructions:['Preheat oven to 400°F (200°C). Line a baking sheet with parchment paper.','Mix ground chicken, egg, Parmesan, garlic powder, Italian seasoning, salt, and pepper until combined.','Press the mixture into a thin, even circle about 10 inches wide on the parchment.','Bake the crust 15 min until golden and set.','Top with marinara, mozzarella, peppers, and tomatoes. Return to oven 8-10 min until cheese is bubbly and lightly browned.']},
+  { id:'big-mac-chop-salad', name:'Big Mac Chop Salad', keywords:['big mac','big mac salad','chop salad','special sauce','burger salad'], mealTypes:['lunch','dinner'],
+    description:'All the flavors of a Big Mac in a fresh, chopped salad. Special sauce dressing, seasoned ground beef, pickles, and cheddar over crisp romaine.',
+    prepTime:'12 min', cookTime:'10 min', baseCal:480, baseP:38, baseC:20, baseF:28,
+    ingredients:[{item:'Ground beef (90% lean)',amount:150,unit:'g'},{item:'Romaine lettuce, chopped',amount:120,unit:'g'},{item:'Cherry tomatoes, halved',amount:60,unit:'g'},{item:'Dill pickles, diced',amount:30,unit:'g'},{item:'Red onion, diced',amount:20,unit:'g'},{item:'Reduced-fat cheddar cheese, shredded',amount:30,unit:'g'},{item:'Non-fat Greek yogurt',amount:40,unit:'g'},{item:'Dijon mustard',amount:8,unit:'g'},{item:'White wine vinegar',amount:8,unit:'ml'}],
+    instructions:['Brown ground beef in a pan over medium-high heat, breaking into crumbles. Season with salt, pepper, and garlic powder. Drain and let cool slightly.','Make the special sauce: mix Greek yogurt, Dijon mustard, white wine vinegar, and a pinch of smoked paprika.','Arrange chopped romaine, tomatoes, pickles, and red onion in a large bowl.','Top with warm beef and shredded cheddar.','Drizzle special sauce over everything and toss gently to combine.']},
+  { id:'sweet-potato-bun-burger', name:'Sweet Potato Bun Burger', keywords:['sweet potato burger','burger','sweet potato bun','paleo burger'], mealTypes:['lunch','dinner'],
+    description:'A juicy beef patty sandwiched between two thick-cut sweet potato rounds instead of a bun. Naturally sweet, tender, and deeply satisfying.',
+    prepTime:'12 min', cookTime:'30 min', baseCal:510, baseP:36, baseC:42, baseF:22,
+    ingredients:[{item:'Ground beef (90% lean)',amount:180,unit:'g'},{item:'Sweet potato',amount:250,unit:'g'},{item:'Olive oil',amount:8,unit:'ml'},{item:'Romaine lettuce',amount:30,unit:'g'},{item:'Tomato, sliced',amount:40,unit:'g'},{item:'Red onion, sliced',amount:20,unit:'g'},{item:'Dijon mustard',amount:10,unit:'g'},{item:'Garlic powder and smoked paprika',amount:2,unit:'g'}],
+    instructions:['Preheat oven to 425°F. Slice sweet potato into thick rounds (about ½ inch each). Brush with olive oil and season with salt and pepper.','Roast on a baking sheet 20-25 min, flipping halfway, until tender and golden at the edges.','Mix beef with garlic powder, smoked paprika, salt, and pepper. Form into a patty the same diameter as the sweet potato rounds.','Cook patty in a hot pan 3-4 min per side to desired doneness.','Assemble: lay lettuce on one sweet potato round, add the patty, tomato, red onion, and a swipe of Dijon, then top with a second sweet potato round.']},
+  { id:'egg-avocado-sweet-potato', name:'Egg in Avocado in Sweet Potato', keywords:['egg avocado sweet potato','baked egg','avocado egg','sweet potato egg','loaded sweet potato'], mealTypes:['breakfast','lunch'],
+    description:'A baked sweet potato loaded with creamy smashed avocado and a soft-baked egg. Three superfoods layered into one gorgeous, nourishing meal.',
+    prepTime:'5 min', cookTime:'55 min', baseCal:430, baseP:18, baseC:46, baseF:20,
+    ingredients:[{item:'Sweet potato (medium)',amount:200,unit:'g'},{item:'Ripe avocado',amount:80,unit:'g'},{item:'Egg',amount:1,unit:'egg'},{item:'Olive oil',amount:5,unit:'ml'},{item:'Salt and pepper',amount:1,unit:'to taste'},{item:'Red pepper flakes',amount:1,unit:'pinch'},{item:'Fresh chives or cilantro',amount:5,unit:'g'}],
+    instructions:['Preheat oven to 400°F. Prick sweet potato all over with a fork and bake 40-45 min until completely tender.','Slice the potato open lengthwise and fluff the flesh gently. Drizzle with olive oil and season with salt.','Mash and spread avocado directly over the sweet potato flesh.','Use a spoon to make a small well in the center and crack an egg into it.','Return to oven and bake 8-12 min until the egg white is just set but the yolk is still soft. Finish with salt, pepper, red pepper flakes, and fresh herbs.']}
 ];
 
 // ─── Ingredient macro lookup ───
@@ -1011,10 +1033,13 @@ function scaleIngredient(ing, scale) {
 }
 
 // ─── Built-in recipe generator ───
-function generateRecipe({ preference, targetCal, targetProt, targetCarbs, targetFat, mealType }) {
+function generateRecipe({ preference, targetCal, targetProt, targetCarbs, targetFat, mealType, excludeNames = [] }) {
   let pool = RECIPE_DB.filter(r =>
     mealType === 'snack' ? r.mealTypes.includes('snack') : r.mealTypes.some(t => t !== 'snack')
   );
+  // Filter out previously seen recipes; if all are excluded, reset to full pool
+  const fresh = pool.filter(r => !excludeNames.includes(r.name));
+  if (fresh.length > 0) pool = fresh;
   if (preference && preference.trim()) {
     const lower = preference.toLowerCase().trim();
     const scored = pool.map(r => {
@@ -1041,7 +1066,7 @@ function generateRecipe({ preference, targetCal, targetProt, targetCarbs, target
     calories = Math.round(pick.baseCal*scale); protein = Math.round(pick.baseP*scale);
     carbs    = Math.round(pick.baseC*scale);   fat     = Math.round(pick.baseF*scale);
   }
-  return Promise.resolve({ name:pick.name, description:pick.description, prepTime:pick.prepTime, cookTime:pick.cookTime, calories, protein, carbs, fat, ingredients:scaledIngs, instructions:pick.instructions });
+  return Promise.resolve({ name:pick.name, description:pick.description, prepTime:pick.prepTime, cookTime:pick.cookTime, calories, protein, carbs, fat, ingredients:scaledIngs, instructions:pick.instructions, _recipeId:pick.id });
 }
 
 // ═══════════════════════════════════════════════════
@@ -1113,7 +1138,7 @@ const IC = {
   refresh:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.8-3.4L23 10"/><path d="M20.5 15a9 9 0 0 1-14.8 3.4L1 14"/></svg>`,
 };
 
-const LOGO_SVG = `<svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2a6049"/><path d="M16 8c0 0-6 4-6 9a6 6 0 0 0 12 0c0-5-6-9-6-9z" fill="white" opacity="0.9"/><path d="M16 14v9" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+const LOGO_SVG = `<svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#5e9080"/><circle cx="16" cy="16" r="15" fill="url(#logoGrad)" opacity="0.3"/><defs><linearGradient id="logoGrad" x1="8" y1="5" x2="24" y2="27"><stop offset="0" stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient></defs><path d="M16 9c0 0-5.5 3.5-5.5 7.5a5.5 5.5 0 0 0 11 0c0-4-5.5-7.5-5.5-7.5z" fill="white" opacity="0.92"/><path d="M16 14v8" stroke="white" stroke-width="1.5" stroke-linecap="round"/><circle cx="21.5" cy="10.5" r="1.5" fill="white" opacity="0.45"/></svg>`;
 
 // ═══════════════════════════════════════════════════
 // ONBOARDING
@@ -1135,7 +1160,7 @@ function renderOnboarding() {
   return `<div class="onboard-wrap">
     <div class="onboard-header">
       <div class="onboard-logo">${LOGO_SVG}<span>Forma</span></div>
-      <p style="color:var(--text-3);font-size:13px;letter-spacing:0.3px">Shape your nutrition.</p>
+      <p style="color:var(--text-3);font-size:13px;letter-spacing:0.3px">nourish yourself, every day</p>
     </div>
     <div class="onboard-body">
       <div class="step-indicator">${dots}</div>
@@ -1728,7 +1753,8 @@ async function generateSlot(dateStr, slotId) {
       targetProt: Math.round(remainProt),
       targetCarbs: Math.round(remainCarbs),
       targetFat: Math.round(remainFat),
-      mealType: slot.type
+      mealType: slot.type,
+      excludeNames: slot.seenNames || []
     });
     slot.meal = recipe;
     saveState();
@@ -1746,6 +1772,10 @@ async function regenerateSlot(dateStr, slotId) {
   const plan = STATE.dailyPlans[dateStr];
   const slot = plan?.slots.find(s => s.id === slotId);
   if (!slot) return;
+  if (slot.meal?.name) {
+    if (!slot.seenNames) slot.seenNames = [];
+    if (!slot.seenNames.includes(slot.meal.name)) slot.seenNames.push(slot.meal.name);
+  }
   slot.meal = null;
   saveState();
   renderTodayInPlace(dateStr);
