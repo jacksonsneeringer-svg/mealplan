@@ -6,6 +6,7 @@
 <title>Nommie – Your Meal Bestie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" id="app-favicon" type="image/svg+xml" href="">
 <style>
 :root {
   --primary: #7ec8a8; --primary-hover: #68b896; --primary-light: #e5f8f0; --primary-dark: #4da880;
@@ -263,6 +264,24 @@ a{color:inherit;text-decoration:none}
 .saved-card:hover{border-color:var(--primary)}
 .radio-card.selected{border-color:var(--primary);background:var(--primary-light)}
 .radio-card:hover{border-color:var(--primary)}
+
+/* ── Modal Tabs ── */
+.modal-tabs{display:flex;gap:0;margin-bottom:18px;border:2px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.modal-tab{flex:1;padding:8px 12px;font-size:13px;font-weight:600;background:none;color:var(--text-2);border:none;cursor:pointer;transition:all .2s}
+.modal-tab.active{background:var(--primary);color:#fff}
+
+/* ── Ingredient Row ── */
+.ing-row{display:grid;grid-template-columns:1fr 56px 48px 48px 48px 32px;gap:4px;align-items:center;margin-bottom:6px}
+.ing-row input{padding:6px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;width:100%}
+.ing-row input:focus{border-color:var(--primary);outline:none}
+.ing-del{background:none;border:none;color:var(--text-3);font-size:16px;cursor:pointer;padding:0;line-height:1}
+.ing-del:hover{color:#e53e3e}
+.ing-header{display:grid;grid-template-columns:1fr 56px 48px 48px 48px 32px;gap:4px;margin-bottom:4px}
+.ing-header span{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3)}
+.ing-totals{display:grid;grid-template-columns:1fr 56px 48px 48px 48px 32px;gap:4px;padding:8px 0;border-top:2px solid var(--border);margin-top:4px}
+.ing-totals span{font-size:12px;font-weight:700;color:var(--text)}
+.saved-pill{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;cursor:pointer;transition:all .15s}
+.saved-pill:hover{border-color:var(--primary);background:var(--primary-light)}
 
 /* ── Background Bubbles ── */
 #bg-bubbles{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
@@ -1800,6 +1819,12 @@ const IC = {
 
 const LOGO_SVG = `<svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lgBg" x1="4" y1="2" x2="32" y2="34"><stop offset="0%" stop-color="#ff8fa3"/><stop offset="100%" stop-color="#e8527a"/></linearGradient><linearGradient id="lgShine" x1="6" y1="4" x2="20" y2="18"><stop offset="0%" stop-color="white" stop-opacity="0.45"/><stop offset="100%" stop-color="white" stop-opacity="0"/></linearGradient><radialGradient id="rgBowl" cx="50%" cy="60%" r="55%"><stop offset="0%" stop-color="white" stop-opacity="0.15"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><circle cx="18" cy="18" r="17" fill="url(#lgBg)"/><circle cx="18" cy="18" r="17" fill="url(#lgShine)"/><ellipse cx="13" cy="11" rx="5" ry="3.5" fill="white" opacity="0.18" transform="rotate(-25 13 11)"/><rect x="8" y="18" width="20" height="4" rx="2" fill="white" opacity="0.97"/><rect x="8" y="18" width="20" height="2" rx="1" fill="rgba(220,80,110,0.18)"/><path d="M8.5 22 Q8 29 18 29 Q28 29 27.5 22 Z" fill="white" opacity="0.97"/><circle cx="14" cy="24.5" r="1.8" fill="#ffb3c6" opacity="0.7"/><circle cx="18" cy="26" r="1.4" fill="#ffd6e0" opacity="0.6"/><circle cx="22" cy="24.5" r="1.8" fill="#ffb3c6" opacity="0.7"/><path d="M14 15.5 Q13.1 13.2 14 11.2" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.88"/><path d="M18 15 Q17.1 12.7 18 10.7" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.88"/><path d="M22 15.5 Q21.1 13.2 22 11.2" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.88"/><path d="M28.5 9 L29.2 7 L29.9 9 L32 9.7 L29.9 10.4 L29.2 12.4 L28.5 10.4 L26.4 9.7 Z" fill="white" opacity="0.92"/><circle cx="29.2" cy="9.7" r="0.6" fill="white" opacity="0.5"/></svg>`;
 
+// Set favicon from logo SVG
+(function() {
+  const el = document.getElementById('app-favicon');
+  if (el) el.href = 'data:image/svg+xml,' + encodeURIComponent(LOGO_SVG.replace(/width="32" height="32"/, 'width="64" height="64"'));
+})();
+
 // ═══════════════════════════════════════════════════
 // ONBOARDING
 // ═══════════════════════════════════════════════════
@@ -2860,7 +2885,10 @@ function renderSaved() {
   });
 
   return `
-    <div style="font-size:20px;font-weight:800;margin-bottom:4px;letter-spacing:-.5px">Saved Meals</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="font-size:20px;font-weight:800;letter-spacing:-.5px">Saved Meals</div>
+      <button class="btn btn-primary btn-sm" onclick="showBuildMealModal()" style="gap:5px">+ Build a Meal</button>
+    </div>
     <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">${STATE.savedMeals.length} saved · Filter by macros</div>
 
     <div class="filter-row">
@@ -2943,6 +2971,233 @@ function addSavedToToday(mealId) {
     showToast(`"${meal.name}" added as new meal slot`);
     if (STATE.currentView === 'today') renderTodayInPlace(dateStr);
   }
+}
+
+// ═══════════════════════════════════════════════════
+// BUILD A MEAL
+// ═══════════════════════════════════════════════════
+let buildMealState = { tab: 'url', loading: false, ingredients: [], importedData: null };
+
+function showBuildMealModal() {
+  buildMealState = { tab: 'url', loading: false, ingredients: [{ id: uid(), name: '', cal: '', p: '', c: '', f: '' }], importedData: null };
+  renderBuildMealModal();
+}
+
+function renderBuildMealModal() {
+  document.getElementById('build-meal-modal')?.remove();
+  const { tab, loading, ingredients } = buildMealState;
+
+  const ingRows = ingredients.map((ing, i) => `
+    <div class="ing-row" id="ing-${ing.id}">
+      <input placeholder="Ingredient name" value="${ing.name}" oninput="buildMealState.ingredients[${i}].name=this.value">
+      <input type="number" placeholder="Cal" value="${ing.cal}" oninput="buildMealState.ingredients[${i}].cal=this.value;buildMealRecalc()">
+      <input type="number" placeholder="P" value="${ing.p}" oninput="buildMealState.ingredients[${i}].p=this.value;buildMealRecalc()">
+      <input type="number" placeholder="C" value="${ing.c}" oninput="buildMealState.ingredients[${i}].c=this.value;buildMealRecalc()">
+      <input type="number" placeholder="F" value="${ing.f}" oninput="buildMealState.ingredients[${i}].f=this.value;buildMealRecalc()">
+      <button class="ing-del" onclick="buildMealRemoveIngredient('${ing.id}')">✕</button>
+    </div>`).join('');
+
+  const totals = ingredients.reduce((acc, ing) => ({
+    cal: acc.cal + (parseFloat(ing.cal)||0),
+    p:   acc.p   + (parseFloat(ing.p)||0),
+    c:   acc.c   + (parseFloat(ing.c)||0),
+    f:   acc.f   + (parseFloat(ing.f)||0)
+  }), { cal:0, p:0, c:0, f:0 });
+
+  const manualTab = `
+    <div class="form-group"><label class="form-label">Meal name</label>
+      <input class="form-input" id="bm-name" placeholder="e.g. Grilled Salmon Bowl" value="${buildMealState.importedData?.name||''}"></div>
+    <div class="form-group"><label class="form-label">Description (optional)</label>
+      <input class="form-input" id="bm-desc" placeholder="Short description" value="${buildMealState.importedData?.description||''}"></div>
+    <div class="form-row" style="gap:10px;margin-bottom:16px">
+      <div class="form-group" style="margin:0"><label class="form-label" style="font-size:11px">Prep time</label>
+        <input class="form-input" id="bm-prep" placeholder="e.g. 10 min" value="${buildMealState.importedData?.prepTime||''}"></div>
+      <div class="form-group" style="margin:0"><label class="form-label" style="font-size:11px">Cook time</label>
+        <input class="form-input" id="bm-cook" placeholder="e.g. 25 min" value="${buildMealState.importedData?.cookTime||''}"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Instructions (optional)</label>
+      <textarea class="form-input" id="bm-inst" rows="3" placeholder="Steps to make the meal..." style="resize:vertical">${buildMealState.importedData?.instructions||''}</textarea></div>
+    <div class="form-label" style="margin-bottom:8px">Ingredients &amp; Macros</div>
+    <div class="ing-header">
+      <span>Ingredient</span><span>Cal</span><span>P(g)</span><span>C(g)</span><span>F(g)</span><span></span>
+    </div>
+    <div id="bm-ing-list">${ingRows}</div>
+    <button class="btn btn-secondary btn-sm" onclick="buildMealAddIngredient()" style="margin-top:6px">+ Add ingredient</button>
+    <div class="ing-totals" id="bm-totals">
+      <span style="font-weight:700">Totals</span>
+      <span id="bt-cal">${Math.round(totals.cal)}</span>
+      <span id="bt-p">${Math.round(totals.p)}</span>
+      <span id="bt-c">${Math.round(totals.c)}</span>
+      <span id="bt-f">${Math.round(totals.f)}</span>
+      <span></span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('build-meal-modal').remove()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1" onclick="buildMealSave()">Save to Library</button>
+    </div>`;
+
+  const urlTab = `
+    <div class="form-group">
+      <label class="form-label">Recipe URL</label>
+      <input class="form-input" id="bm-url" placeholder="https://www.allrecipes.com/recipe/..." style="margin-bottom:8px">
+      <div style="font-size:12px;color:var(--text-2);margin-bottom:10px">Paste a link from any major recipe site — the app will read the ingredient and nutrition info automatically.</div>
+      <button class="btn btn-primary" style="width:100%" onclick="buildMealImportUrl()" ${loading?'disabled':''}>
+        ${loading ? '<span class="spinner"></span> Importing...' : '→ Import Recipe'}
+      </button>
+    </div>
+    <div style="text-align:center;margin:18px 0 10px;color:var(--text-3);font-size:12px">— or build manually instead —</div>
+    <button class="btn btn-secondary" style="width:100%" onclick="buildMealState.tab='manual';renderBuildMealModal()">Fill out manually</button>
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('build-meal-modal').remove()">Cancel</button>
+    </div>`;
+
+  const html = `<div class="modal-overlay" id="build-meal-modal" onclick="if(event.target.id==='build-meal-modal')this.remove()">
+    <div class="modal-sheet">
+      <div class="modal-title">Build a Meal</div>
+      <div class="modal-sub">Add a custom meal to your saved library.</div>
+      <div class="modal-tabs">
+        <button class="modal-tab ${tab==='url'?'active':''}" onclick="buildMealState.tab='url';renderBuildMealModal()">Import from URL</button>
+        <button class="modal-tab ${tab==='manual'?'active':''}" onclick="buildMealState.tab='manual';renderBuildMealModal()">Fill manually</button>
+      </div>
+      ${tab === 'url' ? urlTab : manualTab}
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  if (tab === 'url') setTimeout(() => document.getElementById('bm-url')?.focus(), 80);
+  else setTimeout(() => document.getElementById('bm-name')?.focus(), 80);
+}
+
+async function buildMealImportUrl() {
+  const url = document.getElementById('bm-url')?.value.trim();
+  if (!url) { showToast('Please enter a recipe URL'); return; }
+  buildMealState.loading = true;
+  renderBuildMealModal();
+  try {
+    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+    const res = await fetch(proxyUrl);
+    if (!res.ok) throw new Error('Failed to fetch');
+    const data = await res.json();
+    const html = data.contents || '';
+    const parsed = parseRecipeFromHtml(html);
+    if (!parsed) throw new Error('No recipe data found on this page');
+    buildMealState.importedData = parsed;
+    buildMealState.ingredients = parsed.ingredients.length
+      ? parsed.ingredients.map(ing => ({ id: uid(), name: ing.name || ing, cal: ing.cal || '', p: ing.p || '', c: ing.c || '', f: ing.f || '' }))
+      : [{ id: uid(), name: '', cal: '', p: '', c: '', f: '' }];
+    if (parsed.totalCal && buildMealState.ingredients.every(i => !i.cal)) {
+      buildMealState.ingredients = [{ id: uid(), name: 'Total (from recipe)', cal: parsed.totalCal, p: parsed.totalP || '', c: parsed.totalC || '', f: parsed.totalF || '' }];
+    }
+    buildMealState.loading = false;
+    buildMealState.tab = 'manual';
+    renderBuildMealModal();
+    showToast('Recipe imported! Review and save.');
+  } catch(err) {
+    buildMealState.loading = false;
+    renderBuildMealModal();
+    showToast('Could not import recipe — try filling in manually.', 4000);
+  }
+}
+
+function parseRecipeFromHtml(html) {
+  try {
+    const jsonLdMatches = [...html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+    for (const match of jsonLdMatches) {
+      let data;
+      try { data = JSON.parse(match[1].trim()); } catch { continue; }
+      const recipes = [].concat(data['@graph'] || data).filter(d => {
+        const t = d['@type'];
+        return t === 'Recipe' || (Array.isArray(t) && t.includes('Recipe'));
+      });
+      if (!recipes.length) continue;
+      const r = recipes[0];
+      const nutrition = r.nutrition || {};
+      const parseNum = s => parseFloat((s || '').toString().replace(/[^\d.]/g, '')) || 0;
+      const parseDuration = s => {
+        if (!s) return '';
+        const m = s.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+        if (!m) return s;
+        const h = parseInt(m[1]||0), min = parseInt(m[2]||0);
+        return h ? `${h}h ${min}min` : `${min} min`;
+      };
+      const rawIngs = r.recipeIngredient || [];
+      const instructions = Array.isArray(r.recipeInstructions)
+        ? r.recipeInstructions.map(s => typeof s === 'string' ? s : s.text || '').filter(Boolean).join('\n')
+        : (typeof r.recipeInstructions === 'string' ? r.recipeInstructions : '');
+      return {
+        name: r.name || '',
+        description: r.description || '',
+        prepTime: parseDuration(r.prepTime),
+        cookTime: parseDuration(r.cookTime),
+        instructions,
+        ingredients: rawIngs.map(s => ({ name: s, cal: '', p: '', c: '', f: '' })),
+        totalCal: parseNum(nutrition.calories),
+        totalP:   parseNum(nutrition.proteinContent),
+        totalC:   parseNum(nutrition.carbohydrateContent),
+        totalF:   parseNum(nutrition.fatContent)
+      };
+    }
+  } catch(e) {}
+  return null;
+}
+
+function buildMealAddIngredient() {
+  buildMealState.ingredients.push({ id: uid(), name: '', cal: '', p: '', c: '', f: '' });
+  renderBuildMealModal();
+  const list = document.getElementById('bm-ing-list');
+  if (list) list.lastElementChild?.querySelector('input')?.focus();
+}
+
+function buildMealRemoveIngredient(ingId) {
+  if (buildMealState.ingredients.length <= 1) { showToast('Need at least one ingredient row'); return; }
+  buildMealState.ingredients = buildMealState.ingredients.filter(i => i.id !== ingId);
+  renderBuildMealModal();
+}
+
+function buildMealRecalc() {
+  const totals = buildMealState.ingredients.reduce((acc, ing) => ({
+    cal: acc.cal + (parseFloat(ing.cal)||0),
+    p:   acc.p   + (parseFloat(ing.p)||0),
+    c:   acc.c   + (parseFloat(ing.c)||0),
+    f:   acc.f   + (parseFloat(ing.f)||0)
+  }), { cal:0, p:0, c:0, f:0 });
+  const el = id => document.getElementById(id);
+  if (el('bt-cal')) el('bt-cal').textContent = Math.round(totals.cal);
+  if (el('bt-p'))   el('bt-p').textContent   = Math.round(totals.p);
+  if (el('bt-c'))   el('bt-c').textContent   = Math.round(totals.c);
+  if (el('bt-f'))   el('bt-f').textContent   = Math.round(totals.f);
+}
+
+function buildMealSave() {
+  const name = document.getElementById('bm-name')?.value.trim();
+  if (!name) { showToast('Please enter a meal name'); return; }
+  const ings = buildMealState.ingredients;
+  const totals = ings.reduce((acc, ing) => ({
+    cal: acc.cal + (parseFloat(ing.cal)||0),
+    p:   acc.p   + (parseFloat(ing.p)||0),
+    c:   acc.c   + (parseFloat(ing.c)||0),
+    f:   acc.f   + (parseFloat(ing.f)||0)
+  }), { cal:0, p:0, c:0, f:0 });
+  if (STATE.savedMeals.some(m => m.name.toLowerCase() === name.toLowerCase())) {
+    showToast('A meal with this name already exists'); return;
+  }
+  const ingredients = ings.filter(i => i.name.trim()).map(i => ({ name: i.name, amount: '', cal: parseFloat(i.cal)||0, p: parseFloat(i.p)||0, c: parseFloat(i.c)||0, f: parseFloat(i.f)||0 }));
+  const meal = {
+    id: uid(), name,
+    description: document.getElementById('bm-desc')?.value.trim() || '',
+    prepTime: document.getElementById('bm-prep')?.value.trim() || '',
+    cookTime: document.getElementById('bm-cook')?.value.trim() || '',
+    instructions: document.getElementById('bm-inst')?.value.trim() || '',
+    calories: Math.round(totals.cal),
+    protein:  Math.round(totals.p),
+    carbs:    Math.round(totals.c),
+    fat:      Math.round(totals.f),
+    ingredients
+  };
+  STATE.savedMeals.push(meal);
+  saveState();
+  document.getElementById('build-meal-modal')?.remove();
+  renderSavedInPlace();
+  showToast(`"${name}" saved to library ✓`);
 }
 
 // ═══════════════════════════════════════════════════
@@ -3227,15 +3482,39 @@ function lookupFood(name, amountStr) {
 let logFoodState = { phase: 1, dateStr: '', foodName: '', amount: '', found: false };
 
 function showLogFoodModal(dateStr) {
-  logFoodState = { phase: 1, dateStr, foodName: '', amount: '', found: false };
+  logFoodState = { phase: 1, tab: 'search', dateStr, foodName: '', amount: '', found: false };
   renderLogFoodModal();
 }
 
 function renderLogFoodModal() {
   document.getElementById('log-food-modal')?.remove();
-  const { phase, found, foodName, amount, dateStr } = logFoodState;
+  const { phase, tab, found, foodName, amount, dateStr } = logFoodState;
+
+  const tabs = `<div class="modal-tabs">
+    <button class="modal-tab ${tab!=='saved'?'active':''}" onclick="logFoodState.tab='search';logFoodState.phase=1;renderLogFoodModal()">Search food</button>
+    <button class="modal-tab ${tab==='saved'?'active':''}" onclick="logFoodState.tab='saved';renderLogFoodModal()">From saved meals</button>
+  </div>`;
+
   let inner = '';
-  if (phase === 1) {
+  if (tab === 'saved') {
+    const meals = STATE.savedMeals;
+    inner = meals.length ? `
+      <div style="max-height:340px;overflow-y:auto;">
+        ${meals.map(m => `
+          <div class="saved-pill" onclick="addSavedAsLoggedFood('${m.id}','${dateStr}')">
+            <div>
+              <div style="font-size:14px;font-weight:600">${m.name}</div>
+              <div style="font-size:12px;color:var(--text-2)">${m.calories} cal · ${m.protein}g P · ${m.carbs}g C · ${m.fat}g F</div>
+            </div>
+            <span style="font-size:12px;color:var(--primary);font-weight:600">+ Log</span>
+          </div>`).join('')}
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('log-food-modal').remove()">Cancel</button>
+      </div>` :
+      `<div class="empty-state"><p>No saved meals yet — save meals from the Today view first.</p></div>
+       <div class="modal-actions"><button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('log-food-modal').remove()">Close</button></div>`;
+  } else if (phase === 1) {
     inner = `
       <div class="form-group"><label class="form-label">Food name</label>
         <input class="form-input" id="lf-name" placeholder="e.g. Cheez-Its, chicken breast, banana" value="${foodName}"></div>
@@ -3263,25 +3542,26 @@ function renderLogFoodModal() {
         <button class="btn btn-primary" style="flex:1" onclick="addLoggedFood('${dateStr}')">Confirm &amp; Log</button>
       </div>`;
   }
-  const subText = phase === 1 ? 'Enter a food name and how much you had.' : `${foodName} · ${amount}`;
+
+  const subText = (tab === 'saved') ? 'Pick a saved meal to log its macros.' : (phase === 1 ? 'Enter a food name and how much you had.' : `${foodName} · ${amount}`);
   const html = `<div class="modal-overlay" id="log-food-modal" onclick="if(event.target.id==='log-food-modal')this.remove()">
     <div class="modal-sheet">
       <div class="modal-title">Log a food</div>
       <div class="modal-sub">${subText}</div>
+      ${tabs}
       ${inner}
     </div>
   </div>`;
   document.body.insertAdjacentHTML('beforeend', html);
-  if (phase === 1) {
+  if (tab !== 'saved' && phase === 1) {
     setTimeout(() => document.getElementById('lf-name')?.focus(), 80);
     const nameEl = document.getElementById('lf-name');
     const amtEl  = document.getElementById('lf-amount');
     if (nameEl && amtEl) {
-      // Allow pressing Enter in name field to jump to amount
       nameEl.addEventListener('keydown', e => { if (e.key === 'Enter') amtEl.focus(); });
       amtEl.addEventListener('keydown', e => { if (e.key === 'Enter') lookupLogFood(); });
     }
-  } else if (found && logFoodState.macros) {
+  } else if (tab !== 'saved' && found && logFoodState.macros) {
     setTimeout(() => {
       const m = logFoodState.macros;
       const el = id => document.getElementById(id);
@@ -3290,7 +3570,7 @@ function renderLogFoodModal() {
       if (el('lf-carbs')) el('lf-carbs').value = m.c;
       if (el('lf-fat'))   el('lf-fat').value   = m.f;
     }, 50);
-  } else {
+  } else if (tab !== 'saved') {
     setTimeout(() => document.getElementById('lf-cal')?.focus(), 80);
   }
 }
@@ -3341,11 +3621,26 @@ function removeLoggedFood(dateStr, foodId) {
   renderTodayInPlace(dateStr);
 }
 
+function addSavedAsLoggedFood(mealId, dateStr) {
+  const meal = STATE.savedMeals.find(m => m.id === mealId);
+  if (!meal) return;
+  const plan = getOrCreatePlan(dateStr);
+  if (wouldExceedCalorieLimit(dateStr, meal.calories || 0)) {
+    showToast(`Can't log "${meal.name}" — would exceed daily calorie limit`, 3000);
+    return;
+  }
+  if (!plan.loggedFoods) plan.loggedFoods = [];
+  plan.loggedFoods.push({ id: uid(), name: meal.name, calories: meal.calories || 0, protein: meal.protein || 0, carbs: meal.carbs || 0, fat: meal.fat || 0 });
+  saveState();
+  document.getElementById('log-food-modal')?.remove();
+  renderTodayInPlace(dateStr);
+  showToast(`"${meal.name}" logged ✓`);
+}
+
 function resetDailyPlan() {
-  if (!confirm("Reset today's meal plan to empty slots?")) return;
+  if (!confirm("Reset today's meal plan? Meal slots and logged foods will be cleared.")) return;
   const dateStr = today();
-  const loggedFoods = STATE.dailyPlans[dateStr]?.loggedFoods || [];
-  STATE.dailyPlans[dateStr] = { slots: defaultSlots(), approved: false, loggedFoods };
+  STATE.dailyPlans[dateStr] = { slots: defaultSlots(), approved: false, loggedFoods: [] };
   saveState();
   render();
   showToast("Today's meal plan reset");
