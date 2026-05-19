@@ -1066,7 +1066,11 @@ function render() {
 function renderApp() {
   const v = STATE.currentView;
   return `
-    <div class="nav-bar top">
+    <div class="nav-bar top" style="padding:0 4px">
+      <div style="display:flex;align-items:center;padding:0 12px;gap:6px;flex-shrink:0;border-right:1px solid var(--border)">
+        ${LOGO_SVG}
+        <span style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.5px">Forma</span>
+      </div>
       ${['today','week','saved','settings'].map(tab => `
         <button class="nav-item ${v===tab?'active':''}" onclick="navigate('${tab}')">
           ${NAV_ICONS[tab]}
@@ -1186,17 +1190,17 @@ function renderOB1() {
 function renderOB2() {
   const p = STATE.profile;
   const goals = [
-    { val:'lose', icon:'⬇️', title:'Lose Weight', sub:'Calorie deficit to shed fat' },
-    { val:'maintain', icon:'⚖️', title:'Maintain', sub:'Stay at current weight' },
-    { val:'gain', icon:'💪', title:'Build Muscle', sub:'Lean bulk with moderate surplus' },
-    { val:'bulk', icon:'🏋️', title:'Bulk', sub:'Significant calorie surplus' }
+    { val:'lose', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>`, title:'Lose Weight', sub:'Calorie deficit to shed fat' },
+    { val:'maintain', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`, title:'Maintain', sub:'Stay at current weight' },
+    { val:'gain', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`, title:'Build Muscle', sub:'Lean bulk with moderate surplus' },
+    { val:'bulk', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v16M18 4v16M6 12h12M3 9h3M18 9h3M3 15h3M18 15h3"/></svg>`, title:'Bulk', sub:'Significant calorie surplus' }
   ];
   const activities = [
-    { val:'sedentary', icon:'🛋️', title:'Sedentary', sub:'Little to no exercise' },
-    { val:'light', icon:'🚶', title:'Lightly Active', sub:'1-3 days/week exercise' },
-    { val:'moderate', icon:'🏃', title:'Moderately Active', sub:'3-5 days/week exercise' },
-    { val:'active', icon:'⚡', title:'Very Active', sub:'6-7 days/week hard exercise' },
-    { val:'very', icon:'🔥', title:'Extremely Active', sub:'Athlete / physical job' }
+    { val:'sedentary', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`, title:'Sedentary', sub:'Little to no exercise' },
+    { val:'light', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><path d="M9 19l1-5 2 2 1-4"/><path d="M7.5 14l2-3.5 3 1.5 2-3.5"/></svg>`, title:'Lightly Active', sub:'1-3 days/week exercise' },
+    { val:'moderate', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`, title:'Moderately Active', sub:'3-5 days/week exercise' },
+    { val:'active', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/><polygon points="19 2 14 9 17 9 16 14 21 7 18 7 19 2" fill="currentColor" opacity="0.3"/></svg>`, title:'Very Active', sub:'6-7 days/week hard exercise' },
+    { val:'very', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-.5 2.5-2 3.5-3 5-1 1.5-1 3 .5 4.5-.5-1 0-2.5 1-3 .5 2 2.5 3 2.5 5.5 1.5-1 2-3 1-5 1 1 1.5 2.5 1.5 4 1.5-1.5 2-4 .5-6.5C15 8.5 12.5 7 12 2z"/></svg>`, title:'Extremely Active', sub:'Athlete / physical job' }
   ];
   return `
     <div class="step-title">Your goals</div>
@@ -1233,22 +1237,22 @@ function renderOB3() {
     <div class="step-sub">We calculated these based on your profile. Edit any number — everything adjusts automatically.</div>
     <div class="macro-edit-grid" id="macro-grid">
       <div class="macro-field calories">
-        <label><span class="dot" style="background:#10b981"></span>Calories</label>
+        <label><span class="dot" style="background:#2a6049"></span>Calories</label>
         <input type="number" id="me-calories" value="${m.calories}" data-field="calories">
         <div class="unit">kcal / day</div>
       </div>
       <div class="macro-field">
-        <label><span class="dot" style="background:#6366f1"></span>Protein</label>
+        <label><span class="dot" style="background:#4f46e5"></span>Protein</label>
         <input type="number" id="me-protein" value="${m.protein}" data-field="protein">
         <div class="unit">grams — ${Math.round(m.protein*4/m.calories*100)}% of cals</div>
       </div>
       <div class="macro-field">
-        <label><span class="dot" style="background:#f59e0b"></span>Carbs</label>
+        <label><span class="dot" style="background:#b45309"></span>Carbs</label>
         <input type="number" id="me-carbs" value="${m.carbs}" data-field="carbs">
         <div class="unit">grams — ${Math.round(m.carbs*4/m.calories*100)}% of cals</div>
       </div>
       <div class="macro-field">
-        <label><span class="dot" style="background:#f43f5e"></span>Fat</label>
+        <label><span class="dot" style="background:#be185d"></span>Fat</label>
         <input type="number" id="me-fat" value="${m.fat}" data-field="fat">
         <div class="unit">grams — ${Math.round(m.fat*9/m.calories*100)}% of cals</div>
       </div>
@@ -1282,7 +1286,7 @@ function renderOB4() {
     </div>
     <div class="nav-btns">
       <button class="btn btn-secondary" onclick="STATE.onboardingStep=3;render()">← Back</button>
-      <button class="btn btn-primary" id="ob-next4" style="flex:1">Start planning! 🚀</button>
+      <button class="btn btn-primary" id="ob-next4" style="flex:1">Start planning →</button>
     </div>
   `;
 }
@@ -1544,7 +1548,7 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
       <div class="slot-actions">
         ${slot.meal ? `
           <button class="btn btn-secondary btn-sm" onclick="regenerateSlot('${dateStr}','${slot.id}')">↺ New</button>
-          <button class="btn btn-secondary btn-sm" onclick="saveSlotMeal('${slot.id}')">🔖 Save</button>
+          <button class="btn btn-secondary btn-sm" onclick="saveSlotMeal('${slot.id}')">${IC.bookmark} Save</button>
         ` : !slot.open ? `
           <button class="pill" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Leave open</button>
         ` : ''}
@@ -1553,12 +1557,12 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
     </div>
     <div class="slot-body">
       ${slot.open ? `
-        <div class="slot-open-badge">🔓 Open calories — logged as flex<button style="background:none;border:none;cursor:pointer;margin-left:8px;color:#854d0e;font-size:12px" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Undo</button></div>
+        <div class="slot-open-badge">${IC.unlock} Open slot — logged as flex<button style="background:none;border:none;cursor:pointer;margin-left:8px;color:#854d0e;font-size:12px" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Undo</button></div>
       ` : slot.meal ? renderRecipeCard(slot.meal, slot.id) : `
         <div class="slot-empty">
           <input class="pref-input" id="pref-${slot.id}" placeholder="${isSnack?'Any snack preference? (e.g. chips and dip)':'What would you like? (e.g. overnight oats)'}" value="${slot.preference||''}">
           <button class="btn-generate" id="gen-${slot.id}" onclick="generateSlot('${dateStr}','${slot.id}')">
-            ✨ Generate
+            ${IC.sparkle} Generate
           </button>
         </div>
         ${STATE.savedMeals.length ? `<div style="margin-top:8px"><button class="btn btn-secondary btn-sm" onclick="showUseSaved('${dateStr}','${slot.id}')">Use saved meal</button></div>` : ''}
@@ -1574,15 +1578,15 @@ function renderRecipeCard(meal, slotId) {
       <div class="recipe-name">${meal.name}</div>
       ${meal.description ? `<div class="recipe-desc">${meal.description}</div>` : ''}
       <div class="recipe-meta">
-        ${meal.prepTime ? `<span class="recipe-time">⏱ Prep ${meal.prepTime}</span>` : ''}
-        ${meal.cookTime ? `<span class="recipe-time">🍳 Cook ${meal.cookTime}</span>` : ''}
+        ${meal.prepTime ? `<span class="recipe-time">${IC.clock} Prep ${meal.prepTime}</span>` : ''}
+        ${meal.cookTime ? `<span class="recipe-time">${IC.pan} Cook ${meal.cookTime}</span>` : ''}
       </div>
     </div>
     <div class="recipe-macro-chips">
-      <span class="chip chip-cal">🔥 ${meal.calories} cal</span>
-      <span class="chip chip-protein">💪 ${meal.protein}g protein</span>
-      <span class="chip chip-carbs">🌾 ${meal.carbs}g carbs</span>
-      <span class="chip chip-fat">🥑 ${meal.fat}g fat</span>
+      <span class="chip chip-cal">${IC.flame} ${meal.calories} cal</span>
+      <span class="chip chip-protein">${IC.protein} ${meal.protein}g protein</span>
+      <span class="chip chip-carbs">${IC.grain} ${meal.carbs}g carbs</span>
+      <span class="chip chip-fat">${IC.droplet} ${meal.fat}g fat</span>
     </div>
     ${meal.ingredients?.length ? `
     <div class="recipe-section">
@@ -1596,7 +1600,7 @@ function renderRecipeCard(meal, slotId) {
               <span class="ingredient-amount">${ing.amount}</span>
             </div>
             ${hasMacros ? `<div class="ing-macros">
-              <span class="ing-mac-chip imc-cal">🔥 ${ing.cal} cal</span>
+              <span class="ing-mac-chip imc-cal">${IC.flame} ${ing.cal} cal</span>
               <span class="ing-mac-chip imc-p">P ${ing.p}g</span>
               <span class="ing-mac-chip imc-c">C ${ing.c}g</span>
               <span class="ing-mac-chip imc-f">F ${ing.f}g</span>
@@ -1694,7 +1698,7 @@ async function generateSlot(dateStr, slotId) {
   const genBtn = document.getElementById(`gen-${slotId}`);
   if (genBtn) {
     genBtn.disabled = true;
-    genBtn.innerHTML = `✨ Building...`;
+    genBtn.innerHTML = '<span class="spinner"></span> Building...';
   }
 
   // Compute target macros for this slot
@@ -1733,7 +1737,7 @@ async function generateSlot(dateStr, slotId) {
     showToast(`Error: ${err.message}`, 4000);
     if (genBtn) {
       genBtn.disabled = false;
-      genBtn.innerHTML = '✨ Generate';
+      genBtn.innerHTML = IC.sparkle + ' Generate';
     }
   }
 }
@@ -1833,7 +1837,7 @@ function renderWeek() {
         <div style="font-size:20px;font-weight:800;letter-spacing:-.5px">This Week</div>
         <div style="font-size:13px;color:var(--text-2)">${formatDate(dates[0])} – ${formatDate(dates[6])}</div>
       </div>
-      <button class="btn btn-secondary btn-sm" onclick="planWholeWeek()" id="plan-week-btn">✨ Plan Week</button>
+      <button class="btn btn-secondary btn-sm" onclick="planWholeWeek()" id="plan-week-btn">${IC.sparkle} Plan Week</button>
     </div>
 
     <div class="week-grid">
@@ -1850,7 +1854,7 @@ function renderWeek() {
         const [, mm, dd] = d.split('-');
         const dayName = new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'short'});
         return `<div class="day-card ${isActive?'active':''} ${status==='planned'?'planned':''}" onclick="selectWeekDay('${d}')">
-          <div class="day-name">${dayName}${isToday?' 📍':''}</div>
+          <div class="day-name">${dayName}${isToday ? ' <span style="display:inline-block;width:6px;height:6px;background:var(--primary);border-radius:50%;vertical-align:2px;margin-left:2px"></span>' : ''}</div>
           <div class="day-date">${parseInt(mm)}/${parseInt(dd)}</div>
           ${plannedCals > 0 ? `<div class="day-cals">${plannedCals}</div><div style="font-size:10px;opacity:.6">cal planned</div>` : '<div class="day-cals" style="color:var(--text-3)">—</div>'}
           <div class="day-status ${status}">${statusText}</div>
@@ -1862,7 +1866,7 @@ function renderWeek() {
 
     ${dates.some(d => STATE.dailyPlans[d] && getPlanTotals(STATE.dailyPlans[d]).calories > 0) ? `
       <button class="btn btn-primary" onclick="weekState.groceryMode=true;render()" style="margin-top:8px">
-        🛒 Generate Grocery List
+        ${IC.cart} Generate Grocery List
       </button>
     ` : ''}
   `;
@@ -1874,7 +1878,7 @@ function renderWeekDayDetail(dateStr) {
   return `<div class="day-detail">
     <div class="day-detail-header">
       <div style="font-size:16px;font-weight:700">${label}</div>
-      <button class="btn btn-secondary btn-sm" onclick="planDay('${dateStr}')">✨ Plan day</button>
+      <button class="btn btn-secondary btn-sm" onclick="planDay('${dateStr}')">${IC.sparkle} Plan day</button>
     </div>
     ${plan.slots.map(slot => `
       <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
@@ -1902,7 +1906,7 @@ function clearWeekSlot(dateStr, slotId) {
 
 async function planDay(dateStr) {
   const btn = document.querySelector(`[onclick="planDay('${dateStr}')"]`);
-  if (btn) { btn.disabled=true; btn.innerHTML='✨ Generating...'; }
+  if (btn) { btn.disabled=true; btn.innerHTML='<span class="spinner spinner-dark"></span> Generating...'; }
 
   const plan = getOrCreatePlan(dateStr);
   const { totals: fixedTotals } = getActiveFixedTotals(dateStr);
@@ -1945,7 +1949,7 @@ async function planWholeWeek() {
   for (const d of dates) {
     await planDay(d);
   }
-  showToast('Week planned! Check the grocery list 🛒');
+  showToast('Week planned! Check the grocery list.');
   render();
 }
 
@@ -1979,7 +1983,7 @@ function renderGroceryList(dates) {
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
       <button class="btn btn-secondary btn-sm" onclick="weekState.groceryMode=false;render()">← Back to Week</button>
       <div style="font-size:20px;font-weight:800;flex:1">Grocery List</div>
-      <button class="btn btn-secondary btn-sm" onclick="printGroceryList()">🖨️ Print</button>
+      <button class="btn btn-secondary btn-sm" onclick="printGroceryList()">${IC.printer} Print</button>
     </div>
     <div class="grocery-wrap" id="grocery-list">
       ${items.length ? items.map((item,i) => `
@@ -2022,7 +2026,7 @@ function renderSaved() {
     <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">${STATE.savedMeals.length} saved · Filter by macros</div>
 
     <div class="filter-row">
-      <input class="filter-input" placeholder="🔍 Search..." style="flex:1;width:auto" value="${savedFilters.search}" oninput="savedFilters.search=this.value;renderSavedInPlace()">
+      <input class="filter-input" placeholder="Search..." style="flex:1;width:auto" value="${savedFilters.search}" oninput="savedFilters.search=this.value;renderSavedInPlace()">
       <input class="filter-input" type="number" placeholder="Min cal" value="${savedFilters.minCal}" oninput="savedFilters.minCal=this.value;renderSavedInPlace()">
       <input class="filter-input" type="number" placeholder="Max cal" value="${savedFilters.maxCal}" oninput="savedFilters.maxCal=this.value;renderSavedInPlace()">
       <input class="filter-input" type="number" placeholder="Min protein" value="${savedFilters.minProtein}" oninput="savedFilters.minProtein=this.value;renderSavedInPlace()">
@@ -2038,15 +2042,15 @@ function renderSaved() {
             </div>
             ${m.description ? `<div class="saved-card-desc">${m.description}</div>` : ''}
             <div class="saved-card-chips">
-              <span class="chip chip-cal">🔥 ${m.calories} cal</span>
-              <span class="chip chip-protein">💪 ${m.protein}g P</span>
-              <span class="chip chip-carbs">🌾 ${m.carbs}g C</span>
-              <span class="chip chip-fat">🥑 ${m.fat}g F</span>
+              <span class="chip chip-cal">${IC.flame} ${m.calories} cal</span>
+              <span class="chip chip-protein">${IC.protein} ${m.protein}g P</span>
+              <span class="chip chip-carbs">${IC.grain} ${m.carbs}g C</span>
+              <span class="chip chip-fat">${IC.droplet} ${m.fat}g F</span>
             </div>
             <div style="margin-top:8px"><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();addSavedToToday('${m.id}')">+ Add to today</button></div>
           </div>
         `).join('')}
-      </div>` : `<div class="empty-state"><div class="icon">🔖</div><p>${STATE.savedMeals.length ? 'No meals match your filters' : 'Save meals from the Today view to see them here'}</p></div>`}
+      </div>` : `<div class="empty-state"><div class="icon" style="color:var(--text-3)">${IC.bookmark.replace('width="14" height="14"','width="40" height="40"')}</div><p>${STATE.savedMeals.length ? 'No meals match your filters' : 'Save meals from the Today view to see them here'}</p></div>`}
     </div>
   `;
 }
@@ -2129,27 +2133,27 @@ function renderSettings() {
       <div class="settings-section-title">Daily Macro Targets</div>
       <div class="macro-edit-grid" id="s-macro-grid">
         <div class="macro-field calories">
-          <label><span class="dot" style="background:#10b981"></span>Calories</label>
+          <label><span class="dot" style="background:#2a6049"></span>Calories</label>
           <input type="number" id="sm-calories" value="${p.calories}" data-field="calories">
           <div class="unit">kcal / day</div>
         </div>
         <div class="macro-field">
-          <label><span class="dot" style="background:#6366f1"></span>Protein</label>
+          <label><span class="dot" style="background:#4f46e5"></span>Protein</label>
           <input type="number" id="sm-protein" value="${p.protein}" data-field="protein">
           <div class="unit">grams</div>
         </div>
         <div class="macro-field">
-          <label><span class="dot" style="background:#f59e0b"></span>Carbs</label>
+          <label><span class="dot" style="background:#b45309"></span>Carbs</label>
           <input type="number" id="sm-carbs" value="${p.carbs}" data-field="carbs">
           <div class="unit">grams</div>
         </div>
         <div class="macro-field">
-          <label><span class="dot" style="background:#f43f5e"></span>Fat</label>
+          <label><span class="dot" style="background:#be185d"></span>Fat</label>
           <input type="number" id="sm-fat" value="${p.fat}" data-field="fat">
           <div class="unit">grams</div>
         </div>
       </div>
-      <button class="btn btn-secondary btn-sm" onclick="recalcTDEE()" style="margin-top:10px">↺ Recalculate from profile</button>
+      <button class="btn btn-secondary btn-sm" onclick="recalcTDEE()" style="margin-top:10px">${IC.refresh} Recalculate from profile</button>
     </div>
 
     <div class="settings-section">
@@ -2170,7 +2174,7 @@ function renderSettings() {
 
 <button class="btn btn-primary" id="save-settings-btn">Save Settings</button>
     <div style="margin-top:12px">
-      <button class="btn btn-danger btn-sm" onclick="resetApp()">⚠️ Reset all data</button>
+      <button class="btn btn-danger btn-sm" onclick="resetApp()">Reset all data</button>
     </div>
   `;
 }
