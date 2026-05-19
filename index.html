@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NourishAI – Smart Meal Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #10b981; --primary-hover: #059669; --primary-light: #ecfdf5; --primary-dark: #065f46;
+  --protein: #6366f1; --carbs: #f59e0b; --fat: #f43f5e;
+  --bg: #f8fafc; --surface: #ffffff; --surface-2: #f1f5f9;
+  --border: #e2e8f0; --border-focus: #10b981;
+  --text: #0f172a; --text-2: #475569; --text-3: #94a3b8;
+  --radius: 14px; --radius-sm: 8px; --radius-lg: 20px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+button{cursor:pointer;font-family:'Inter',sans-serif;border:none;outline:none}
+input,select,textarea{font-family:'Inter',sans-serif;outline:none}
+a{color:inherit;text-decoration:none}
+
+/* ── Layout ── */
+#app{min-height:100vh;display:flex;flex-direction:column}
+.nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
+.nav-bar.top{position:fixed;top:0;bottom:auto;border-top:none;border-bottom:1px solid var(--border);padding:0}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;color:var(--text-3);font-size:11px;font-weight:500;transition:color .2s}
+.nav-item.active{color:var(--primary)}
+.nav-item svg{width:22px;height:22px}
+.page-content{flex:1;padding:16px;padding-bottom:90px;max-width:680px;margin:0 auto;width:100%}
+.page-content.with-topnav{padding-top:72px}
+
+/* ── Onboarding ── */
+.onboard-wrap{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(160deg,#ecfdf5 0%,#f0f9ff 100%)}
+.onboard-header{padding:48px 24px 24px;text-align:center}
+.onboard-logo{font-size:28px;font-weight:800;color:var(--primary);letter-spacing:-1px;margin-bottom:8px}
+.onboard-body{flex:1;padding:0 24px 32px;max-width:500px;margin:0 auto;width:100%}
+.step-indicator{display:flex;gap:6px;justify-content:center;margin-bottom:32px}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s}
+.step-dot.active{background:var(--primary);width:24px;border-radius:4px}
+.step-dot.done{background:var(--primary)}
+.step-title{font-size:24px;font-weight:700;margin-bottom:6px;letter-spacing:-0.5px}
+.step-sub{color:var(--text-2);font-size:15px;margin-bottom:28px;line-height:1.5}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.form-input{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;background:var(--surface);color:var(--text);transition:border-color .2s}
+.form-input:focus{border-color:var(--primary)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.radio-group{display:grid;gap:10px}
+.radio-card{display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;background:var(--surface)}
+.radio-card:hover{border-color:var(--primary);background:var(--primary-light)}
+.radio-card.selected{border-color:var(--primary);background:var(--primary-light)}
+.radio-card-icon{font-size:22px}
+.radio-card-text .title{font-weight:600;font-size:14px}
+.radio-card-text .sub{font-size:12px;color:var(--text-2)}
+.btn{padding:14px 24px;border-radius:var(--radius-sm);font-size:15px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn-primary{background:var(--primary);color:#fff;width:100%}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-secondary{background:var(--surface-2);color:var(--text-2);border:2px solid var(--border)}
+.btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:6px}
+.btn-danger{background:#fef2f2;color:#ef4444;border:2px solid #fecaca}
+.btn-danger:hover{background:#ef4444;color:#fff}
+.btn-ghost{background:none;color:var(--text-2);font-size:14px;padding:8px}
+.btn-ghost:hover{color:var(--primary)}
+.nav-btns{display:flex;gap:10px;margin-top:24px}
+.macro-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.macro-field{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px;transition:border-color .2s}
+.macro-field:focus-within{border-color:var(--primary)}
+.macro-field label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text-3);display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.macro-field .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.macro-field input{width:100%;border:none;font-size:22px;font-weight:700;color:var(--text);background:none;padding:0}
+.macro-field .unit{font-size:13px;color:var(--text-3);margin-top:2px}
+.macro-field.calories{grid-column:1/-1;background:linear-gradient(135deg,var(--primary-light),#f0fdf4)}
+.macro-field.calories input{color:var(--primary);font-size:28px}
+
+/* ── Cards & Surfaces ── */
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;border:1px solid var(--border)}
+.card-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.chip-cal{background:#fef9c3;color:#854d0e}
+.chip-protein{background:#eef2ff;color:#4338ca}
+.chip-carbs{background:#fffbeb;color:#92400e}
+.chip-fat{background:#fff1f2;color:#be123c}
+
+/* ── Macro Ring ── */
+.summary-section{background:linear-gradient(135deg,#10b981,#059669);border-radius:var(--radius-lg);padding:20px;color:#fff;margin-bottom:16px}
+.summary-top{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.ring-wrap{position:relative;width:100px;height:100px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg);width:100%;height:100%}
+.ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ring-text .cals{font-size:20px;font-weight:800;line-height:1}
+.ring-text .of{font-size:10px;opacity:.8;margin-top:2px}
+.summary-right{flex:1}
+.summary-right .label{font-size:12px;opacity:.8;margin-bottom:4px}
+.summary-right .big-num{font-size:28px;font-weight:800;line-height:1}
+.summary-right .sub{font-size:12px;opacity:.7;margin-top:2px}
+.macro-bars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.macro-bar-item label{font-size:11px;font-weight:600;opacity:.85;margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.macro-bar-track{height:6px;background:rgba(255,255,255,.25);border-radius:3px;overflow:hidden}
+.macro-bar-fill{height:100%;border-radius:3px;background:#fff;transition:width .4s ease}
+.macro-bar-nums{font-size:12px;margin-top:3px;opacity:.9}
+
+/* ── Fixed Items ── */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.section-title{font-size:14px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.7px}
+.fixed-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:8px}
+.fixed-item-toggle{position:relative;width:38px;height:22px;flex-shrink:0}
+.fixed-item-toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{display:block;width:100%;height:100%;background:#e2e8f0;border-radius:11px;cursor:pointer;transition:background .2s}
+.fixed-item-toggle input:checked + .toggle-track{background:var(--primary)}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.fixed-item-toggle input:checked ~ .toggle-thumb{transform:translateX(16px)}
+.fixed-item-info{flex:1}
+.fixed-item-name{font-size:14px;font-weight:600}
+.fixed-item-macros{font-size:12px;color:var(--text-3)}
+.fixed-item-inactive{opacity:.4}
+
+/* ── Meal Slots ── */
+.meal-slot{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
+.slot-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px}
+.slot-title{font-size:15px;font-weight:700}
+.slot-target{font-size:12px;color:var(--text-3)}
+.slot-actions{display:flex;gap:6px;align-items:center}
+.slot-body{padding:0 16px 14px}
+.slot-empty{display:flex;gap:8px;align-items:center}
+.pref-input{flex:1;padding:10px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:14px;color:var(--text);background:var(--surface-2)}
+.pref-input:focus{border-color:var(--primary);background:#fff}
+.btn-generate{background:var(--primary);color:#fff;padding:10px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;white-space:nowrap}
+.btn-generate:hover{background:var(--primary-hover)}
+.btn-generate:disabled{opacity:.6;cursor:not-allowed}
+.slot-open-badge{display:inline-flex;align-items:center;gap:6px;background:#fef9c3;color:#854d0e;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600}
+
+/* ── Recipe Card ── */
+.recipe-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.recipe-header{padding:14px 16px;background:linear-gradient(135deg,var(--primary-light),#f0fdf4);border-bottom:1px solid var(--border)}
+.recipe-name{font-size:16px;font-weight:700;margin-bottom:6px}
+.recipe-desc{font-size:13px;color:var(--text-2);line-height:1.5}
+.recipe-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.recipe-macro-chips{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border)}
+.recipe-time{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:4px}
+.recipe-section{padding:12px 16px}
+.recipe-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text-2);margin-bottom:8px}
+.ingredient-list{list-style:none;display:flex;flex-direction:column;gap:0}
+.ingredient-list li{font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)}
+.ingredient-list li:last-child{border-bottom:none}
+.ing-row{display:flex;align-items:center;gap:6px}
+.ing-name{flex:1;font-size:13px;color:var(--text)}
+.ingredient-amount{color:var(--text-2);font-weight:500;font-size:12px;margin-right:4px}
+.ing-macros{display:flex;gap:4px;margin-top:2px;flex-wrap:wrap}
+.ing-mac-chip{font-size:10px;font-weight:600;padding:1px 5px;border-radius:10px;white-space:nowrap}
+.imc-cal{background:#fef9c3;color:#854d0e}
+.imc-p{background:#eef2ff;color:#4338ca}
+.imc-c{background:#fffbeb;color:#92400e}
+.imc-f{background:#fff1f2;color:#be123c}
+
+/* ── Logged Foods ── */
+.logged-food-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:6px}
+.logged-food-info{flex:1}
+.logged-food-name{font-size:14px;font-weight:600}
+.logged-food-macros{font-size:12px;color:var(--text-3)}
+.btn-remove-log{background:none;border:none;color:var(--text-3);font-size:16px;cursor:pointer;padding:0 4px;line-height:1}
+.btn-remove-log:hover{color:#ef4444}
+.instruction-list{list-style:none;counter-reset:steps;display:flex;flex-direction:column;gap:8px}
+.instruction-list li{counter-increment:steps;display:flex;gap:10px;font-size:13px;line-height:1.5;color:var(--text-2)}
+.instruction-list li::before{content:counter(steps);background:var(--primary);color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.recipe-footer{padding:12px 16px;display:flex;gap:8px;border-top:1px solid var(--border);background:var(--surface-2)}
+.collapsible-toggle{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;background:none;border:none;padding:0 0 4px}
+.collapsible-content{overflow:hidden;transition:max-height .3s ease}
+
+/* ── Loading Spinner ── */
+.spinner{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+.spinner-dark{border-color:rgba(0,0,0,.1);border-top-color:var(--primary)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-card{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:12px;color:var(--text-2);font-size:14px}
+
+/* ── Week View ── */
+.week-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.day-card{background:var(--surface);border-radius:var(--radius);border:2px solid var(--border);padding:14px;cursor:pointer;transition:all .2s}
+.day-card:hover{border-color:var(--primary);box-shadow:var(--shadow-md)}
+.day-card.active{border-color:var(--primary);background:var(--primary-light)}
+.day-card.planned{border-color:#86efac}
+.day-name{font-size:13px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px}
+.day-date{font-size:12px;color:var(--text-3);margin-bottom:8px}
+.day-cals{font-size:20px;font-weight:800;color:var(--primary)}
+.day-status{font-size:12px;margin-top:4px}
+.day-status.planned{color:#059669}
+.day-status.partial{color:#d97706}
+.day-status.none{color:var(--text-3)}
+.day-detail{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:16px;margin-bottom:16px}
+.day-detail-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+
+/* ── Saved Meals ── */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.filter-input{padding:8px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:13px;width:120px}
+.filter-input:focus{border-color:var(--primary)}
+.saved-grid{display:grid;gap:10px}
+.saved-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:14px;cursor:pointer;transition:all .2s}
+.saved-card:hover{box-shadow:var(--shadow-md);border-color:var(--primary)}
+.saved-card-name{font-size:15px;font-weight:700;margin-bottom:6px}
+.saved-card-desc{font-size:12px;color:var(--text-2);margin-bottom:8px;line-height:1.4}
+.saved-card-chips{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ── Settings ── */
+.settings-section{margin-bottom:20px}
+.settings-section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text-2);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--border)}
+.fixed-item-row{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface-2);border-radius:var(--radius-sm);margin-bottom:8px}
+.fixed-item-row .name{font-size:14px;font-weight:600;flex:1}
+.fixed-item-row .macros{font-size:12px;color:var(--text-3)}
+
+/* ── Grocery List ── */
+.grocery-wrap{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:16px}
+.grocery-day{margin-bottom:14px}
+.grocery-day-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:6px}
+.grocery-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px}
+.grocery-item:last-child{border-bottom:none}
+.grocery-check{width:16px;height:16px;border-radius:4px;border:2px solid var(--border);cursor:pointer;flex-shrink:0}
+.grocery-item.checked .grocery-text{text-decoration:line-through;color:var(--text-3)}
+
+/* ── Modals & Overlays ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;animation:fadeIn .2s ease}
+.modal-sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:24px;max-height:90vh;overflow-y:auto;width:100%;max-width:680px;margin:0 auto;animation:slideUp .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(40px)}to{transform:translateY(0)}}
+.modal-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:14px;color:var(--text-2);margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;margin-top:20px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;background:var(--surface-2);color:var(--text-2);border:2px solid var(--border);cursor:pointer;transition:all .2s}
+.pill:hover,.pill.active{border-color:var(--primary);background:var(--primary-light);color:var(--primary)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-3)}
+.empty-state .icon{font-size:40px;margin-bottom:8px}
+.empty-state p{font-size:14px}
+.badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-green{background:#dcfce7;color:#166534}
+.badge-gray{background:var(--surface-2);color:var(--text-2)}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;z-index:999;animation:toastIn .3s ease;white-space:nowrap}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ── Responsive ── */
+@media(min-width:500px){.week-grid{grid-template-columns:repeat(4,1fr)}.form-row{grid-template-columns:1fr 1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// STATE & STORAGE
+// ═══════════════════════════════════════════════════
+const STORAGE_KEY = 'nourishai_v1';
+
+function defaultState() {
+  return {
+    onboardingComplete: false,
+    profile: {
+      name: '', age: 25, sex: 'male',
+      weightLbs: 180, heightFt: 5, heightIn: 10,
+      goal: 'maintain', activity: 'moderate',
+      calories: 2200, protein: 165, carbs: 220, fat: 73
+    },
+    fixedItems: [],
+    savedMeals: [],
+    dailyPlans: {},
+    apiKey: '',
+    apiProvider: 'openai',
+    currentView: 'today',
+    onboardingStep: 1
+  };
+}
+
+let STATE = (() => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return { ...defaultState(), ...JSON.parse(saved) };
+  } catch(e) {}
+  return defaultState();
+})();
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch(e) {}
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function todayLabel() {
+  return new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+}
+
+function getWeekDates() {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  return Array.from({length:7}, (_,i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d.toISOString().split('T')[0];
+  });
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+}
+
+function showToast(msg, duration = 2500) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), duration);
+}
+
+// ═══════════════════════════════════════════════════
+// TDEE & MACRO MATH
+// ═══════════════════════════════════════════════════
+const ACTIVITY_MULT = { sedentary:1.2, light:1.375, moderate:1.55, active:1.725, very:1.9 };
+const GOAL_ADJ = { lose:-500, maintain:0, gain:300, bulk:500 };
+const GOAL_MACROS = {
+  lose:   { p:.40, c:.30, f:.30 },
+  maintain:{ p:.30, c:.40, f:.30 },
+  gain:   { p:.35, c:.40, f:.25 },
+  bulk:   { p:.25, c:.50, f:.25 }
+};
+
+function calcTDEE(profile) {
+  const weightKg = profile.weightLbs * 0.453592;
+  const heightCm = (profile.heightFt * 30.48) + (profile.heightIn * 2.54);
+  const bmr = profile.sex === 'male'
+    ? 10 * weightKg + 6.25 * heightCm - 5 * profile.age + 5
+    : 10 * weightKg + 6.25 * heightCm - 5 * profile.age - 161;
+  const tdee = bmr * (ACTIVITY_MULT[profile.activity] || 1.55);
+  const cal = Math.round(tdee + (GOAL_ADJ[profile.goal] || 0));
+  const split = GOAL_MACROS[profile.goal] || GOAL_MACROS.maintain;
+  return {
+    calories: Math.max(1200, cal),
+    protein: Math.round((cal * split.p) / 4),
+    carbs: Math.round((cal * split.c) / 4),
+    fat: Math.round((cal * split.f) / 9)
+  };
+}
+
+function adjustMacros(field, rawVal, cur) {
+  const val = parseFloat(rawVal) || 0;
+  if (val < 0) return cur;
+  let { calories, protein, carbs, fat } = { ...cur };
+
+  if (field === 'calories') {
+    const ratio = calories > 0 ? val / calories : 1;
+    return { calories: Math.round(val), protein: Math.round(protein*ratio), carbs: Math.round(carbs*ratio), fat: Math.round(fat*ratio) };
+  }
+  if (field === 'protein') {
+    protein = Math.round(val);
+    const used = protein * 4;
+    const remaining = calories - used;
+    if (remaining < 0) {
+      // Raise calories to fit
+      return { calories: Math.round(used + carbs*4 + fat*9), protein, carbs, fat };
+    }
+    const prevNon = carbs*4 + fat*9;
+    const cRatio = prevNon > 0 ? (carbs*4)/prevNon : 0.55;
+    return { calories, protein, carbs: Math.round(remaining*cRatio/4), fat: Math.round(remaining*(1-cRatio)/9) };
+  }
+  if (field === 'carbs') {
+    carbs = Math.round(val);
+    const used = protein*4 + carbs*4;
+    if (used > calories) return { calories: Math.round(used + fat*9), protein, carbs, fat };
+    return { calories, protein, carbs, fat: Math.round((calories-used)/9) };
+  }
+  if (field === 'fat') {
+    fat = Math.round(val);
+    const used = protein*4 + fat*9;
+    if (used > calories) return { calories: Math.round(used + carbs*4), protein, carbs, fat };
+    return { calories, protein, carbs: Math.round((calories-used)/4), fat };
+  }
+  return cur;
+}
+
+function macrosFromItems(items) {
+  return items.reduce((acc, it) => ({
+    calories: acc.calories + (it.calories||0),
+    protein: acc.protein + (it.protein||0),
+    carbs: acc.carbs + (it.carbs||0),
+    fat: acc.fat + (it.fat||0)
+  }), { calories:0, protein:0, carbs:0, fat:0 });
+}
+
+// Calorie weighting: snacks get much less than meals; lunch & dinner are biggest
+function slotWeight(slot) {
+  if (slot.type === 'snack') return 0.08;
+  const label = (slot.label || '').toLowerCase();
+  if (label.includes('breakfast')) return 0.25;
+  if (label.includes('lunch'))     return 0.32;
+  if (label.includes('dinner') || label.includes('supper')) return 0.32;
+  return 0.28; // generic meal slot
+}
+
+// Returns the weighted macro target for a single slot given remaining macros and all empty slots
+function weightedSlotTarget(slot, remaining, emptySlots) {
+  if (!emptySlots.length) return { cal:0, prot:0, carbs:0, fat:0 };
+  const totalWeight = emptySlots.reduce((s, sl) => s + slotWeight(sl), 0);
+  const ratio = totalWeight > 0 ? slotWeight(slot) / totalWeight : 1 / emptySlots.length;
+  return {
+    cal:   Math.max(50,  Math.round(remaining.calories * ratio)),
+    prot:  Math.max(0,   Math.round(remaining.protein  * ratio)),
+    carbs: Math.max(0,   Math.round(remaining.carbs    * ratio)),
+    fat:   Math.max(0,   Math.round(remaining.fat      * ratio))
+  };
+}
+
+// ═══════════════════════════════════════════════════
+// DAILY PLAN HELPERS
+// ═══════════════════════════════════════════════════
+function getOrCreatePlan(dateStr) {
+  if (!STATE.dailyPlans[dateStr]) {
+    STATE.dailyPlans[dateStr] = { slots: defaultSlots(), approved: false };
+    saveState();
+  }
+  return STATE.dailyPlans[dateStr];
+}
+
+function defaultSlots() {
+  const cal = STATE.profile.calories;
+  const snacks = cal < 1600 ? 1 : cal < 2400 ? 2 : 3;
+  const slots = [
+    { id: uid(), type:'meal', label:'Breakfast', preference:'', meal:null, open:false },
+    { id: uid(), type:'meal', label:'Lunch', preference:'', meal:null, open:false },
+    { id: uid(), type:'meal', label:'Dinner', preference:'', meal:null, open:false }
+  ];
+  for (let i = 0; i < snacks; i++) {
+    slots.push({ id: uid(), type:'snack', label:`Snack ${i+1}`, preference:'', meal:null, open:false });
+  }
+  return slots;
+}
+
+function getPlanTotals(plan) {
+  const slotTotals = plan.slots.reduce((acc, slot) => {
+    if (slot.meal && !slot.open) {
+      acc.calories += slot.meal.calories || 0;
+      acc.protein += slot.meal.protein || 0;
+      acc.carbs += slot.meal.carbs || 0;
+      acc.fat += slot.meal.fat || 0;
+    }
+    return acc;
+  }, { calories:0, protein:0, carbs:0, fat:0 });
+  // Add any manually logged foods
+  const logged = (plan.loggedFoods || []).reduce((acc, f) => ({
+    calories: acc.calories + (f.calories||0),
+    protein: acc.protein + (f.protein||0),
+    carbs: acc.carbs + (f.carbs||0),
+    fat: acc.fat + (f.fat||0)
+  }), { calories:0, protein:0, carbs:0, fat:0 });
+  return {
+    calories: slotTotals.calories + logged.calories,
+    protein: slotTotals.protein + logged.protein,
+    carbs: slotTotals.carbs + logged.carbs,
+    fat: slotTotals.fat + logged.fat
+  };
+}
+
+function getActiveFixedTotals(dateStr) {
+  const key = `fixed_active_${dateStr}`;
+  let active;
+  try { active = JSON.parse(localStorage.getItem(key) || 'null'); } catch(e) { active = null; }
+  if (!active) {
+    active = STATE.fixedItems.reduce((o, it) => { o[it.id] = true; return o; }, {});
+    localStorage.setItem(key, JSON.stringify(active));
+  }
+  return { active, totals: STATE.fixedItems.filter(it => active[it.id]).reduce((acc, it) => ({
+    calories: acc.calories+(it.calories||0), protein: acc.protein+(it.protein||0),
+    carbs: acc.carbs+(it.carbs||0), fat: acc.fat+(it.fat||0)
+  }), { calories:0, protein:0, carbs:0, fat:0 }) };
+}
+
+function setFixedItemActive(dateStr, itemId, val) {
+  const key = `fixed_active_${dateStr}`;
+  let active;
+  try { active = JSON.parse(localStorage.getItem(key) || 'null'); } catch(e) { active = null; }
+  if (!active) active = STATE.fixedItems.reduce((o,it) => { o[it.id]=true; return o; }, {});
+  active[itemId] = val;
+  localStorage.setItem(key, JSON.stringify(active));
+}
+
+// ═══════════════════════════════════════════════════
+// BUILT-IN RECIPE DATABASE
+// ═══════════════════════════════════════════════════
+const RECIPE_DB = [
+  // ─── BREAKFAST ───
+  { id:'overnight-oats', name:'Overnight Oats with Berries', keywords:['oats','overnight oats','oatmeal'], mealTypes:['breakfast'],
+    description:'Creamy overnight oats loaded with protein and topped with fresh berries. Prep the night before for a zero-effort morning.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:420, baseP:28, baseC:58, baseF:9,
+    ingredients:[{item:'Rolled oats',amount:80,unit:'g'},{item:'Non-fat Greek yogurt',amount:150,unit:'g'},{item:'Unsweetened almond milk',amount:120,unit:'ml'},{item:'Protein powder (vanilla)',amount:25,unit:'g'},{item:'Mixed berries',amount:100,unit:'g'},{item:'Honey',amount:10,unit:'g'}],
+    instructions:['Combine oats, Greek yogurt, almond milk, and protein powder in a jar.','Stir well until fully mixed.','Cover and refrigerate overnight (at least 6 hours).','In the morning, top with mixed berries and a drizzle of honey.','Add extra almond milk if you prefer a thinner consistency.']},
+  { id:'scrambled-eggs-toast', name:'Fluffy Scrambled Eggs on Toast', keywords:['eggs','scrambled eggs','toast','egg'], mealTypes:['breakfast'],
+    description:'Buttery, fluffy scrambled eggs piled high on whole wheat toast. A protein-packed classic that never gets old.',
+    prepTime:'5 min', cookTime:'8 min', baseCal:400, baseP:24, baseC:32, baseF:18,
+    ingredients:[{item:'Large eggs',amount:3,unit:'egg'},{item:'Whole wheat bread',amount:2,unit:'slice'},{item:'Butter',amount:8,unit:'g'},{item:'Milk',amount:30,unit:'ml'},{item:'Salt and pepper',amount:1,unit:'pinch'},{item:'Fresh chives (optional)',amount:5,unit:'g'}],
+    instructions:['Crack eggs into a bowl, add milk, salt, and pepper. Whisk until combined.','Melt butter in a non-stick pan over medium-low heat.','Pour in egg mixture. Let it sit 30 seconds, then gently fold with a spatula.','Remove from heat just before eggs are fully set — residual heat finishes them.','Toast bread and top with scrambled eggs.']},
+  { id:'greek-yogurt-parfait', name:'Greek Yogurt Protein Parfait', keywords:['yogurt','parfait','greek yogurt'], mealTypes:['breakfast','snack'],
+    description:'Layers of thick Greek yogurt, crunchy granola, and fresh fruit for a breakfast that feels like dessert.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:370, baseP:28, baseC:50, baseF:6,
+    ingredients:[{item:'Non-fat Greek yogurt',amount:250,unit:'g'},{item:'Low-sugar granola',amount:40,unit:'g'},{item:'Strawberries, sliced',amount:80,unit:'g'},{item:'Blueberries',amount:50,unit:'g'},{item:'Honey',amount:10,unit:'g'}],
+    instructions:['Spoon half the Greek yogurt into a glass or bowl.','Add half the granola, then half the fruit.','Repeat with remaining yogurt, granola, and fruit.','Drizzle with honey and serve immediately.']},
+  { id:'protein-pancakes', name:'High-Protein Banana Pancakes', keywords:['pancakes','protein pancakes','pancake'], mealTypes:['breakfast'],
+    description:'Fluffy, satisfying pancakes packed with protein. These taste indulgent but are genuinely good for you.',
+    prepTime:'8 min', cookTime:'12 min', baseCal:460, baseP:36, baseC:52, baseF:9,
+    ingredients:[{item:'Rolled oats (blended to flour)',amount:60,unit:'g'},{item:'Protein powder (vanilla)',amount:30,unit:'g'},{item:'Ripe banana',amount:1,unit:'medium'},{item:'Eggs',amount:2,unit:'egg'},{item:'Non-fat Greek yogurt',amount:80,unit:'g'},{item:'Baking powder',amount:3,unit:'g'},{item:'Cooking spray',amount:1,unit:'spray'}],
+    instructions:['Blend oats into fine flour. Mash banana in a bowl.','Mix all ingredients together until smooth batter forms.','Heat a non-stick pan over medium and coat with cooking spray.','Pour ¼ cup batter per pancake. Cook 2-3 min until bubbles form, then flip.','Cook 1-2 min more until golden. Serve with fresh fruit.']},
+  { id:'avocado-egg-toast', name:'Avocado & Fried Egg Toast', keywords:['avocado toast','avocado','fried egg'], mealTypes:['breakfast'],
+    description:'Creamy smashed avocado on crispy toast with a perfectly fried egg. Satisfying, nutritious, and ready in minutes.',
+    prepTime:'5 min', cookTime:'5 min', baseCal:430, baseP:18, baseC:34, baseF:24,
+    ingredients:[{item:'Whole grain bread',amount:2,unit:'slice'},{item:'Ripe avocado',amount:100,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Lemon juice',amount:5,unit:'ml'},{item:'Red pepper flakes',amount:1,unit:'pinch'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
+    instructions:['Toast bread until golden and crisp.','Mash avocado with lemon juice, salt, pepper, and red pepper flakes.','Fry eggs to your liking in a lightly oiled pan.','Spread avocado on toast and top with fried eggs.','Season with extra salt and red pepper flakes. Serve immediately.']},
+  { id:'breakfast-burrito', name:'High-Protein Breakfast Burrito', keywords:['burrito','breakfast burrito','wrap'], mealTypes:['breakfast'],
+    description:'A hearty, protein-packed burrito loaded with eggs, turkey sausage, and veggies. Filling enough to power you through the morning.',
+    prepTime:'8 min', cookTime:'10 min', baseCal:530, baseP:35, baseC:52, baseF:18,
+    ingredients:[{item:'Large flour tortilla (10")',amount:1,unit:'tortilla'},{item:'Eggs',amount:3,unit:'egg'},{item:'Turkey breakfast sausage',amount:60,unit:'g'},{item:'Black beans (canned, drained)',amount:80,unit:'g'},{item:'Shredded cheese',amount:30,unit:'g'},{item:'Salsa',amount:40,unit:'g'}],
+    instructions:['Cook turkey sausage in a pan, breaking it up. Set aside.','Scramble eggs in the same pan until just set. Season well.','Warm tortilla in microwave for 20 seconds.','Layer eggs, sausage, black beans, and cheese in the center of tortilla.','Top with salsa, fold sides in, then roll up tightly.']},
+  { id:'cottage-cheese-bowl', name:'Cottage Cheese Power Bowl', keywords:['cottage cheese','cottage'], mealTypes:['breakfast','snack'],
+    description:'A high-protein cottage cheese bowl with fruit and a hint of sweetness. Incredibly filling for the calorie count.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:330, baseP:30, baseC:40, baseF:5,
+    ingredients:[{item:'Low-fat cottage cheese',amount:225,unit:'g'},{item:'Pineapple chunks',amount:80,unit:'g'},{item:'Blueberries',amount:50,unit:'g'},{item:'Honey',amount:8,unit:'g'},{item:'Chia seeds',amount:8,unit:'g'}],
+    instructions:['Scoop cottage cheese into a bowl.','Top with pineapple and blueberries.','Drizzle with honey and sprinkle chia seeds.','Mix gently and enjoy.']},
+  { id:'egg-white-omelette', name:'Veggie Egg White Omelette', keywords:['omelette','omelet','egg white','egg whites'], mealTypes:['breakfast'],
+    description:'A light, fluffy omelette loaded with colorful vegetables. High protein, low fat, and packed with nutrients.',
+    prepTime:'8 min', cookTime:'8 min', baseCal:290, baseP:28, baseC:14, baseF:12,
+    ingredients:[{item:'Egg whites',amount:6,unit:'egg white'},{item:'Whole egg',amount:1,unit:'egg'},{item:'Bell pepper, diced',amount:80,unit:'g'},{item:'Mushrooms, sliced',amount:60,unit:'g'},{item:'Baby spinach',amount:40,unit:'g'},{item:'Feta cheese',amount:25,unit:'g'},{item:'Olive oil',amount:5,unit:'ml'}],
+    instructions:['Whisk egg whites and whole egg with a pinch of salt.','Sauté bell pepper and mushrooms in olive oil over medium heat for 3-4 min.','Add spinach and cook until wilted. Remove veggies and set aside.','Pour egg mixture into pan. Let set on bottom then lift edges.','Add veggies and feta to one half. Fold and slide onto plate.']},
+  { id:'oatmeal-almond-butter', name:'Creamy Oatmeal with Almond Butter', keywords:['oatmeal','oats','almond butter'], mealTypes:['breakfast'],
+    description:'Warm, creamy oatmeal swirled with rich almond butter and banana. The kind of breakfast that keeps you full for hours.',
+    prepTime:'2 min', cookTime:'5 min', baseCal:460, baseP:15, baseC:62, baseF:17,
+    ingredients:[{item:'Rolled oats',amount:80,unit:'g'},{item:'Water or milk',amount:200,unit:'ml'},{item:'Almond butter',amount:25,unit:'g'},{item:'Banana, sliced',amount:1,unit:'medium'},{item:'Cinnamon',amount:2,unit:'g'},{item:'Honey',amount:10,unit:'g'}],
+    instructions:['Bring water or milk to a boil in a small saucepan.','Add oats and reduce to medium-low. Cook 3-5 min, stirring occasionally.','Remove from heat. Stir in cinnamon and honey.','Transfer to bowl. Swirl in almond butter.','Top with banana slices and enjoy hot.']},
+  { id:'smoothie-bowl', name:'Tropical Protein Smoothie Bowl', keywords:['smoothie','smoothie bowl','acai'], mealTypes:['breakfast'],
+    description:'A thick, vibrant smoothie bowl topped with crunchy granola and tropical fruit. Nutritious and delicious.',
+    prepTime:'8 min', cookTime:'0 min', baseCal:390, baseP:24, baseC:62, baseF:6,
+    ingredients:[{item:'Frozen mango chunks',amount:120,unit:'g'},{item:'Frozen banana',amount:80,unit:'g'},{item:'Protein powder (vanilla)',amount:25,unit:'g'},{item:'Non-fat Greek yogurt',amount:100,unit:'g'},{item:'Granola',amount:30,unit:'g'},{item:'Kiwi, sliced',amount:60,unit:'g'},{item:'Coconut flakes',amount:10,unit:'g'}],
+    instructions:['Blend frozen mango, banana, protein powder, and yogurt until thick and smooth.','If too thick, add 1-2 tbsp water or milk.','Pour into a bowl.','Arrange granola, kiwi, and coconut flakes on top.','Eat immediately with a spoon.']},
+  { id:'french-toast', name:'Protein French Toast', keywords:['french toast','french'], mealTypes:['breakfast'],
+    description:'Golden, custardy French toast with a secret protein boost. Tastes like a treat, fuels like a champion.',
+    prepTime:'5 min', cookTime:'8 min', baseCal:440, baseP:30, baseC:48, baseF:12,
+    ingredients:[{item:'Whole wheat bread',amount:3,unit:'slice'},{item:'Eggs',amount:2,unit:'egg'},{item:'Non-fat Greek yogurt',amount:60,unit:'g'},{item:'Cinnamon',amount:2,unit:'g'},{item:'Vanilla extract',amount:2,unit:'ml'},{item:'Butter',amount:6,unit:'g'},{item:'Fresh berries',amount:80,unit:'g'}],
+    instructions:['Whisk eggs, yogurt, cinnamon, and vanilla together.','Dip each bread slice in egg mixture, coating both sides.','Melt butter in a non-stick pan over medium heat.','Cook each slice 2-3 min per side until golden brown.','Serve topped with fresh berries.']},
+
+  // ─── LUNCH ───
+  { id:'chicken-rice-bowl', name:'Grilled Chicken Rice Bowl', keywords:['chicken','rice','rice bowl','chicken rice'], mealTypes:['lunch','dinner'],
+    description:'Tender grilled chicken over fluffy white rice with fresh salsa and lime. A meal-prep staple that never gets boring.',
+    prepTime:'10 min', cookTime:'15 min', baseCal:550, baseP:46, baseC:60, baseF:10,
+    ingredients:[{item:'Chicken breast',amount:175,unit:'g'},{item:'White rice (cooked)',amount:200,unit:'g'},{item:'Black beans (canned)',amount:80,unit:'g'},{item:'Corn',amount:40,unit:'g'},{item:'Salsa',amount:50,unit:'g'},{item:'Lime wedge',amount:1,unit:'wedge'},{item:'Olive oil',amount:5,unit:'ml'},{item:'Cumin and garlic powder',amount:2,unit:'g'}],
+    instructions:['Season chicken with cumin, garlic powder, salt, and pepper.','Grill or pan-cook in olive oil over medium-high heat, 5-6 min per side.','Rest 5 min, then slice.','Warm rice and beans if needed.','Build bowl: rice, sliced chicken, beans, corn, salsa. Squeeze lime over top.']},
+  { id:'turkey-avocado-wrap', name:'Turkey Avocado Club Wrap', keywords:['turkey','wrap','avocado wrap','turkey wrap'], mealTypes:['lunch'],
+    description:'A hearty deli-style wrap stuffed with turkey, creamy avocado, and crisp veggies. Way better than anything from a counter.',
+    prepTime:'8 min', cookTime:'0 min', baseCal:510, baseP:35, baseC:46, baseF:18,
+    ingredients:[{item:'Large whole wheat tortilla',amount:1,unit:'tortilla'},{item:'Deli turkey breast',amount:120,unit:'g'},{item:'Avocado, sliced',amount:70,unit:'g'},{item:'Romaine lettuce',amount:40,unit:'g'},{item:'Tomato, sliced',amount:60,unit:'g'},{item:'Swiss cheese',amount:20,unit:'g'},{item:'Dijon mustard',amount:10,unit:'g'}],
+    instructions:['Lay tortilla flat. Spread mustard evenly.','Layer turkey, cheese, lettuce, tomato, and avocado in the center.','Season avocado with salt and pepper.','Fold sides in, then roll from the bottom into a tight wrap.','Slice diagonally and serve immediately.']},
+  { id:'tuna-salad-sandwich', name:'High-Protein Tuna Melt Sandwich', keywords:['tuna','tuna salad','tuna sandwich','tuna melt'], mealTypes:['lunch'],
+    description:'A creamy, flavor-packed tuna salad on toasted whole wheat with melted cheese. High protein and ready in minutes.',
+    prepTime:'8 min', cookTime:'5 min', baseCal:470, baseP:40, baseC:40, baseF:14,
+    ingredients:[{item:'Canned tuna in water',amount:150,unit:'g'},{item:'Whole wheat bread',amount:2,unit:'slice'},{item:'Non-fat Greek yogurt (instead of mayo)',amount:40,unit:'g'},{item:'Celery, diced',amount:30,unit:'g'},{item:'Red onion, diced',amount:20,unit:'g'},{item:'Reduced-fat cheddar cheese',amount:30,unit:'g'},{item:'Lemon juice, salt, pepper',amount:1,unit:'to taste'}],
+    instructions:['Drain tuna thoroughly. Mix with Greek yogurt, celery, onion, lemon juice, salt, and pepper.','Toast bread. Spread tuna mixture on one slice.','Top with cheese. Broil or microwave until cheese is melted.','Top with remaining bread, slice, and serve.']},
+  { id:'greek-chicken-salad', name:'Greek Chicken Salad Bowl', keywords:['salad','greek salad','chicken salad'], mealTypes:['lunch'],
+    description:'A bright Mediterranean salad with grilled chicken, olives, and feta over crisp romaine. Fresh and genuinely filling.',
+    prepTime:'12 min', cookTime:'12 min', baseCal:420, baseP:40, baseC:16, baseF:22,
+    ingredients:[{item:'Chicken breast',amount:160,unit:'g'},{item:'Romaine lettuce, chopped',amount:120,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Cucumber, diced',amount:80,unit:'g'},{item:'Kalamata olives',amount:30,unit:'g'},{item:'Feta cheese',amount:40,unit:'g'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Red wine vinegar and dried oregano',amount:6,unit:'ml'}],
+    instructions:['Season and grill or pan-cook chicken until cooked through. Slice.','Combine lettuce, tomatoes, cucumber, and olives in a large bowl.','Whisk olive oil, vinegar, oregano, salt, and pepper for dressing.','Add sliced chicken and feta to the salad.','Drizzle with dressing, toss gently, and serve.']},
+  { id:'quinoa-bowl', name:'Mediterranean Quinoa Power Bowl', keywords:['quinoa','quinoa bowl','chickpea','chickpeas','vegetarian','vegan'], mealTypes:['lunch','dinner'],
+    description:'A colorful quinoa bowl loaded with chickpeas, roasted veggies, and a creamy tahini drizzle. Hearty and plant-based.',
+    prepTime:'10 min', cookTime:'20 min', baseCal:500, baseP:22, baseC:70, baseF:14,
+    ingredients:[{item:'Quinoa (cooked)',amount:180,unit:'g'},{item:'Chickpeas (canned, drained)',amount:130,unit:'g'},{item:'Roasted red pepper',amount:60,unit:'g'},{item:'Cucumber, diced',amount:80,unit:'g'},{item:'Baby spinach',amount:40,unit:'g'},{item:'Tahini',amount:20,unit:'g'},{item:'Lemon juice',amount:15,unit:'ml'},{item:'Olive oil',amount:8,unit:'ml'}],
+    instructions:['Cook quinoa per package directions.','Optionally roast chickpeas at 400°F for 20 min with olive oil and spices until crispy.','Mix tahini with lemon juice and a little water to make a pourable dressing.','Build bowl: quinoa, chickpeas, roasted pepper, cucumber, and spinach.','Drizzle tahini dressing over top. Season with salt and pepper.']},
+  { id:'chicken-quesadilla', name:'Loaded Chicken Quesadilla', keywords:['quesadilla','chicken quesadilla'], mealTypes:['lunch','dinner'],
+    description:'Crispy, cheesy quesadillas stuffed with spiced chicken and peppers. Quick to make and impossible to resist.',
+    prepTime:'10 min', cookTime:'12 min', baseCal:560, baseP:42, baseC:48, baseF:20,
+    ingredients:[{item:'Large flour tortillas',amount:2,unit:'tortilla'},{item:'Chicken breast, cooked and shredded',amount:150,unit:'g'},{item:'Reduced-fat Mexican cheese blend',amount:60,unit:'g'},{item:'Bell pepper, sliced',amount:80,unit:'g'},{item:'Onion, sliced',amount:40,unit:'g'},{item:'Greek yogurt for dipping',amount:40,unit:'g'},{item:'Cooking spray',amount:1,unit:'spray'}],
+    instructions:['Sauté peppers and onions until softened, about 5 min. Season well.','Mix with shredded chicken.','Lay one tortilla in a pan over medium heat.','Add half the cheese, the chicken mixture, remaining cheese, and second tortilla.','Cook 2-3 min per side until golden. Slice and serve with Greek yogurt for dipping.']},
+  { id:'salmon-salad', name:'Seared Salmon Power Salad', keywords:['salmon','salmon salad'], mealTypes:['lunch','dinner'],
+    description:'A gorgeous salad with pan-seared salmon over mixed greens, avocado, and a zesty lemon dressing.',
+    prepTime:'10 min', cookTime:'10 min', baseCal:460, baseP:38, baseC:18, baseF:24,
+    ingredients:[{item:'Salmon fillet',amount:170,unit:'g'},{item:'Mixed salad greens',amount:100,unit:'g'},{item:'Avocado',amount:60,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Red onion, thinly sliced',amount:20,unit:'g'},{item:'Olive oil',amount:12,unit:'ml'},{item:'Lemon juice',amount:15,unit:'ml'},{item:'Capers',amount:10,unit:'g'}],
+    instructions:['Pat salmon dry and season with salt, pepper, and a little olive oil.','Sear skin-side down in a hot pan 4-5 min, flip and cook 2-3 min more.','Whisk remaining olive oil, lemon juice, capers, salt, and pepper for dressing.','Arrange greens, tomatoes, avocado, and red onion in a bowl.','Break salmon into large pieces over the salad. Drizzle with dressing.']},
+  { id:'pasta-chicken', name:'Chicken and Veggie Pasta', keywords:['pasta','pasta salad','chicken pasta'], mealTypes:['lunch','dinner'],
+    description:'Tender pasta tossed with grilled chicken, cherry tomatoes, and a light olive oil sauce. Comforting without being heavy.',
+    prepTime:'10 min', cookTime:'20 min', baseCal:570, baseP:40, baseC:65, baseF:12,
+    ingredients:[{item:'Penne pasta (dry)',amount:100,unit:'g'},{item:'Chicken breast, cubed',amount:150,unit:'g'},{item:'Cherry tomatoes, halved',amount:100,unit:'g'},{item:'Baby spinach',amount:60,unit:'g'},{item:'Garlic cloves',amount:3,unit:'clove'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Parmesan cheese',amount:15,unit:'g'},{item:'Italian seasoning',amount:2,unit:'g'}],
+    instructions:['Cook pasta per package directions until al dente. Reserve ¼ cup pasta water.','Season chicken with salt, pepper, and Italian seasoning. Cook in olive oil until done.','Add garlic, cook 1 min. Add tomatoes and cook 3-4 min until softened.','Add spinach and stir until wilted.','Toss pasta with the sauce, adding pasta water as needed. Top with Parmesan.']},
+
+  // ─── DINNER ───
+  { id:'baked-salmon-rice', name:'Lemon Herb Baked Salmon with Rice', keywords:['salmon','baked salmon','salmon rice'], mealTypes:['dinner'],
+    description:'Flaky, herb-crusted salmon baked to perfection and served over fluffy white rice with roasted asparagus.',
+    prepTime:'10 min', cookTime:'20 min', baseCal:580, baseP:44, baseC:58, baseF:14,
+    ingredients:[{item:'Salmon fillet',amount:200,unit:'g'},{item:'White rice (cooked)',amount:180,unit:'g'},{item:'Asparagus',amount:100,unit:'g'},{item:'Lemon',amount:1,unit:'lemon'},{item:'Garlic, minced',amount:3,unit:'clove'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Fresh dill or parsley',amount:10,unit:'g'}],
+    instructions:['Preheat oven to 400°F (200°C).','Place salmon and asparagus on a baking sheet. Drizzle with olive oil.','Top salmon with garlic, herbs, lemon zest, and lemon slices.','Season everything with salt and pepper.','Bake 15-18 min until salmon flakes easily. Serve over rice with fresh lemon.']},
+  { id:'chicken-stir-fry', name:'Chicken and Veggie Stir Fry', keywords:['stir fry','chicken stir fry','stir-fry'], mealTypes:['dinner'],
+    description:'A vibrant, high-protein stir fry with tender chicken and crisp vegetables in a savory garlic-ginger sauce.',
+    prepTime:'12 min', cookTime:'12 min', baseCal:555, baseP:46, baseC:56, baseF:12,
+    ingredients:[{item:'Chicken breast, sliced thin',amount:200,unit:'g'},{item:'White rice (cooked)',amount:180,unit:'g'},{item:'Broccoli florets',amount:100,unit:'g'},{item:'Bell pepper, sliced',amount:80,unit:'g'},{item:'Snap peas',amount:60,unit:'g'},{item:'Low-sodium soy sauce',amount:20,unit:'ml'},{item:'Sesame oil',amount:5,unit:'ml'},{item:'Garlic and ginger, minced',amount:10,unit:'g'}],
+    instructions:['Mix soy sauce, sesame oil, garlic, and ginger for the sauce.','Cook chicken in a wok over high heat until golden. Set aside.','Add broccoli, pepper, and snap peas. Stir fry 3-4 min until tender-crisp.','Return chicken to pan, pour sauce over, toss well for 1-2 min.','Serve immediately over rice, garnished with sesame seeds if desired.']},
+  { id:'beef-tacos', name:'Seasoned Ground Beef Tacos', keywords:['tacos','beef tacos','taco','ground beef'], mealTypes:['dinner'],
+    description:'Boldly seasoned ground beef in warm tortillas with all the fixings. Crowd-pleasing tacos ready in 20 minutes.',
+    prepTime:'8 min', cookTime:'12 min', baseCal:610, baseP:40, baseC:54, baseF:24,
+    ingredients:[{item:'Ground beef (90% lean)',amount:200,unit:'g'},{item:'Small corn tortillas',amount:3,unit:'tortilla'},{item:'Taco seasoning',amount:12,unit:'g'},{item:'Shredded lettuce',amount:40,unit:'g'},{item:'Tomato, diced',amount:60,unit:'g'},{item:'Reduced-fat cheddar',amount:30,unit:'g'},{item:'Greek yogurt (as sour cream)',amount:40,unit:'g'},{item:'Salsa',amount:40,unit:'g'}],
+    instructions:['Brown ground beef in a pan over medium-high heat, breaking up lumps.','Drain excess fat. Add taco seasoning and ¼ cup water. Simmer 2-3 min.','Warm tortillas in a dry pan or microwave.','Fill tortillas with seasoned beef.','Top with lettuce, tomato, cheese, Greek yogurt, and salsa.']},
+  { id:'steak-sweet-potato', name:'Grilled Steak with Sweet Potato', keywords:['steak','beef steak','sweet potato'], mealTypes:['dinner'],
+    description:'A perfectly seasoned grilled steak alongside roasted sweet potato. Simple, satisfying, and absolutely delicious.',
+    prepTime:'10 min', cookTime:'25 min', baseCal:580, baseP:46, baseC:40, baseF:22,
+    ingredients:[{item:'Sirloin or flank steak',amount:200,unit:'g'},{item:'Sweet potato',amount:250,unit:'g'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Garlic powder and paprika',amount:3,unit:'g'},{item:'Rosemary or thyme',amount:2,unit:'g'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
+    instructions:['Preheat oven to 425°F. Cut sweet potato into wedges, toss with olive oil and spices.','Roast sweet potato 20-25 min, flipping halfway, until golden and tender.','Season steak generously with salt, pepper, garlic powder, and rosemary.','Grill or sear in a cast iron pan over high heat, 3-4 min per side for medium-rare.','Rest steak 5 min before slicing. Serve with sweet potato wedges.']},
+  { id:'chicken-parmesan', name:'Lightened Chicken Parmesan', keywords:['chicken parmesan','chicken parm','parmesan'], mealTypes:['dinner'],
+    description:'Juicy, crispy chicken in marinara sauce with melted mozzarella over pasta. All the flavor with less of the guilt.',
+    prepTime:'15 min', cookTime:'25 min', baseCal:640, baseP:50, baseC:65, baseF:16,
+    ingredients:[{item:'Chicken breast',amount:200,unit:'g'},{item:'Whole wheat pasta (dry)',amount:90,unit:'g'},{item:'Marinara sauce',amount:120,unit:'g'},{item:'Part-skim mozzarella',amount:40,unit:'g'},{item:'Whole wheat breadcrumbs',amount:30,unit:'g'},{item:'Parmesan cheese, grated',amount:15,unit:'g'},{item:'Egg',amount:1,unit:'egg'},{item:'Italian seasoning',amount:3,unit:'g'}],
+    instructions:['Pound chicken to even thickness. Dip in beaten egg, then breadcrumbs mixed with Parmesan and Italian seasoning.','Bake at 425°F for 20 min until crispy and cooked through.','Spoon marinara on top of chicken, add mozzarella. Broil 2-3 min until bubbly.','Cook pasta per package directions.','Serve chicken over pasta. Sprinkle extra Parmesan.']},
+  { id:'turkey-meatballs-pasta', name:'Turkey Meatball Pasta', keywords:['meatballs','turkey meatballs','pasta'], mealTypes:['dinner'],
+    description:'Juicy, herbed turkey meatballs simmered in tomato sauce over al dente pasta. Comfort food that is genuinely high-protein.',
+    prepTime:'15 min', cookTime:'25 min', baseCal:600, baseP:44, baseC:68, baseF:12,
+    ingredients:[{item:'Ground turkey (93% lean)',amount:200,unit:'g'},{item:'Whole wheat pasta (dry)',amount:100,unit:'g'},{item:'Marinara sauce',amount:150,unit:'g'},{item:'Breadcrumbs',amount:20,unit:'g'},{item:'Egg',amount:1,unit:'egg'},{item:'Parmesan cheese',amount:15,unit:'g'},{item:'Garlic and Italian herbs',amount:5,unit:'g'}],
+    instructions:['Mix turkey, breadcrumbs, egg, Parmesan, garlic, and herbs. Form into golf ball-sized meatballs.','Brown meatballs in a pan, about 3-4 min per side.','Add marinara sauce and simmer 10-15 min until meatballs are cooked through.','Cook pasta per package directions.','Serve meatballs and sauce over pasta. Garnish with Parmesan.']},
+  { id:'stuffed-peppers', name:'Ground Turkey Stuffed Peppers', keywords:['stuffed peppers','peppers','turkey'], mealTypes:['dinner'],
+    description:'Colorful bell peppers filled with a hearty turkey-rice mixture and melted cheese. A complete meal in one.',
+    prepTime:'15 min', cookTime:'35 min', baseCal:520, baseP:38, baseC:50, baseF:14,
+    ingredients:[{item:'Bell peppers',amount:2,unit:'large'},{item:'Ground turkey (93% lean)',amount:180,unit:'g'},{item:'White rice (cooked)',amount:120,unit:'g'},{item:'Diced tomatoes (canned)',amount:100,unit:'g'},{item:'Shredded cheese',amount:40,unit:'g'},{item:'Onion, diced',amount:40,unit:'g'},{item:'Italian seasoning and garlic',amount:4,unit:'g'}],
+    instructions:['Preheat oven to 375°F. Cut tops off peppers, remove seeds.','Brown turkey with onion and garlic in a pan.','Mix cooked turkey with rice, diced tomatoes, and half the cheese. Season well.','Stuff mixture into peppers and place in a baking dish.','Top with remaining cheese. Bake 30-35 min until peppers are tender.']},
+  { id:'baked-chicken-thighs', name:'Crispy Baked Chicken Thighs with Roasted Veggies', keywords:['chicken thighs','thighs','roasted chicken'], mealTypes:['dinner'],
+    description:'Crispy-skinned, juicy chicken thighs with caramelized roasted vegetables. Simple, delicious weeknight cooking.',
+    prepTime:'10 min', cookTime:'30 min', baseCal:500, baseP:42, baseC:28, baseF:22,
+    ingredients:[{item:'Bone-in chicken thighs',amount:250,unit:'g'},{item:'Broccoli florets',amount:120,unit:'g'},{item:'Zucchini, sliced',amount:100,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Olive oil',amount:12,unit:'ml'},{item:'Garlic powder, paprika, Italian seasoning',amount:5,unit:'g'}],
+    instructions:['Preheat oven to 425°F.','Pat chicken dry. Season with salt, pepper, garlic powder, paprika, and Italian seasoning.','Toss vegetables with olive oil, salt, and pepper.','Arrange chicken skin-side up on a sheet pan. Spread vegetables around it.','Roast 25-30 min until chicken skin is crispy and internal temp reaches 165°F.']},
+  { id:'shrimp-fried-rice', name:'Shrimp Fried Rice', keywords:['shrimp','fried rice','shrimp fried rice'], mealTypes:['dinner'],
+    description:'Better-than-takeout shrimp fried rice that is actually high in protein. Packed with flavor and ready in 15 minutes.',
+    prepTime:'10 min', cookTime:'12 min', baseCal:540, baseP:34, baseC:68, baseF:12,
+    ingredients:[{item:'Large shrimp, peeled',amount:180,unit:'g'},{item:'Cooked white rice (day-old preferred)',amount:240,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Frozen peas and carrots',amount:80,unit:'g'},{item:'Low-sodium soy sauce',amount:25,unit:'ml'},{item:'Sesame oil',amount:5,unit:'ml'},{item:'Garlic, minced',amount:3,unit:'clove'},{item:'Green onions',amount:20,unit:'g'}],
+    instructions:['Cook shrimp in a large wok over high heat until pink, 2 min per side. Set aside.','Scramble eggs in the same pan. Remove and set aside.','Add rice to pan, spread out, and cook without stirring 2 min for a little crunch.','Add garlic, peas, and carrots. Stir fry 2 min.','Return shrimp and eggs. Add soy sauce and sesame oil. Toss well. Garnish with green onions.']},
+  { id:'beef-broccoli', name:'Beef and Broccoli Rice Bowl', keywords:['beef broccoli','beef and broccoli','beef bowl'], mealTypes:['dinner'],
+    description:'Tender beef and crisp broccoli in a rich, savory sauce over steamed rice. Your favorite takeout, made leaner at home.',
+    prepTime:'12 min', cookTime:'15 min', baseCal:570, baseP:42, baseC:58, baseF:16,
+    ingredients:[{item:'Flank steak or sirloin, thinly sliced',amount:200,unit:'g'},{item:'Broccoli florets',amount:180,unit:'g'},{item:'White rice (cooked)',amount:180,unit:'g'},{item:'Soy sauce',amount:25,unit:'ml'},{item:'Oyster sauce',amount:15,unit:'ml'},{item:'Garlic and ginger',amount:8,unit:'g'},{item:'Sesame oil',amount:5,unit:'ml'},{item:'Cornstarch',amount:8,unit:'g'}],
+    instructions:['Toss beef slices with cornstarch and a pinch of salt.','Mix soy sauce, oyster sauce, and sesame oil for the sauce.','Sear beef in very hot pan until browned, about 2 min. Set aside.','Stir fry broccoli 3-4 min. Add garlic and ginger, cook 1 min.','Return beef, pour sauce, toss over heat 1-2 min. Serve over rice.']},
+  { id:'ground-turkey-bowl', name:'Seasoned Ground Turkey Bowl', keywords:['ground turkey','turkey bowl'], mealTypes:['dinner','lunch'],
+    description:'Savory seasoned ground turkey over rice with roasted veggies. A fast, flexible meal that hits all your macros.',
+    prepTime:'8 min', cookTime:'15 min', baseCal:530, baseP:45, baseC:52, baseF:14,
+    ingredients:[{item:'Ground turkey (93% lean)',amount:200,unit:'g'},{item:'White or brown rice (cooked)',amount:180,unit:'g'},{item:'Zucchini, diced',amount:100,unit:'g'},{item:'Garlic cloves, minced',amount:3,unit:'clove'},{item:'Olive oil',amount:8,unit:'ml'},{item:'Paprika, cumin, onion powder',amount:4,unit:'g'},{item:'Low-sodium soy sauce or Worcestershire',amount:10,unit:'ml'}],
+    instructions:['Cook turkey in olive oil over medium-high heat, breaking into crumbles.','Season with paprika, cumin, onion powder, salt, and pepper.','Add garlic and zucchini. Cook 4-5 min until veggies are tender.','Splash in soy sauce or Worcestershire and stir.','Serve over rice.']},
+
+  // ─── SNACKS ───
+  { id:'apple-pb', name:'Apple Slices with Peanut Butter', keywords:['apple','peanut butter','apple and peanut butter'], mealTypes:['snack'],
+    description:'Crisp apple slices with creamy natural peanut butter. The perfect balance of sweet, salty, and satisfying.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:270, baseP:7, baseC:34, baseF:13,
+    ingredients:[{item:'Apple (medium)',amount:1,unit:'apple'},{item:'Natural peanut butter',amount:30,unit:'g'}],
+    instructions:['Slice apple into wedges.','Serve with peanut butter for dipping.','Optional: sprinkle with cinnamon.']},
+  { id:'yogurt-berries', name:'Greek Yogurt with Mixed Berries', keywords:['yogurt','greek yogurt','berries'], mealTypes:['snack'],
+    description:'Thick, protein-rich Greek yogurt topped with antioxidant-packed berries and a drizzle of honey.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:180, baseP:17, baseC:22, baseF:2,
+    ingredients:[{item:'Non-fat Greek yogurt',amount:175,unit:'g'},{item:'Mixed berries',amount:80,unit:'g'},{item:'Honey',amount:7,unit:'g'}],
+    instructions:['Spoon yogurt into a bowl.','Top with berries and a drizzle of honey.','Enjoy immediately.']},
+  { id:'cottage-cheese-fruit', name:'Cottage Cheese with Fruit', keywords:['cottage cheese','cottage'], mealTypes:['snack'],
+    description:'Light, protein-dense cottage cheese paired with sweet pineapple. A classic high-protein snack.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:200, baseP:20, baseC:26, baseF:2,
+    ingredients:[{item:'Low-fat cottage cheese',amount:180,unit:'g'},{item:'Pineapple or peach chunks',amount:80,unit:'g'}],
+    instructions:['Scoop cottage cheese into a bowl.','Top with fruit.','Season with a pinch of cinnamon if desired.']},
+  { id:'rice-cakes-pb', name:'Rice Cakes with Peanut Butter', keywords:['rice cakes','rice cake'], mealTypes:['snack'],
+    description:'Crunchy rice cakes spread with natural peanut butter. Simple and satisfying with great texture contrast.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:220, baseP:6, baseC:28, baseF:10,
+    ingredients:[{item:'Plain rice cakes',amount:2,unit:'cake'},{item:'Natural peanut butter',amount:25,unit:'g'}],
+    instructions:['Spread peanut butter evenly over rice cakes.','Optional: add banana slices on top.','Serve immediately.']},
+  { id:'hard-boiled-eggs', name:'Hard Boiled Eggs', keywords:['hard boiled eggs','boiled eggs','hard-boiled','eggs'], mealTypes:['snack'],
+    description:'A simple, portable, high-protein snack. Add everything bagel seasoning for extra flavor.',
+    prepTime:'2 min', cookTime:'12 min', baseCal:155, baseP:13, baseC:1, baseF:11,
+    ingredients:[{item:'Eggs',amount:2,unit:'egg'},{item:'Everything bagel seasoning (optional)',amount:1,unit:'pinch'}],
+    instructions:['Place eggs in a saucepan and cover with cold water by 1 inch.','Bring to a boil over medium-high heat.','Turn off heat, cover, and let sit 10-12 min.','Transfer to ice water for 5 min to stop cooking.','Peel and serve with seasoning.']},
+  { id:'almonds-dried-fruit', name:'Almonds and Dried Fruit Trail Mix', keywords:['almonds','trail mix','nuts','dried fruit'], mealTypes:['snack'],
+    description:'A handful of almonds and dried fruit for a satisfying snack with healthy fats and natural sugar.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:260, baseP:7, baseC:26, baseF:16,
+    ingredients:[{item:'Raw almonds',amount:30,unit:'g'},{item:'Raisins or dried cranberries',amount:25,unit:'g'}],
+    instructions:['Combine almonds and dried fruit in a small bowl.','Enjoy as a portable snack anytime.']},
+  { id:'hummus-veggies', name:'Hummus with Veggie Sticks', keywords:['hummus','vegetables','veggies','carrots'], mealTypes:['snack'],
+    description:'Creamy hummus with crisp, colorful vegetable sticks. High fiber, satisfying, and endlessly dippable.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:190, baseP:7, baseC:22, baseF:9,
+    ingredients:[{item:'Hummus',amount:80,unit:'g'},{item:'Carrot sticks',amount:80,unit:'g'},{item:'Celery sticks',amount:60,unit:'g'},{item:'Cucumber slices',amount:80,unit:'g'}],
+    instructions:['Cut vegetables into sticks or rounds.','Serve alongside hummus for dipping.','Season hummus with paprika or olive oil if desired.']},
+  { id:'cheese-crackers', name:'Cheese and Whole Wheat Crackers', keywords:['crackers','cheese crackers','cheese and crackers'], mealTypes:['snack'],
+    description:'Sharp cheddar on whole wheat crackers. A classic combo that hits the savory, satisfying craving perfectly.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:240, baseP:10, baseC:22, baseF:13,
+    ingredients:[{item:'Whole wheat crackers',amount:30,unit:'g'},{item:'Reduced-fat cheddar cheese, sliced',amount:40,unit:'g'}],
+    instructions:['Slice cheese into thin pieces.','Arrange crackers on a plate and top with cheese.','Optional: add a thin slice of apple on top of each.']},
+  { id:'edamame', name:'Salted Edamame', keywords:['edamame','soy beans'], mealTypes:['snack'],
+    description:'Steamed edamame sprinkled with sea salt. One of the best high-protein plant-based snacks in existence.',
+    prepTime:'1 min', cookTime:'5 min', baseCal:190, baseP:17, baseC:14, baseF:8,
+    ingredients:[{item:'Frozen edamame in shell',amount:200,unit:'g'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Microwave frozen edamame 3-4 min, or boil in salted water for 5 min.','Drain and sprinkle generously with sea salt.','Eat by squeezing beans out of pods directly into your mouth.']},
+  { id:'banana-almond-butter', name:'Banana with Almond Butter', keywords:['banana','almond butter','banana and almond butter'], mealTypes:['snack'],
+    description:'Creamy almond butter spread on fresh banana slices. A filling snack with natural sweetness and healthy fats.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:280, baseP:6, baseC:40, baseF:12,
+    ingredients:[{item:'Banana (medium)',amount:1,unit:'banana'},{item:'Almond butter',amount:25,unit:'g'}],
+    instructions:['Peel and slice banana.','Serve with almond butter for dipping or spread on each slice.','Optional: sprinkle with hemp seeds.']},
+  { id:'tuna-crackers', name:'Tuna and Crackers', keywords:['tuna','crackers','tuna crackers'], mealTypes:['snack'],
+    description:'High-protein canned tuna served with whole wheat crackers. Satisfying and portable.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:230, baseP:28, baseC:16, baseF:4,
+    ingredients:[{item:'Canned tuna in water',amount:90,unit:'g'},{item:'Whole wheat crackers',amount:25,unit:'g'},{item:'Lemon juice, salt, pepper',amount:1,unit:'to taste'}],
+    instructions:['Drain tuna and season with lemon juice, salt, and pepper.','Serve on top of crackers.','Optional: add a dab of hot sauce or mustard.']},
+
+  // ─── BREAKFAST (new) ───
+  { id:'protein-waffles', name:'Crispy Protein Waffles', keywords:['waffles','waffle','protein waffles'], mealTypes:['breakfast'],
+    description:'Light and crispy waffles made with protein powder and oats. Top with fresh berries and a touch of maple syrup.',
+    prepTime:'8 min', cookTime:'10 min', baseCal:450, baseP:38, baseC:48, baseF:10,
+    ingredients:[{item:'Rolled oats (blended to flour)',amount:60,unit:'g'},{item:'Protein powder (vanilla)',amount:30,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Non-fat Greek yogurt',amount:80,unit:'g'},{item:'Almond milk',amount:60,unit:'ml'},{item:'Baking powder',amount:4,unit:'g'},{item:'Mixed berries',amount:80,unit:'g'}],
+    instructions:['Blend oats into flour. Mix with protein powder and baking powder.','Whisk eggs, yogurt, and almond milk together.','Combine wet and dry ingredients into a smooth batter.','Pour into a preheated waffle iron coated with cooking spray.','Cook 4-5 min until golden and crispy. Top with berries.']},
+  { id:'egg-muffin', name:'Egg & Cheese English Muffin', keywords:['egg muffin','english muffin','egg sandwich'], mealTypes:['breakfast'],
+    description:'A perfectly cooked egg with melted cheese on a toasted English muffin. Quick, satisfying, and better than any drive-through.',
+    prepTime:'5 min', cookTime:'5 min', baseCal:360, baseP:24, baseC:36, baseF:14,
+    ingredients:[{item:'Whole wheat English muffin',amount:1,unit:'slice'},{item:'Eggs',amount:2,unit:'egg'},{item:'Reduced-fat cheddar cheese',amount:30,unit:'g'},{item:'Turkey breakfast sausage',amount:40,unit:'g'},{item:'Butter',amount:5,unit:'g'}],
+    instructions:['Toast English muffin halves until golden.','Cook sausage patty in a pan until cooked through. Set aside.','Melt butter in the same pan over medium-low heat.','Crack eggs in, season with salt and pepper. Cook to your liking.','Add cheese on top to melt. Stack on muffin with sausage.']},
+  { id:'chia-pudding', name:'Chocolate Chia Pudding', keywords:['chia','chia pudding','chocolate'], mealTypes:['breakfast','snack'],
+    description:'Rich, creamy chocolate chia pudding that sets overnight. Tastes like dessert but fuels like a meal.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:380, baseP:24, baseC:42, baseF:12,
+    ingredients:[{item:'Chia seeds',amount:40,unit:'g'},{item:'Almond milk',amount:250,unit:'ml'},{item:'Protein powder (vanilla)',amount:25,unit:'g'},{item:'Cocoa powder',amount:10,unit:'g'},{item:'Honey',amount:12,unit:'g'},{item:'Blueberries',amount:60,unit:'g'}],
+    instructions:['Mix chia seeds, almond milk, protein powder, cocoa, and honey in a jar.','Whisk vigorously to prevent clumping.','Refrigerate at least 4 hours or overnight.','Stir well before serving.','Top with blueberries.']},
+  { id:'smoked-salmon-bagel', name:'Smoked Salmon Bagel', keywords:['smoked salmon','bagel','lox'], mealTypes:['breakfast'],
+    description:'Creamy whipped cottage cheese and smoked salmon on a toasted bagel. Elegant, protein-packed, and ready in 5 minutes.',
+    prepTime:'5 min', cookTime:'2 min', baseCal:420, baseP:35, baseC:42, baseF:10,
+    ingredients:[{item:'Whole wheat bagel thin',amount:1,unit:'slice'},{item:'Canned tuna in water',amount:60,unit:'g'},{item:'Low-fat cottage cheese',amount:80,unit:'g'},{item:'Cherry tomatoes',amount:50,unit:'g'},{item:'Red onion, thinly sliced',amount:15,unit:'g'},{item:'Capers',amount:10,unit:'g'},{item:'Lemon juice',amount:5,unit:'ml'}],
+    instructions:['Toast bagel thin until golden.','Blend or whip cottage cheese until smooth.','Spread cottage cheese on both halves.','Top with fish, tomatoes, red onion, and capers.','Squeeze fresh lemon juice over top.']},
+
+  // ─── LUNCH (new) ───
+  { id:'caesar-wrap', name:'Chicken Caesar Wrap', keywords:['caesar','caesar wrap','caesar salad'], mealTypes:['lunch'],
+    description:'All the flavors of a great Caesar salad wrapped up in a whole wheat tortilla. Crispy, creamy, and satisfying.',
+    prepTime:'10 min', cookTime:'12 min', baseCal:520, baseP:42, baseC:44, baseF:18,
+    ingredients:[{item:'Large whole wheat tortilla',amount:1,unit:'tortilla'},{item:'Chicken breast',amount:160,unit:'g'},{item:'Romaine lettuce, chopped',amount:100,unit:'g'},{item:'Parmesan cheese',amount:20,unit:'g'},{item:'Light caesar dressing',amount:25,unit:'ml'},{item:'Olive oil',amount:5,unit:'ml'},{item:'Garlic powder and paprika',amount:2,unit:'g'}],
+    instructions:['Season chicken with garlic powder, paprika, salt, and pepper.','Grill or pan-cook in olive oil until cooked through. Slice.','Toss romaine with Caesar dressing and Parmesan.','Warm tortilla briefly.','Layer salad and chicken on tortilla. Roll tightly and slice diagonally.']},
+  { id:'egg-salad-sandwich', name:'High-Protein Egg Salad Sandwich', keywords:['egg salad','egg sandwich'], mealTypes:['lunch'],
+    description:'Creamy, tangy egg salad made with Greek yogurt instead of mayo, piled on whole wheat toast.',
+    prepTime:'10 min', cookTime:'12 min', baseCal:430, baseP:30, baseC:38, baseF:16,
+    ingredients:[{item:'Eggs',amount:3,unit:'egg'},{item:'Whole wheat bread',amount:2,unit:'slice'},{item:'Non-fat Greek yogurt (instead of mayo)',amount:40,unit:'g'},{item:'Celery, diced',amount:30,unit:'g'},{item:'Dijon mustard',amount:10,unit:'g'},{item:'Red onion, diced',amount:20,unit:'g'},{item:'Romaine lettuce',amount:30,unit:'g'}],
+    instructions:['Hard-boil eggs, peel, and chop roughly.','Mix eggs with Greek yogurt, dijon, celery, and onion.','Season well with salt, pepper, and a pinch of paprika.','Toast bread until golden.','Layer lettuce on toast, pile on egg salad, and top with second slice.']},
+  { id:'soba-noodle-bowl', name:'Cold Sesame Soba Noodle Bowl', keywords:['soba','noodle bowl','asian','sesame'], mealTypes:['lunch','dinner'],
+    description:'Chewy soba noodles in a nutty sesame-soy sauce with crisp veggies and edamame. A refreshing and filling bowl.',
+    prepTime:'12 min', cookTime:'8 min', baseCal:490, baseP:26, baseC:68, baseF:14,
+    ingredients:[{item:'Soba noodles (dry)',amount:100,unit:'g'},{item:'Frozen edamame in shell',amount:100,unit:'g'},{item:'Cucumber, diced',amount:80,unit:'g'},{item:'Shredded lettuce',amount:60,unit:'g'},{item:'Sesame oil',amount:8,unit:'ml'},{item:'Low-sodium soy sauce',amount:20,unit:'ml'},{item:'Natural peanut butter',amount:20,unit:'g'},{item:'Lemon juice',amount:10,unit:'ml'}],
+    instructions:['Cook soba noodles per package directions. Rinse under cold water.','Cook edamame per package directions.','Whisk sesame oil, soy sauce, peanut butter, and lemon juice for dressing.','Toss noodles with dressing, cucumber, and shredded edamame.','Serve in a bowl over greens, garnished with sesame seeds.']},
+  { id:'shrimp-lettuce-wraps', name:'Spicy Shrimp Lettuce Wraps', keywords:['shrimp','lettuce wraps','lettuce wrap'], mealTypes:['lunch'],
+    description:'Plump spiced shrimp served in cool, crunchy lettuce cups with a tangy dipping sauce.',
+    prepTime:'10 min', cookTime:'6 min', baseCal:340, baseP:36, baseC:20, baseF:12,
+    ingredients:[{item:'Large shrimp, peeled',amount:200,unit:'g'},{item:'Romaine lettuce',amount:120,unit:'g'},{item:'Bell pepper, sliced',amount:60,unit:'g'},{item:'Carrot sticks',amount:60,unit:'g'},{item:'Sesame oil',amount:8,unit:'ml'},{item:'Low-sodium soy sauce',amount:15,unit:'ml'},{item:'Garlic and ginger, minced',amount:8,unit:'g'},{item:'Lemon juice',amount:10,unit:'ml'}],
+    instructions:['Season shrimp with salt, pepper, and a pinch of chili flakes.','Cook in sesame oil over high heat 2-3 min per side until pink and curled.','Mix soy sauce, garlic, ginger, and lemon juice for dipping sauce.','Separate romaine into large cup-shaped leaves.','Fill each cup with shrimp, pepper strips, and carrots. Serve with dipping sauce.']},
+
+  // ─── DINNER (new) ───
+  { id:'chicken-fajitas', name:'Sizzling Chicken Fajitas', keywords:['fajitas','chicken fajitas','peppers and onions'], mealTypes:['dinner'],
+    description:'Strips of juicy chicken with charred peppers and onions in warm tortillas. The sizzle is half the experience.',
+    prepTime:'12 min', cookTime:'15 min', baseCal:580, baseP:44, baseC:56, baseF:16,
+    ingredients:[{item:'Chicken breast, sliced thin',amount:200,unit:'g'},{item:'Large flour tortillas',amount:2,unit:'tortilla'},{item:'Bell pepper, sliced',amount:100,unit:'g'},{item:'Onion, sliced',amount:80,unit:'g'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Taco seasoning',amount:10,unit:'g'},{item:'Non-fat Greek yogurt',amount:40,unit:'g'},{item:'Salsa',amount:50,unit:'g'}],
+    instructions:['Season chicken with taco seasoning, salt, and pepper.','Heat a cast iron skillet over high heat until very hot.','Cook chicken in olive oil 4-5 min per side until charred. Remove.','Cook peppers and onions in the same pan until caramelized, 5-6 min.','Warm tortillas. Fill with chicken, peppers, onions, yogurt, and salsa.']},
+  { id:'shrimp-tacos', name:'Crispy Shrimp Tacos', keywords:['shrimp tacos','tacos','fish tacos'], mealTypes:['dinner'],
+    description:'Lightly seasoned shrimp in corn tortillas with a bright, tangy slaw. Fresh and full of flavor.',
+    prepTime:'15 min', cookTime:'8 min', baseCal:530, baseP:38, baseC:56, baseF:14,
+    ingredients:[{item:'Large shrimp, peeled',amount:200,unit:'g'},{item:'Small corn tortillas',amount:3,unit:'tortilla'},{item:'Shredded lettuce',amount:60,unit:'g'},{item:'Cherry tomatoes',amount:60,unit:'g'},{item:'Avocado',amount:50,unit:'g'},{item:'Lemon juice',amount:15,unit:'ml'},{item:'Non-fat Greek yogurt',amount:40,unit:'g'},{item:'Taco seasoning',amount:8,unit:'g'}],
+    instructions:['Season shrimp with taco seasoning, salt, and pepper.','Cook in a hot pan 2-3 min per side until pink.','Mix Greek yogurt with lemon juice and a pinch of salt for crema.','Warm tortillas in a dry pan.','Fill each tortilla with shrimp, lettuce, tomatoes, and avocado. Drizzle with crema.']},
+  { id:'turkey-chili', name:'Smoky Turkey Chili', keywords:['chili','turkey chili','chili bowl'], mealTypes:['dinner'],
+    description:'A rich, deeply flavored turkey chili that gets better the longer it simmers. High protein and loaded with fiber.',
+    prepTime:'12 min', cookTime:'30 min', baseCal:520, baseP:42, baseC:52, baseF:10,
+    ingredients:[{item:'Ground turkey (93% lean)',amount:220,unit:'g'},{item:'Black beans (canned, drained)',amount:130,unit:'g'},{item:'Diced tomatoes (canned)',amount:200,unit:'g'},{item:'Corn',amount:80,unit:'g'},{item:'Onion, diced',amount:80,unit:'g'},{item:'Bell pepper, diced',amount:80,unit:'g'},{item:'Taco seasoning',amount:15,unit:'g'},{item:'Olive oil',amount:8,unit:'ml'}],
+    instructions:['Cook onion and bell pepper in olive oil over medium heat 4-5 min.','Add turkey and break up well. Cook until no longer pink.','Add taco seasoning and stir 1 min.','Add diced tomatoes, beans, and corn. Stir to combine.','Simmer 20-25 min, stirring occasionally, until thickened. Season to taste.']},
+  { id:'teriyaki-chicken', name:'Teriyaki Chicken Bowl', keywords:['teriyaki','teriyaki chicken','japanese'], mealTypes:['dinner'],
+    description:'Sticky, sweet-savory teriyaki chicken over fluffy rice with steamed broccoli. A weeknight dinner classic.',
+    prepTime:'10 min', cookTime:'15 min', baseCal:590, baseP:46, baseC:66, baseF:10,
+    ingredients:[{item:'Chicken breast',amount:200,unit:'g'},{item:'White rice (cooked)',amount:180,unit:'g'},{item:'Broccoli florets',amount:100,unit:'g'},{item:'Teriyaki sauce',amount:40,unit:'ml'},{item:'Sesame oil',amount:5,unit:'ml'},{item:'Garlic and ginger, minced',amount:8,unit:'g'}],
+    instructions:['Season chicken with salt and pepper.','Cook in sesame oil over medium-high heat 5-6 min per side.','Add garlic and ginger, stir 30 seconds.','Pour teriyaki sauce over chicken. Simmer 2-3 min until glazed.','Steam broccoli until tender-crisp. Serve chicken and broccoli over rice.']},
+  { id:'baked-cod', name:'Herb-Crusted Baked Cod', keywords:['cod','fish','baked fish','white fish'], mealTypes:['dinner'],
+    description:'Flaky cod with a golden herb crust baked to perfection. Lean, clean, and full of flavor.',
+    prepTime:'8 min', cookTime:'18 min', baseCal:490, baseP:48, baseC:48, baseF:10,
+    ingredients:[{item:'Canned tuna in water',amount:60,unit:'g'},{item:'Chicken breast',amount:160,unit:'g'},{item:'White rice (cooked)',amount:160,unit:'g'},{item:'Asparagus',amount:100,unit:'g'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Garlic, minced',amount:3,unit:'clove'},{item:'Lemon juice',amount:15,unit:'ml'},{item:'Italian seasoning',amount:3,unit:'g'}],
+    instructions:['Preheat oven to 400°F.','Season protein with garlic, Italian seasoning, olive oil, salt, and pepper.','Arrange on a baking sheet with asparagus.','Roast 15-18 min until cooked through and flaky.','Drizzle with lemon juice. Serve over rice.']},
+  { id:'shrimp-fried-rice', name:'High-Protein Shrimp Fried Rice', keywords:['fried rice','shrimp fried rice','rice'], mealTypes:['dinner'],
+    description:'Better-than-takeout shrimp fried rice packed with vegetables and protein. Ready in 15 minutes.',
+    prepTime:'8 min', cookTime:'12 min', baseCal:560, baseP:38, baseC:68, baseF:10,
+    ingredients:[{item:'Large shrimp, peeled',amount:180,unit:'g'},{item:'White rice (cooked)',amount:200,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Snap peas',amount:60,unit:'g'},{item:'Carrot sticks',amount:60,unit:'g'},{item:'Low-sodium soy sauce',amount:20,unit:'ml'},{item:'Sesame oil',amount:6,unit:'ml'},{item:'Garlic and ginger, minced',amount:8,unit:'g'}],
+    instructions:['Cook shrimp in sesame oil over high heat 2 min per side. Set aside.','Scramble eggs in the same wok. Set aside.','Add garlic and ginger, then carrots and snap peas. Stir fry 3 min.','Add cold rice and soy sauce. Stir fry 3-4 min until hot and slightly crispy.','Return shrimp and eggs, toss everything together. Serve hot.']},
+  { id:'beef-stir-fry', name:'Ginger Beef Stir Fry', keywords:['beef','beef stir fry','ginger','stir fry'], mealTypes:['dinner'],
+    description:'Tender strips of beef with crisp broccoli and bell peppers in a bold ginger-soy sauce.',
+    prepTime:'12 min', cookTime:'10 min', baseCal:560, baseP:42, baseC:52, baseF:16,
+    ingredients:[{item:'Flank steak or sirloin, thinly sliced',amount:200,unit:'g'},{item:'White rice (cooked)',amount:160,unit:'g'},{item:'Broccoli florets',amount:100,unit:'g'},{item:'Bell pepper, sliced',amount:80,unit:'g'},{item:'Garlic and ginger, minced',amount:10,unit:'g'},{item:'Low-sodium soy sauce',amount:25,unit:'ml'},{item:'Sesame oil',amount:5,unit:'ml'},{item:'Oyster sauce',amount:15,unit:'ml'}],
+    instructions:['Mix soy sauce, oyster sauce, and sesame oil for the sauce.','Cook beef in a very hot wok until browned, 2-3 min. Set aside.','Stir fry broccoli and peppers 3-4 min until tender-crisp.','Add garlic and ginger, 30 seconds.','Return beef, pour sauce over everything, toss 1-2 min. Serve over rice.']},
+
+  // ─── SNACKS (new) ───
+  { id:'protein-shake', name:'Protein Shake', keywords:['protein shake','shake','protein drink'], mealTypes:['snack'],
+    description:'A quick, filling protein shake blended with banana and almond milk. The fastest snack there is.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:250, baseP:28, baseC:26, baseF:4,
+    ingredients:[{item:'Protein powder (vanilla)',amount:30,unit:'g'},{item:'Almond milk',amount:300,unit:'ml'},{item:'Frozen banana',amount:80,unit:'g'}],
+    instructions:['Combine all ingredients in a blender.','Blend on high until smooth and creamy.','Pour into a glass and enjoy immediately.']},
+  { id:'pb-toast', name:'Peanut Butter Banana Toast', keywords:['pb toast','peanut butter toast','peanut butter and banana'], mealTypes:['snack'],
+    description:'Creamy peanut butter and banana on whole wheat toast. Energizing, satisfying, and ready in 2 minutes.',
+    prepTime:'3 min', cookTime:'2 min', baseCal:310, baseP:10, baseC:44, baseF:12,
+    ingredients:[{item:'Whole wheat bread',amount:1,unit:'slice'},{item:'Natural peanut butter',amount:25,unit:'g'},{item:'Banana (medium)',amount:1,unit:'banana'}],
+    instructions:['Toast bread until golden.','Spread peanut butter generously over toast.','Slice banana and arrange on top.','Optional: drizzle with a little honey and sprinkle with cinnamon.']},
+  { id:'string-cheese-apple', name:'String Cheese & Apple Slices', keywords:['string cheese','cheese and apple','cheese'], mealTypes:['snack'],
+    description:'A classic pairing of protein-rich string cheese and crisp apple slices. Portable, satisfying, and no prep needed.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:175, baseP:8, baseC:24, baseF:6,
+    ingredients:[{item:'Low-fat string cheese',amount:2,unit:'piece'},{item:'Apple (medium)',amount:1,unit:'apple'}],
+    instructions:['Slice the apple into wedges.','Peel string cheese into strips.','Pair together and enjoy — no other steps required.']},
+  { id:'mixed-nuts', name:'Spiced Mixed Nuts', keywords:['nuts','mixed nuts','almonds'], mealTypes:['snack'],
+    description:'A handful of lightly spiced mixed nuts for a satisfying, healthy-fat-rich snack that keeps hunger at bay.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:210, baseP:6, baseC:8, baseF:18,
+    ingredients:[{item:'Raw almonds',amount:20,unit:'g'},{item:'Cashews',amount:15,unit:'g'},{item:'Pumpkin seeds',amount:10,unit:'g'}],
+    instructions:['Combine nuts and seeds in a small bowl.','Optional: toast in a dry pan 2-3 min with a pinch of salt and smoked paprika.','Portion into 45g serving. Enjoy as a portable snack.']}
+];
+
+// ─── Ingredient macro lookup ───
+// Per gram [cal, protein, carbs, fat] — or per-unit for eggs/slices/etc.
+const ING_PER_G = {
+  // Grains
+  'rolled oats':0.01,'oats':0,'oat flour':0, // keys set below for readability
+};
+// Redefine as proper object (per 1g or per 1ml for liquids)
+const IMAC = {
+  // Grains & starches [cal, p, c, f] per gram
+  'rolled oats':[3.89,0.17,0.66,0.07], 'oats':[3.89,0.17,0.66,0.07],
+  'oat flour':[3.89,0.17,0.66,0.07],
+  'white rice':[1.30,0.027,0.28,0.003], 'brown rice':[1.16,0.026,0.23,0.009],
+  'quinoa':[1.20,0.044,0.21,0.019],
+  'penne pasta':[3.71,0.13,0.74,0.016], 'pasta':[3.71,0.13,0.74,0.016],
+  'whole wheat pasta':[3.58,0.13,0.72,0.015],
+  'sweet potato':[0.86,0.016,0.20,0.001],
+  'corn':[0.86,0.032,0.19,0.011], 'cornstarch':[3.81,0.003,0.91,0.001],
+  // Dairy (per gram)
+  'greek yogurt':[0.59,0.10,0.04,0.00], 'non-fat greek yogurt':[0.59,0.10,0.04,0.00],
+  'low-fat cottage cheese':[0.72,0.11,0.027,0.010], 'cottage cheese':[0.98,0.11,0.034,0.010],
+  'feta cheese':[2.64,0.14,0.04,0.21], 'feta':[2.64,0.14,0.04,0.21],
+  'parmesan cheese':[4.31,0.38,0.04,0.29], 'parmesan':[4.31,0.38,0.04,0.29],
+  'reduced-fat cheddar':[2.90,0.26,0.013,0.19], 'cheddar':[4.03,0.25,0.013,0.33],
+  'swiss cheese':[3.80,0.27,0.014,0.28],
+  'shredded cheese':[3.55,0.25,0.013,0.28],
+  'reduced-fat mexican cheese blend':[3.10,0.24,0.013,0.22],
+  'part-skim mozzarella':[2.54,0.19,0.029,0.16], 'mozzarella':[2.80,0.22,0.02,0.22],
+  'milk':[0.61,0.032,0.048,0.033],
+  'almond milk':[0.15,0.005,0.003,0.011], 'unsweetened almond milk':[0.15,0.005,0.003,0.011],
+  'butter':[7.17,0,0,0.81],
+  // Proteins (per gram cooked unless noted)
+  'chicken breast':[1.65,0.31,0,0.036], 'chicken breast, cubed':[1.65,0.31,0,0.036],
+  'chicken breast, cooked and shredded':[1.65,0.31,0,0.036],
+  'chicken breast, sliced thin':[1.65,0.31,0,0.036],
+  'ground beef (90% lean)':[2.18,0.26,0,0.12], 'ground beef':[2.18,0.26,0,0.12],
+  'ground turkey (93% lean)':[1.48,0.22,0,0.066], 'ground turkey':[1.48,0.22,0,0.066],
+  'salmon fillet':[2.08,0.20,0,0.13], 'salmon':[2.08,0.20,0,0.13],
+  'canned tuna in water':[1.16,0.26,0,0.010], 'tuna':[1.16,0.26,0,0.010],
+  'large shrimp, peeled':[0.99,0.24,0,0.003], 'shrimp':[0.99,0.24,0,0.003],
+  'deli turkey breast':[1.10,0.20,0,0.025],
+  'turkey breakfast sausage':[1.60,0.20,0.01,0.083],
+  'sirloin or flank steak':[2.07,0.26,0,0.11], 'flank steak or sirloin, thinly sliced':[1.74,0.22,0,0.085],
+  'bone-in chicken thighs':[1.36,0.19,0,0.076],
+  'protein powder (vanilla)':[4.00,0.80,0.08,0.07], 'protein powder':[4.00,0.80,0.08,0.07],
+  // Vegetables (per gram)
+  'broccoli florets':[0.34,0.028,0.066,0.004], 'broccoli':[0.34,0.028,0.066,0.004],
+  'bell pepper, diced':[0.31,0.010,0.071,0.003], 'bell pepper, sliced':[0.31,0.010,0.071,0.003],
+  'bell pepper':[0.31,0.010,0.071,0.003],
+  'baby spinach':[0.23,0.029,0.036,0.004], 'spinach':[0.23,0.029,0.036,0.004],
+  'romaine lettuce, chopped':[0.17,0.012,0.033,0.002],
+  'romaine lettuce':[0.17,0.012,0.033,0.002], 'romaine':[0.17,0.012,0.033,0.002],
+  'shredded lettuce':[0.17,0.012,0.033,0.002], 'mixed salad greens':[0.20,0.018,0.032,0.003],
+  'cherry tomatoes':[0.18,0.009,0.039,0.002], 'tomato, sliced':[0.18,0.009,0.039,0.002],
+  'tomato, diced':[0.18,0.009,0.039,0.002], 'tomato':[0.18,0.009,0.039,0.002],
+  'diced tomatoes (canned)':[0.24,0.013,0.045,0.002],
+  'cucumber, diced':[0.16,0.007,0.036,0.001], 'cucumber':[0.16,0.007,0.036,0.001],
+  'zucchini, sliced':[0.17,0.012,0.032,0.003], 'zucchini, diced':[0.17,0.012,0.032,0.003],
+  'zucchini':[0.17,0.012,0.032,0.003],
+  'mushrooms, sliced':[0.22,0.031,0.032,0.003], 'mushrooms':[0.22,0.031,0.032,0.003],
+  'asparagus':[0.20,0.022,0.038,0.001],
+  'snap peas':[0.42,0.028,0.075,0.002],
+  'carrot sticks':[0.41,0.009,0.096,0.002], 'carrots':[0.41,0.009,0.096,0.002],
+  'celery sticks':[0.16,0.007,0.030,0.002], 'celery, diced':[0.16,0.007,0.030,0.002],
+  'onion, sliced':[0.44,0.011,0.10,0.001], 'onion, diced':[0.44,0.011,0.10,0.001],
+  'red onion, diced':[0.44,0.011,0.10,0.001], 'red onion, thinly sliced':[0.44,0.011,0.10,0.001],
+  'cucumber slices':[0.16,0.007,0.036,0.001],
+  'black beans (canned)':[1.10,0.076,0.20,0.009], 'black beans (canned, drained)':[1.10,0.076,0.20,0.009],
+  'chickpeas (canned, drained)':[1.10,0.075,0.17,0.022],
+  'frozen edamame in shell':[1.22,0.11,0.090,0.052],
+  'frozen peas and carrots':[0.65,0.035,0.13,0.003],
+  'kalamata olives':[1.15,0.008,0.060,0.11],
+  'roasted red pepper':[0.32,0.010,0.070,0.003],
+  // Fruits (per gram)
+  'mixed berries':[0.50,0.007,0.11,0.003], 'berries':[0.50,0.007,0.11,0.003],
+  'blueberries':[0.57,0.007,0.14,0.003], 'strawberries, sliced':[0.32,0.007,0.077,0.003],
+  'frozen mango chunks':[0.60,0.008,0.15,0.004], 'pineapple chunks':[0.53,0.005,0.13,0.001],
+  'pineapple or peach chunks':[0.46,0.007,0.11,0.002],
+  'frozen banana':[0.89,0.011,0.23,0.003],
+  'kiwi, sliced':[0.61,0.011,0.15,0.005],
+  'dried fruit':[3.32,0.003,0.84,0.014], 'raisins or dried cranberries':[3.32,0.003,0.84,0.014],
+  // Fats, oils, sauces (per gram or ml — same density for oils)
+  'olive oil':[8.84,0,0,1.00], 'sesame oil':[8.84,0,0,1.00],
+  'almond butter':[5.98,0.21,0.22,0.55], 'natural peanut butter':[5.88,0.25,0.20,0.50],
+  'peanut butter':[5.88,0.25,0.20,0.50],
+  'avocado':[1.60,0.020,0.085,0.15], 'avocado, sliced':[1.60,0.020,0.085,0.15],
+  'tahini':[5.95,0.17,0.21,0.53],
+  'honey':[3.04,0,0.82,0],
+  'salsa':[0.36,0.017,0.080,0.003],
+  'hummus':[1.77,0.049,0.20,0.10],
+  'marinara sauce':[0.68,0.016,0.12,0.023],
+  'low-sodium soy sauce':[0.53,0.059,0.059,0.001], 'soy sauce':[0.53,0.059,0.059,0.001],
+  'oyster sauce':[1.93,0.050,0.40,0.007],
+  'light caesar dressing':[3.00,0.010,0.067,0.30],
+  'teriyaki sauce':[1.19,0.032,0.26,0.007],
+  // Misc (per gram)
+  'granola':[4.80,0.10,0.65,0.20], 'low-sugar granola':[4.80,0.10,0.65,0.20],
+  'whole wheat crackers':[4.00,0.10,0.67,0.10], 'crackers':[4.48,0.10,0.67,0.17],
+  'chia seeds':[4.86,0.17,0.42,0.31],
+  'coconut flakes':[6.50,0.07,0.28,0.60],
+  'whole wheat breadcrumbs':[3.82,0.14,0.72,0.042], 'breadcrumbs':[3.95,0.13,0.73,0.045],
+  'taco seasoning':[0.67,0,0.17,0], 'garlic and italian herbs':[0,0,0,0],
+  'italian seasoning':[0,0,0,0], 'fresh dill or parsley':[0,0,0,0],
+  'garlic and ginger, minced':[1.49,0.064,0.33,0.005], 'garlic, minced':[1.49,0.064,0.33,0.005],
+  'capers':[0.23,0.023,0.049,0.009], 'red wine vinegar':[0.19,0,0.003,0],
+  'lemon juice':[0.22,0.003,0.069,0],
+  'dijon mustard':[0.94,0.056,0.056,0.056],
+  'baking powder':[0.53,0,0.28,0],
+  'cocoa powder':[2.28,0.20,0.58,0.14],
+  'soba noodles':[3.38,0.12,0.71,0.010],
+  'oyster sauce':[1.93,0.050,0.40,0.007],
+  'teriyaki sauce':[1.19,0.032,0.26,0.007],
+  'pumpkin seeds':[5.59,0.30,0.11,0.49],
+  'cashews':[5.53,0.18,0.30,0.44],
+  'cocoa':[2.28,0.20,0.58,0.14],
+  'frozen peas':[0.81,0.054,0.14,0.004],
+  'low-fat string cheese':[2.71,0.23,0.027,0.16],
+  // Per-unit lookups [cal, p, c, f] — applied when unit is the key
+};
+// Per-unit macros [cal, p, c, f] per 1 unit
+const IMAC_UNIT = {
+  'egg':         [78, 6, 0.6, 5],
+  'egg white':   [17, 3.6, 0.2, 0],
+  'slice':       [74, 3.5, 12, 1],       // whole-wheat bread slice ~30g
+  'tortilla':    [218, 6, 36, 5.5],       // large flour 10"
+  'cake':        [35, 0.7, 7.3, 0.3],     // plain rice cake
+  'clove':       [4, 0.2, 1, 0],          // garlic clove
+  'banana':      [105, 1.3, 27, 0.4],
+  'apple':       [95, 0.5, 25, 0.3],
+  'lemon':       [17, 1.1, 5.4, 0.2],
+  'large':       [31, 1, 7, 0],           // default large pepper ~100g
+  'medium':      [105, 1.3, 27, 0.4],     // default medium banana
+  'wedge':       [4, 0.2, 1, 0],
+  'pinch':       [0, 0, 0, 0],
+  'spray':       [0, 0, 0, 0],
+  'to taste':    [0, 0, 0, 0],
+  'piece':       [60, 6, 0.5, 3.5],   // low-fat string cheese stick ~28g
+};
+
+function ingMacros(ing, scale) {
+  const n = ing.amount * scale;
+  const u = ing.unit;
+  // Unit-based items
+  if (IMAC_UNIT[u]) {
+    const r = IMAC_UNIT[u];
+    return { cal: Math.round(r[0]*n), p: Math.round(r[1]*n), c: Math.round(r[2]*n), f: Math.round(r[3]*n) };
+  }
+  // Gram/ml lookup by item name
+  const key = ing.item.toLowerCase().replace(/\s*\([^)]*\)/g,'').trim();
+  const rate = IMAC[key] || IMAC[key.split(',')[0].trim()] || IMAC[key.split(' ').slice(0,2).join(' ')] || IMAC[key.split(' ')[0]];
+  if (rate) return { cal: Math.round(rate[0]*n), p: Math.round(rate[1]*n), c: Math.round(rate[2]*n), f: Math.round(rate[3]*n) };
+  return null; // unknown — will show dash
+}
+
+function fmtAmt(n, u) {
+  if (u === 'g')         return `${Math.round(n)}g`;
+  if (u === 'ml')        return `${Math.round(n)}ml`;
+  if (u === 'egg')       return `${Math.max(1,Math.round(n))} egg${Math.round(n)!==1?'s':''}`;
+  if (u === 'egg white') return `${Math.max(1,Math.round(n))} egg white${Math.round(n)!==1?'s':''}`;
+  if (u === 'slice')     return `${Math.max(1,Math.round(n))} slice${Math.round(n)!==1?'s':''}`;
+  if (u === 'tortilla')  return `${Math.max(1,Math.round(n))} tortilla${Math.round(n)!==1?'s':''}`;
+  if (u === 'clove')     return `${Math.max(1,Math.round(n))} clove${Math.round(n)!==1?'s':''}`;
+  if (u === 'cake')      return `${Math.max(1,Math.round(n))} rice cake${Math.round(n)!==1?'s':''}`;
+  if (u === 'large')     return `${Math.max(1,Math.round(n))} large`;
+  if (u === 'banana' || u === 'apple' || u === 'lemon' || u === 'medium' || u === 'wedge')
+                         return `${Math.max(1,Math.round(n))} ${u}${Math.round(n)!==1?'s':''}`;
+  if (u === 'spray' || u === 'pinch' || u === 'to taste') return `${ing.amount} ${u}`;
+  return `${Math.round(n*10)/10} ${u}`;
+}
+
+// ─── Scale a single ingredient — returns display object with macros ───
+function scaleIngredient(ing, scale) {
+  const m = ingMacros(ing, scale);
+  return { item: ing.item, amount: fmtAmt(ing.amount * scale, ing.unit), ...( m || {}) };
+}
+
+// ─── Built-in recipe generator ───
+function generateRecipe({ preference, targetCal, targetProt, targetCarbs, targetFat, mealType }) {
+  let pool = RECIPE_DB.filter(r =>
+    mealType === 'snack' ? r.mealTypes.includes('snack') : r.mealTypes.some(t => t !== 'snack')
+  );
+  if (preference && preference.trim()) {
+    const lower = preference.toLowerCase().trim();
+    const scored = pool.map(r => {
+      let score = 0;
+      r.keywords.forEach(k => { if (lower.includes(k)) score += 10; else if (k.split(' ').some(w => w.length > 3 && lower.includes(w))) score += 4; });
+      r.name.toLowerCase().split(' ').forEach(w => { if (w.length > 3 && lower.includes(w)) score += 3; });
+      return { r, score };
+    }).filter(x => x.score > 0);
+    if (scored.length) { scored.sort((a,b)=>b.score-a.score); pool = scored.slice(0,5).map(x=>x.r); }
+  }
+  pool.sort((a,b) => Math.abs(a.baseCal-targetCal) - Math.abs(b.baseCal-targetCal));
+  const pick = pool[Math.floor(Math.random() * Math.min(3, pool.length))];
+  const scale = pick.baseCal > 0 ? targetCal / pick.baseCal : 1;
+  const scaledIngs = pick.ingredients.map(ing => scaleIngredient(ing, scale));
+  // Re-sum macros from ingredient lookups where available, fall back to recipe-level scaling
+  const knownIngs = scaledIngs.filter(i => i.cal !== undefined);
+  let calories, protein, carbs, fat;
+  if (knownIngs.length === scaledIngs.length) {
+    calories = scaledIngs.reduce((s,i)=>s+(i.cal||0),0);
+    protein  = scaledIngs.reduce((s,i)=>s+(i.p||0),0);
+    carbs    = scaledIngs.reduce((s,i)=>s+(i.c||0),0);
+    fat      = scaledIngs.reduce((s,i)=>s+(i.f||0),0);
+  } else {
+    calories = Math.round(pick.baseCal*scale); protein = Math.round(pick.baseP*scale);
+    carbs    = Math.round(pick.baseC*scale);   fat     = Math.round(pick.baseF*scale);
+  }
+  return Promise.resolve({ name:pick.name, description:pick.description, prepTime:pick.prepTime, cookTime:pick.cookTime, calories, protein, carbs, fat, ingredients:scaledIngs, instructions:pick.instructions });
+}
+
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+function navigate(view) {
+  STATE.currentView = view;
+  render();
+}
+
+function render() {
+  const app = document.getElementById('app');
+  if (!STATE.onboardingComplete) {
+    app.innerHTML = renderOnboarding();
+    bindOnboarding();
+    return;
+  }
+  app.innerHTML = renderApp();
+  bindApp();
+}
+
+function renderApp() {
+  const v = STATE.currentView;
+  return `
+    <div class="nav-bar top">
+      ${['today','week','saved','settings'].map(tab => `
+        <button class="nav-item ${v===tab?'active':''}" onclick="navigate('${tab}')">
+          ${NAV_ICONS[tab]}
+          <span>${tab.charAt(0).toUpperCase()+tab.slice(1)}</span>
+        </button>
+      `).join('')}
+    </div>
+    <div class="page-content with-topnav">
+      ${v==='today' ? renderToday() : ''}
+      ${v==='week' ? renderWeek() : ''}
+      ${v==='saved' ? renderSaved() : ''}
+      ${v==='settings' ? renderSettings() : ''}
+    </div>
+  `;
+}
+
+const NAV_ICONS = {
+  today: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+  week:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`,
+  saved: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
+  settings:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`
+};
+
+// ═══════════════════════════════════════════════════
+// ONBOARDING
+// ═══════════════════════════════════════════════════
+let tempProfile = {};
+let tempMacros = {};
+
+function renderOnboarding() {
+  const s = STATE.onboardingStep;
+  const steps = 4;
+  const dots = Array.from({length:steps}, (_,i) => `<div class="step-dot ${i+1===s?'active':i+1<s?'done':''}"></div>`).join('');
+
+  let body = '';
+  if (s === 1) body = renderOB1();
+  else if (s === 2) body = renderOB2();
+  else if (s === 3) body = renderOB3();
+  else if (s === 4) body = renderOB4();
+
+  return `<div class="onboard-wrap">
+    <div class="onboard-header">
+      <div class="onboard-logo">🥗 NourishAI</div>
+      <p style="color:var(--text-2);font-size:14px">Your AI-powered meal planner</p>
+    </div>
+    <div class="onboard-body">
+      <div class="step-indicator">${dots}</div>
+      ${body}
+    </div>
+  </div>`;
+}
+
+function renderOB1() {
+  const p = STATE.profile;
+  return `
+    <div class="step-title">Let's get started 👋</div>
+    <div class="step-sub">Tell us a bit about yourself so we can personalize your nutrition plan.</div>
+    <div class="form-group">
+      <label class="form-label">Your name</label>
+      <input class="form-input" id="ob-name" placeholder="e.g. Jackson" value="${p.name||''}">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Age</label>
+        <input class="form-input" id="ob-age" type="number" min="13" max="100" value="${p.age||25}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sex</label>
+        <select class="form-input" id="ob-sex">
+          <option value="male" ${p.sex==='male'?'selected':''}>Male</option>
+          <option value="female" ${p.sex==='female'?'selected':''}>Female</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Weight (lbs)</label>
+        <input class="form-input" id="ob-weight" type="number" min="80" max="500" value="${p.weightLbs||180}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Height</label>
+        <div style="display:flex;gap:6px">
+          <select class="form-input" id="ob-hft" style="width:50%">
+            ${Array.from({length:5},(_,i)=>`<option value="${i+4}" ${p.heightFt===i+4?'selected':''}>${i+4}ft</option>`).join('')}
+          </select>
+          <select class="form-input" id="ob-hin" style="width:50%">
+            ${Array.from({length:12},(_,i)=>`<option value="${i}" ${p.heightIn===i?'selected':''}>${i}in</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="ob-next1">Continue →</button>
+  `;
+}
+
+function renderOB2() {
+  const p = STATE.profile;
+  const goals = [
+    { val:'lose', icon:'⬇️', title:'Lose Weight', sub:'Calorie deficit to shed fat' },
+    { val:'maintain', icon:'⚖️', title:'Maintain', sub:'Stay at current weight' },
+    { val:'gain', icon:'💪', title:'Build Muscle', sub:'Lean bulk with moderate surplus' },
+    { val:'bulk', icon:'🏋️', title:'Bulk', sub:'Significant calorie surplus' }
+  ];
+  const activities = [
+    { val:'sedentary', icon:'🛋️', title:'Sedentary', sub:'Little to no exercise' },
+    { val:'light', icon:'🚶', title:'Lightly Active', sub:'1-3 days/week exercise' },
+    { val:'moderate', icon:'🏃', title:'Moderately Active', sub:'3-5 days/week exercise' },
+    { val:'active', icon:'⚡', title:'Very Active', sub:'6-7 days/week hard exercise' },
+    { val:'very', icon:'🔥', title:'Extremely Active', sub:'Athlete / physical job' }
+  ];
+  return `
+    <div class="step-title">Your goals</div>
+    <div class="step-sub">What are you trying to achieve?</div>
+    <label class="form-label">Goal</label>
+    <div class="radio-group" style="margin-bottom:20px" id="goal-group">
+      ${goals.map(g=>`<label class="radio-card ${p.goal===g.val?'selected':''}" data-val="${g.val}" data-group="goal">
+        <span class="radio-card-icon">${g.icon}</span>
+        <div class="radio-card-text"><div class="title">${g.title}</div><div class="sub">${g.sub}</div></div>
+      </label>`).join('')}
+    </div>
+    <label class="form-label">Activity Level</label>
+    <div class="radio-group" id="activity-group">
+      ${activities.map(a=>`<label class="radio-card ${p.activity===a.val?'selected':''}" data-val="${a.val}" data-group="activity">
+        <span class="radio-card-icon">${a.icon}</span>
+        <div class="radio-card-text"><div class="title">${a.title}</div><div class="sub">${a.sub}</div></div>
+      </label>`).join('')}
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="STATE.onboardingStep=1;render()">← Back</button>
+      <button class="btn btn-primary" id="ob-next2" style="flex:1">Continue →</button>
+    </div>
+  `;
+}
+
+function renderOB3() {
+  // Calculate recommended macros and show editable form
+  const calculated = calcTDEE(STATE.profile);
+  if (!tempMacros.calories) tempMacros = { ...calculated };
+  const m = tempMacros;
+  const calCheck = Math.round(m.protein*4 + m.carbs*4 + m.fat*9);
+  return `
+    <div class="step-title">Your daily targets</div>
+    <div class="step-sub">We calculated these based on your profile. Edit any number — everything adjusts automatically.</div>
+    <div class="macro-edit-grid" id="macro-grid">
+      <div class="macro-field calories">
+        <label><span class="dot" style="background:#10b981"></span>Calories</label>
+        <input type="number" id="me-calories" value="${m.calories}" data-field="calories">
+        <div class="unit">kcal / day</div>
+      </div>
+      <div class="macro-field">
+        <label><span class="dot" style="background:#6366f1"></span>Protein</label>
+        <input type="number" id="me-protein" value="${m.protein}" data-field="protein">
+        <div class="unit">grams — ${Math.round(m.protein*4/m.calories*100)}% of cals</div>
+      </div>
+      <div class="macro-field">
+        <label><span class="dot" style="background:#f59e0b"></span>Carbs</label>
+        <input type="number" id="me-carbs" value="${m.carbs}" data-field="carbs">
+        <div class="unit">grams — ${Math.round(m.carbs*4/m.calories*100)}% of cals</div>
+      </div>
+      <div class="macro-field">
+        <label><span class="dot" style="background:#f43f5e"></span>Fat</label>
+        <input type="number" id="me-fat" value="${m.fat}" data-field="fat">
+        <div class="unit">grams — ${Math.round(m.fat*9/m.calories*100)}% of cals</div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--text-3);margin-top:8px;text-align:center">Macro calories: ${calCheck} kcal</p>
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="tempMacros={};STATE.onboardingStep=2;render()">← Back</button>
+      <button class="btn btn-primary" id="ob-next3" style="flex:1">Looks good →</button>
+    </div>
+  `;
+}
+
+function renderOB4() {
+  const items = STATE.fixedItems;
+  return `
+    <div class="step-title">Pre-logged items</div>
+    <div class="step-sub">Add things you always consume (e.g. protein shake, morning coffee). These auto-count toward your daily macros — you can toggle them off for any day.</div>
+    <div id="fixed-items-list">
+      ${items.length ? items.map(it => renderFixedItemRow(it)).join('') : '<p style="color:var(--text-3);font-size:14px;margin-bottom:16px">No items yet — add one below!</p>'}
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title" style="margin-bottom:12px;font-size:14px">Add item</div>
+      <div class="form-group"><input class="form-input" id="fi-name" placeholder="Name (e.g. Protein Shake)"></div>
+      <div class="form-row-3">
+        <div><label class="form-label" style="font-size:11px">Calories</label><input class="form-input" id="fi-cal" type="number" placeholder="140"></div>
+        <div><label class="form-label" style="font-size:11px">Protein (g)</label><input class="form-input" id="fi-prot" type="number" placeholder="30"></div>
+        <div><label class="form-label" style="font-size:11px">Carbs (g)</label><input class="form-input" id="fi-carbs" type="number" placeholder="5"></div>
+      </div>
+      <div style="margin-top:10px"><label class="form-label" style="font-size:11px">Fat (g)</label><input class="form-input" id="fi-fat" type="number" placeholder="2" style="max-width:120px"></div>
+      <button class="btn btn-primary" id="fi-add" style="margin-top:12px;width:auto;padding:10px 20px">+ Add Item</button>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="STATE.onboardingStep=3;render()">← Back</button>
+      <button class="btn btn-primary" id="ob-next4" style="flex:1">Start planning! 🚀</button>
+    </div>
+  `;
+}
+
+
+function renderFixedItemRow(it) {
+  return `<div class="fixed-item-row" id="firow-${it.id}">
+    <div style="flex:1">
+      <div class="name">${it.name}</div>
+      <div class="macros">${it.calories} cal · ${it.protein}g protein · ${it.carbs}g carbs · ${it.fat}g fat</div>
+    </div>
+    <button class="btn btn-danger btn-sm" onclick="removeFixedItem('${it.id}')">✕</button>
+  </div>`;
+}
+
+function removeFixedItem(id) {
+  STATE.fixedItems = STATE.fixedItems.filter(f => f.id !== id);
+  saveState();
+  const row = document.getElementById(`firow-${id}`);
+  if (row) row.remove();
+}
+
+function bindOnboarding() {
+  const s = STATE.onboardingStep;
+  if (s === 1) {
+    document.getElementById('ob-next1')?.addEventListener('click', () => {
+      const name = document.getElementById('ob-name').value.trim();
+      const age = parseInt(document.getElementById('ob-age').value) || 25;
+      const sex = document.getElementById('ob-sex').value;
+      const weightLbs = parseFloat(document.getElementById('ob-weight').value) || 180;
+      const heightFt = parseInt(document.getElementById('ob-hft').value) || 5;
+      const heightIn = parseInt(document.getElementById('ob-hin').value) || 10;
+      Object.assign(STATE.profile, { name, age, sex, weightLbs, heightFt, heightIn });
+      saveState();
+      STATE.onboardingStep = 2;
+      render();
+    });
+  }
+  if (s === 2) {
+    document.querySelectorAll('[data-group]').forEach(el => {
+      el.addEventListener('click', () => {
+        const group = el.dataset.group;
+        const val = el.dataset.val;
+        document.querySelectorAll(`[data-group="${group}"]`).forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+        STATE.profile[group] = val;
+      });
+    });
+    document.getElementById('ob-next2')?.addEventListener('click', () => {
+      saveState();
+      tempMacros = calcTDEE(STATE.profile);
+      STATE.onboardingStep = 3;
+      render();
+    });
+  }
+  if (s === 3) {
+    document.querySelectorAll('[data-field]').forEach(input => {
+      input.addEventListener('change', () => {
+        const field = input.dataset.field;
+        tempMacros = adjustMacros(field, input.value, tempMacros);
+        // Update all fields without full re-render
+        const m = tempMacros;
+        const fields = ['calories','protein','carbs','fat'];
+        fields.forEach(f => {
+          const el = document.getElementById(`me-${f}`);
+          if (el && el !== input) el.value = m[f];
+        });
+        // Update percentages
+        document.querySelectorAll('.macro-field .unit').forEach(u => {
+          const fEl = u.previousElementSibling;
+          if (!fEl) return;
+          const f = fEl.dataset.field;
+          if (f === 'protein') u.textContent = `grams — ${Math.round(m.protein*4/m.calories*100)}% of cals`;
+          if (f === 'carbs') u.textContent = `grams — ${Math.round(m.carbs*4/m.calories*100)}% of cals`;
+          if (f === 'fat') u.textContent = `grams — ${Math.round(m.fat*9/m.calories*100)}% of cals`;
+        });
+        const calCheck = Math.round(m.protein*4+m.carbs*4+m.fat*9);
+        const cc = document.querySelector('[style*="Macro calories"]');
+        if (cc) cc.textContent = `Macro calories: ${calCheck} kcal`;
+      });
+    });
+    document.getElementById('ob-next3')?.addEventListener('click', () => {
+      Object.assign(STATE.profile, tempMacros);
+      saveState();
+      STATE.onboardingStep = 4;
+      render();
+    });
+  }
+  if (s === 4) {
+    document.getElementById('fi-add')?.addEventListener('click', () => {
+      const name = document.getElementById('fi-name').value.trim();
+      if (!name) { showToast('Please enter a name'); return; }
+      const item = {
+        id: uid(),
+        name,
+        calories: parseFloat(document.getElementById('fi-cal').value)||0,
+        protein: parseFloat(document.getElementById('fi-prot').value)||0,
+        carbs: parseFloat(document.getElementById('fi-carbs').value)||0,
+        fat: parseFloat(document.getElementById('fi-fat').value)||0
+      };
+      STATE.fixedItems.push(item);
+      saveState();
+      const list = document.getElementById('fixed-items-list');
+      if (list) {
+        const empMsg = list.querySelector('p');
+        if (empMsg) empMsg.remove();
+        list.insertAdjacentHTML('beforeend', renderFixedItemRow(item));
+      }
+      ['fi-name','fi-cal','fi-prot','fi-carbs','fi-fat'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    });
+    document.getElementById('ob-next4')?.addEventListener('click', () => {
+      STATE.onboardingComplete = true;
+      STATE.currentView = 'today';
+      saveState();
+      render();
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// TODAY VIEW
+// ═══════════════════════════════════════════════════
+function renderToday() {
+  const dateStr = today();
+  const plan = getOrCreatePlan(dateStr);
+  const { active: fixedActive, totals: fixedTotals } = getActiveFixedTotals(dateStr);
+  const mealTotals = getPlanTotals(plan);
+  const consumed = {
+    calories: fixedTotals.calories + mealTotals.calories,
+    protein: fixedTotals.protein + mealTotals.protein,
+    carbs: fixedTotals.carbs + mealTotals.carbs,
+    fat: fixedTotals.fat + mealTotals.fat
+  };
+  const target = STATE.profile;
+  const remaining = {
+    calories: Math.max(0, target.calories - consumed.calories),
+    protein: Math.max(0, target.protein - consumed.protein),
+    carbs: Math.max(0, target.carbs - consumed.carbs),
+    fat: Math.max(0, target.fat - consumed.fat)
+  };
+  const calPct = Math.min(1, consumed.calories / target.calories);
+  const circumference = 2 * Math.PI * 44;
+  const offset = circumference * (1 - calPct);
+
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-0.5px">Today</div>
+        <div style="font-size:13px;color:var(--text-2)">${todayLabel()}</div>
+      </div>
+      <span class="badge ${consumed.calories > 0 ? 'badge-green' : 'badge-gray'}">${consumed.calories > 0 ? 'Tracking' : 'Not started'}</span>
+    </div>
+
+    <div class="summary-section">
+      <div class="summary-top">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="8"/>
+            <circle cx="50" cy="50" r="44" fill="none" stroke="white" stroke-width="8"
+              stroke-dasharray="${circumference.toFixed(2)}"
+              stroke-dashoffset="${offset.toFixed(2)}"
+              stroke-linecap="round"/>
+          </svg>
+          <div class="ring-text">
+            <div class="cals">${consumed.calories}</div>
+            <div class="of">of ${target.calories}</div>
+          </div>
+        </div>
+        <div class="summary-right">
+          <div class="label">Remaining calories</div>
+          <div class="big-num">${remaining.calories}</div>
+          <div class="sub">${consumed.calories > target.calories ? '⚠️ Over target' : `${Math.round(calPct*100)}% of daily goal`}</div>
+        </div>
+      </div>
+      <div class="macro-bars">
+        ${[
+          { label:'Protein', val:consumed.protein, tgt:target.protein, unit:'g' },
+          { label:'Carbs', val:consumed.carbs, tgt:target.carbs, unit:'g' },
+          { label:'Fat', val:consumed.fat, tgt:target.fat, unit:'g' }
+        ].map(m => `<div class="macro-bar-item">
+          <label>${m.label}</label>
+          <div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.min(100,m.val/m.tgt*100).toFixed(1)}%"></div></div>
+          <div class="macro-bar-nums">${m.val}/${m.tgt}${m.unit}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    ${STATE.fixedItems.length ? `
+    <div class="section-header">
+      <span class="section-title">Pre-logged items</span>
+      <span style="font-size:12px;color:var(--text-3)">${fixedTotals.calories} cal auto-added</span>
+    </div>
+    ${STATE.fixedItems.map(it => `
+      <div class="fixed-item ${fixedActive[it.id]===false?'fixed-item-inactive':''}">
+        <label class="fixed-item-toggle">
+          <input type="checkbox" ${fixedActive[it.id]!==false?'checked':''} onchange="toggleFixedItem('${dateStr}','${it.id}',this.checked)">
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </label>
+        <div class="fixed-item-info">
+          <div class="fixed-item-name">${it.name}</div>
+          <div class="fixed-item-macros">${it.calories} cal · ${it.protein}g P · ${it.carbs}g C · ${it.fat}g F</div>
+        </div>
+      </div>
+    `).join('')}
+    <div style="margin-bottom:16px"></div>
+    ` : ''}
+
+    <div class="section-header">
+      <span class="section-title">Meal Plan</span>
+      <div style="display:flex;gap:6px">
+        <button class="pill" onclick="addSlot('${dateStr}','meal')">+ Meal</button>
+        <button class="pill" onclick="addSlot('${dateStr}','snack')">+ Snack</button>
+      </div>
+    </div>
+
+    ${plan.slots.map(slot => renderMealSlot(slot, dateStr, remaining, plan.slots)).join('')}
+
+    <div class="section-header" style="margin-top:8px">
+      <span class="section-title">Other foods</span>
+      <button class="pill" style="background:var(--primary-light);border-color:var(--primary);color:var(--primary)" onclick="showLogFoodModal('${dateStr}')">+ Log Food</button>
+    </div>
+    ${(plan.loggedFoods||[]).length ? `
+    <div style="margin-bottom:12px">
+      ${(plan.loggedFoods||[]).map(f => `
+      <div class="logged-food-row">
+        <div class="logged-food-info">
+          <div class="logged-food-name">${f.name}</div>
+          <div class="logged-food-macros">${f.calories} cal · ${f.protein}g P · ${f.carbs}g C · ${f.fat}g F</div>
+        </div>
+        <button class="btn-remove-log" onclick="removeLoggedFood('${dateStr}','${f.id}')" title="Remove">✕</button>
+      </div>`).join('')}
+    </div>
+    ` : `<div style="color:var(--text-3);font-size:13px;padding:8px 0 16px">Log any food not covered by your meal plan above.</div>`}
+
+    <div style="height:20px"></div>
+  `;
+}
+
+function renderMealSlot(slot, dateStr, remaining, allSlots) {
+  const emptySlots = allSlots.filter(s => !s.meal && !s.open);
+  const wt = weightedSlotTarget(slot, remaining, emptySlots);
+  const perSlotCal = wt.cal;
+  const perSlotProt = wt.prot;
+
+  const targetCal = slot.meal ? slot.meal.calories : perSlotCal;
+  const isSnack = slot.type === 'snack';
+
+  return `<div class="meal-slot" id="slot-${slot.id}">
+    <div class="slot-header">
+      <div>
+        <div class="slot-title">${slot.label}</div>
+        ${!slot.meal && !slot.open ? `<div class="slot-target">~${perSlotCal} cal · ${perSlotProt}g P target</div>` : ''}
+        ${slot.meal ? `<div class="slot-target">${slot.meal.calories} cal · ${slot.meal.protein}g P · ${slot.meal.carbs}g C · ${slot.meal.fat}g F</div>` : ''}
+      </div>
+      <div class="slot-actions">
+        ${slot.meal ? `
+          <button class="btn btn-secondary btn-sm" onclick="regenerateSlot('${dateStr}','${slot.id}')">↺ New</button>
+          <button class="btn btn-secondary btn-sm" onclick="saveSlotMeal('${slot.id}')">🔖 Save</button>
+        ` : !slot.open ? `
+          <button class="pill" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Leave open</button>
+        ` : ''}
+        <button class="btn btn-ghost btn-sm" onclick="removeSlot('${dateStr}','${slot.id}')" title="Remove slot" style="color:var(--text-3);font-size:16px">✕</button>
+      </div>
+    </div>
+    <div class="slot-body">
+      ${slot.open ? `
+        <div class="slot-open-badge">🔓 Open calories — logged as flex<button style="background:none;border:none;cursor:pointer;margin-left:8px;color:#854d0e;font-size:12px" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Undo</button></div>
+      ` : slot.meal ? renderRecipeCard(slot.meal, slot.id) : `
+        <div class="slot-empty">
+          <input class="pref-input" id="pref-${slot.id}" placeholder="${isSnack?'Any snack preference? (e.g. chips and dip)':'What would you like? (e.g. overnight oats)'}" value="${slot.preference||''}">
+          <button class="btn-generate" id="gen-${slot.id}" onclick="generateSlot('${dateStr}','${slot.id}')">
+            ✨ Generate
+          </button>
+        </div>
+        ${STATE.savedMeals.length ? `<div style="margin-top:8px"><button class="btn btn-secondary btn-sm" onclick="showUseSaved('${dateStr}','${slot.id}')">Use saved meal</button></div>` : ''}
+      `}
+    </div>
+  </div>`;
+}
+
+function renderRecipeCard(meal, slotId) {
+  const id = slotId || 'preview';
+  return `<div class="recipe-card">
+    <div class="recipe-header">
+      <div class="recipe-name">${meal.name}</div>
+      ${meal.description ? `<div class="recipe-desc">${meal.description}</div>` : ''}
+      <div class="recipe-meta">
+        ${meal.prepTime ? `<span class="recipe-time">⏱ Prep ${meal.prepTime}</span>` : ''}
+        ${meal.cookTime ? `<span class="recipe-time">🍳 Cook ${meal.cookTime}</span>` : ''}
+      </div>
+    </div>
+    <div class="recipe-macro-chips">
+      <span class="chip chip-cal">🔥 ${meal.calories} cal</span>
+      <span class="chip chip-protein">💪 ${meal.protein}g protein</span>
+      <span class="chip chip-carbs">🌾 ${meal.carbs}g carbs</span>
+      <span class="chip chip-fat">🥑 ${meal.fat}g fat</span>
+    </div>
+    ${meal.ingredients?.length ? `
+    <div class="recipe-section">
+      <div class="recipe-section-title">Ingredients</div>
+      <ul class="ingredient-list">
+        ${meal.ingredients.map(ing => {
+          const hasMacros = ing.cal !== undefined;
+          return `<li>
+            <div class="ing-row">
+              <span class="ing-name">${ing.item}</span>
+              <span class="ingredient-amount">${ing.amount}</span>
+            </div>
+            ${hasMacros ? `<div class="ing-macros">
+              <span class="ing-mac-chip imc-cal">🔥 ${ing.cal} cal</span>
+              <span class="ing-mac-chip imc-p">P ${ing.p}g</span>
+              <span class="ing-mac-chip imc-c">C ${ing.c}g</span>
+              <span class="ing-mac-chip imc-f">F ${ing.f}g</span>
+            </div>` : ''}
+          </li>`;
+        }).join('')}
+      </ul>
+    </div>
+    ` : ''}
+    ${meal.instructions?.length ? `
+    <div class="recipe-section">
+      <button class="collapsible-toggle" onclick="toggleInstructions('inst-${id}',this)">
+        <span>▶</span> Show instructions
+      </button>
+      <div class="collapsible-content" id="inst-${id}" style="max-height:0">
+        <ol class="instruction-list">
+          ${meal.instructions.map(step=>`<li>${step}</li>`).join('')}
+        </ol>
+      </div>
+    </div>
+    ` : ''}
+  </div>`;
+}
+
+function toggleInstructions(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const isOpen = el.style.maxHeight !== '0px' && el.style.maxHeight !== '';
+  el.style.maxHeight = isOpen ? '0' : el.scrollHeight + 'px';
+  const arrow = btn.querySelector('span');
+  if (arrow) arrow.textContent = isOpen ? '▶' : '▼';
+  btn.childNodes[1].textContent = isOpen ? ' Show instructions' : ' Hide instructions';
+}
+
+// ═══════════════════════════════════════════════════
+// TODAY ACTIONS
+// ═══════════════════════════════════════════════════
+function toggleFixedItem(dateStr, itemId, checked) {
+  setFixedItemActive(dateStr, itemId, checked);
+  renderTodayInPlace(dateStr);
+}
+
+function addSlot(dateStr, type) {
+  const plan = getOrCreatePlan(dateStr);
+  const countOfType = plan.slots.filter(s => s.type === type).length;
+  plan.slots.push({
+    id: uid(),
+    type,
+    label: type === 'meal' ? `Meal ${countOfType + 1}` : `Snack ${countOfType + 1}`,
+    preference: '',
+    meal: null,
+    open: false
+  });
+  saveState();
+  renderTodayInPlace(dateStr);
+}
+
+function removeSlot(dateStr, slotId) {
+  const plan = STATE.dailyPlans[dateStr];
+  if (!plan) return;
+  plan.slots = plan.slots.filter(s => s.id !== slotId);
+  saveState();
+  renderTodayInPlace(dateStr);
+}
+
+function toggleSlotOpen(dateStr, slotId) {
+  const plan = STATE.dailyPlans[dateStr];
+  const slot = plan?.slots.find(s => s.id === slotId);
+  if (!slot) return;
+  slot.open = !slot.open;
+  saveState();
+  renderTodayInPlace(dateStr);
+}
+
+function renderTodayInPlace(dateStr) {
+  const content = document.querySelector('.page-content');
+  if (content) {
+    content.innerHTML = renderToday();
+    bindToday();
+  }
+}
+
+function bindToday() {
+  // Input preferences are bound inline
+}
+
+async function generateSlot(dateStr, slotId) {
+  const plan = STATE.dailyPlans[dateStr];
+  const slot = plan?.slots.find(s => s.id === slotId);
+  if (!slot) return;
+
+  const prefInput = document.getElementById(`pref-${slotId}`);
+  if (prefInput) slot.preference = prefInput.value.trim();
+
+  const genBtn = document.getElementById(`gen-${slotId}`);
+  if (genBtn) {
+    genBtn.disabled = true;
+    genBtn.innerHTML = `✨ Building...`;
+  }
+
+  // Compute target macros for this slot
+  const { totals: fixedTotals } = getActiveFixedTotals(dateStr);
+  const filledTotals = plan.slots.reduce((acc, s) => {
+    if (s.id === slotId || !s.meal) return acc;
+    return { calories: acc.calories+(s.meal.calories||0), protein: acc.protein+(s.meal.protein||0), carbs: acc.carbs+(s.meal.carbs||0), fat: acc.fat+(s.meal.fat||0) };
+  }, { calories:0, protein:0, carbs:0, fat:0 });
+  const usedCal = fixedTotals.calories + filledTotals.calories;
+  const stillEmpty = plan.slots.filter(s => !s.meal && !s.open);
+  const remaining = {
+    calories: Math.max(0, STATE.profile.calories - usedCal),
+    protein:  Math.max(0, STATE.profile.protein  - fixedTotals.protein  - filledTotals.protein),
+    carbs:    Math.max(0, STATE.profile.carbs     - fixedTotals.carbs    - filledTotals.carbs),
+    fat:      Math.max(0, STATE.profile.fat       - fixedTotals.fat      - filledTotals.fat)
+  };
+  const wt = weightedSlotTarget(slot, remaining, stillEmpty);
+  const remainCal   = Math.max(100, wt.cal);
+  const remainProt  = wt.prot;
+  const remainCarbs = wt.carbs;
+  const remainFat   = wt.fat;
+
+  try {
+    const recipe = await generateRecipe({
+      preference: slot.preference,
+      targetCal: Math.round(remainCal),
+      targetProt: Math.round(remainProt),
+      targetCarbs: Math.round(remainCarbs),
+      targetFat: Math.round(remainFat),
+      mealType: slot.type
+    });
+    slot.meal = recipe;
+    saveState();
+    renderTodayInPlace(dateStr);
+  } catch(err) {
+    showToast(`Error: ${err.message}`, 4000);
+    if (genBtn) {
+      genBtn.disabled = false;
+      genBtn.innerHTML = '✨ Generate';
+    }
+  }
+}
+
+async function regenerateSlot(dateStr, slotId) {
+  const plan = STATE.dailyPlans[dateStr];
+  const slot = plan?.slots.find(s => s.id === slotId);
+  if (!slot) return;
+  slot.meal = null;
+  saveState();
+  renderTodayInPlace(dateStr);
+  // Small delay then generate
+  setTimeout(() => generateSlot(dateStr, slotId), 100);
+}
+
+function saveSlotMeal(slotId) {
+  const dateStr = today();
+  const plan = STATE.dailyPlans[dateStr];
+  const slot = plan?.slots.find(s => s.id === slotId);
+  if (!slot?.meal) return;
+  const already = STATE.savedMeals.find(m => m.name === slot.meal.name);
+  if (already) { showToast('Already saved!'); return; }
+  STATE.savedMeals.push({ id: uid(), ...slot.meal, savedAt: Date.now() });
+  saveState();
+  showToast(`"${slot.meal.name}" saved to favorites!`);
+}
+
+function showUseSaved(dateStr, slotId) {
+  const plan = STATE.dailyPlans[dateStr];
+  const slot = plan?.slots.find(s => s.id === slotId);
+  if (!slot) return;
+
+  const modalHtml = `<div class="modal-overlay" id="saved-modal" onclick="if(event.target.id==='saved-modal')closeSavedModal()">
+    <div class="modal-sheet">
+      <div class="modal-title">Choose a saved meal</div>
+      <div class="modal-sub">Select a meal to use for ${slot.label}</div>
+      <input class="form-input" id="saved-search" placeholder="Search..." style="margin-bottom:12px" oninput="filterSavedModal(this.value,'${dateStr}','${slotId}')">
+      <div id="saved-modal-list">
+        ${STATE.savedMeals.map(m => `
+          <div class="saved-card" onclick="useSavedMeal('${dateStr}','${slotId}','${m.id}')">
+            <div class="saved-card-name">${m.name}</div>
+            <div class="saved-card-chips">
+              <span class="chip chip-cal">${m.calories} cal</span>
+              <span class="chip chip-protein">${m.protein}g P</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function filterSavedModal(q, dateStr, slotId) {
+  const list = document.getElementById('saved-modal-list');
+  if (!list) return;
+  const lower = q.toLowerCase();
+  const filtered = STATE.savedMeals.filter(m => m.name.toLowerCase().includes(lower));
+  list.innerHTML = filtered.map(m => `
+    <div class="saved-card" onclick="useSavedMeal('${dateStr}','${slotId}','${m.id}')">
+      <div class="saved-card-name">${m.name}</div>
+      <div class="saved-card-chips">
+        <span class="chip chip-cal">${m.calories} cal</span>
+        <span class="chip chip-protein">${m.protein}g P</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function closeSavedModal() {
+  document.getElementById('saved-modal')?.remove();
+}
+
+function useSavedMeal(dateStr, slotId, mealId) {
+  const plan = getOrCreatePlan(dateStr);
+  const slot = plan.slots.find(s => s.id === slotId);
+  const meal = STATE.savedMeals.find(m => m.id === mealId);
+  if (!slot || !meal) return;
+  slot.meal = { ...meal };
+  saveState();
+  closeSavedModal();
+  renderTodayInPlace(dateStr);
+}
+
+// ═══════════════════════════════════════════════════
+// WEEK VIEW
+// ═══════════════════════════════════════════════════
+let weekState = { activeDay: null, groceryMode: false };
+
+function renderWeek() {
+  const dates = getWeekDates();
+  if (weekState.groceryMode) return renderGroceryList(dates);
+
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.5px">This Week</div>
+        <div style="font-size:13px;color:var(--text-2)">${formatDate(dates[0])} – ${formatDate(dates[6])}</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="planWholeWeek()" id="plan-week-btn">✨ Plan Week</button>
+    </div>
+
+    <div class="week-grid">
+      ${dates.map(d => {
+        const plan = STATE.dailyPlans[d];
+        const plannedCount = plan ? plan.slots.filter(s=>s.meal).length : 0;
+        const totalCount = plan ? plan.slots.length : 0;
+        const plannedCals = plan ? getPlanTotals(plan).calories : 0;
+        const isActive = weekState.activeDay === d;
+        const isToday = d === today();
+        let status = 'none', statusText = 'Not planned';
+        if (plan && plannedCount === totalCount && totalCount > 0) { status='planned'; statusText='✓ Fully planned'; }
+        else if (plan && plannedCount > 0) { status='partial'; statusText=`${plannedCount}/${totalCount} meals`; }
+        const [, mm, dd] = d.split('-');
+        const dayName = new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'short'});
+        return `<div class="day-card ${isActive?'active':''} ${status==='planned'?'planned':''}" onclick="selectWeekDay('${d}')">
+          <div class="day-name">${dayName}${isToday?' 📍':''}</div>
+          <div class="day-date">${parseInt(mm)}/${parseInt(dd)}</div>
+          ${plannedCals > 0 ? `<div class="day-cals">${plannedCals}</div><div style="font-size:10px;opacity:.6">cal planned</div>` : '<div class="day-cals" style="color:var(--text-3)">—</div>'}
+          <div class="day-status ${status}">${statusText}</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    ${weekState.activeDay ? renderWeekDayDetail(weekState.activeDay) : ''}
+
+    ${dates.some(d => STATE.dailyPlans[d] && getPlanTotals(STATE.dailyPlans[d]).calories > 0) ? `
+      <button class="btn btn-primary" onclick="weekState.groceryMode=true;render()" style="margin-top:8px">
+        🛒 Generate Grocery List
+      </button>
+    ` : ''}
+  `;
+}
+
+function renderWeekDayDetail(dateStr) {
+  const plan = getOrCreatePlan(dateStr);
+  const label = new Date(dateStr+'T12:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+  return `<div class="day-detail">
+    <div class="day-detail-header">
+      <div style="font-size:16px;font-weight:700">${label}</div>
+      <button class="btn btn-secondary btn-sm" onclick="planDay('${dateStr}')">✨ Plan day</button>
+    </div>
+    ${plan.slots.map(slot => `
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${slot.label}</div>
+          ${slot.meal ? `<div style="font-size:12px;color:var(--text-2)">${slot.meal.name} — ${slot.meal.calories} cal, ${slot.meal.protein}g P</div>` : `<div style="font-size:12px;color:var(--text-3)">Not planned</div>`}
+        </div>
+        ${slot.meal ? `<button class="btn btn-danger btn-sm" onclick="clearWeekSlot('${dateStr}','${slot.id}')">✕</button>` : ''}
+      </div>
+    `).join('')}
+    ${dateStr === today() ? `<button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="navigate('today')">Open Today's planner →</button>` : ''}
+  </div>`;
+}
+
+function selectWeekDay(dateStr) {
+  weekState.activeDay = weekState.activeDay === dateStr ? null : dateStr;
+  render();
+}
+
+function clearWeekSlot(dateStr, slotId) {
+  const plan = STATE.dailyPlans[dateStr];
+  const slot = plan?.slots.find(s=>s.id===slotId);
+  if (slot) { slot.meal = null; saveState(); render(); }
+}
+
+async function planDay(dateStr) {
+  const btn = document.querySelector(`[onclick="planDay('${dateStr}')"]`);
+  if (btn) { btn.disabled=true; btn.innerHTML='✨ Generating...'; }
+
+  const plan = getOrCreatePlan(dateStr);
+  const { totals: fixedTotals } = getActiveFixedTotals(dateStr);
+  const emptySlots = plan.slots.filter(s=>!s.meal);
+  let usedCal = fixedTotals.calories;
+  let usedProt = fixedTotals.protein;
+  let usedCarbs = fixedTotals.carbs;
+  let usedFat = fixedTotals.fat;
+
+  for (const slot of emptySlots) {
+    const stillEmpty = plan.slots.filter(s => !s.meal && !s.open);
+    const remainingMacros = {
+      calories: Math.max(0, STATE.profile.calories - usedCal),
+      protein:  Math.max(0, STATE.profile.protein  - usedProt),
+      carbs:    Math.max(0, STATE.profile.carbs     - usedCarbs),
+      fat:      Math.max(0, STATE.profile.fat       - usedFat)
+    };
+    const wt = weightedSlotTarget(slot, remainingMacros, stillEmpty);
+    const tCal   = Math.max(100, wt.cal);
+    const tProt  = wt.prot;
+    const tCarbs = wt.carbs;
+    const tFat   = wt.fat;
+    try {
+      const recipe = await generateRecipe({ preference:slot.preference||'', targetCal:Math.round(tCal), targetProt:Math.round(tProt), targetCarbs:Math.round(tCarbs), targetFat:Math.round(tFat), mealType:slot.type });
+      slot.meal = recipe;
+      usedCal += recipe.calories||0;
+      usedProt += recipe.protein||0;
+      usedCarbs += recipe.carbs||0;
+      usedFat += recipe.fat||0;
+      saveState();
+    } catch(e) { showToast(`Error for ${slot.label}: ${e.message}`, 3000); }
+  }
+  render();
+}
+
+async function planWholeWeek() {
+  const dates = getWeekDates();
+  const btn = document.getElementById('plan-week-btn');
+  if (btn) { btn.disabled=true; btn.textContent='Planning...'; }
+  for (const d of dates) {
+    await planDay(d);
+  }
+  showToast('Week planned! Check the grocery list 🛒');
+  render();
+}
+
+function renderGroceryList(dates) {
+  // Aggregate ingredients from all planned meals
+  const allIngredients = [];
+  dates.forEach(d => {
+    const plan = STATE.dailyPlans[d];
+    if (!plan) return;
+    const dayLabel = new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    plan.slots.forEach(slot => {
+      if (slot.meal?.ingredients) {
+        slot.meal.ingredients.forEach(ing => {
+          allIngredients.push({ ...ing, day: dayLabel, meal: slot.meal.name, slotLabel: slot.label });
+        });
+      }
+    });
+  });
+
+  // Group by ingredient name (simple dedup)
+  const grouped = {};
+  allIngredients.forEach(ing => {
+    const key = ing.item.toLowerCase();
+    if (!grouped[key]) grouped[key] = { item: ing.item, uses: [] };
+    grouped[key].uses.push(`${ing.amount} (${ing.day} – ${ing.meal})`);
+  });
+
+  const items = Object.values(grouped);
+
+  return `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <button class="btn btn-secondary btn-sm" onclick="weekState.groceryMode=false;render()">← Back to Week</button>
+      <div style="font-size:20px;font-weight:800;flex:1">Grocery List</div>
+      <button class="btn btn-secondary btn-sm" onclick="printGroceryList()">🖨️ Print</button>
+    </div>
+    <div class="grocery-wrap" id="grocery-list">
+      ${items.length ? items.map((item,i) => `
+        <div class="grocery-item" id="gi-${i}">
+          <input type="checkbox" class="grocery-check" onchange="this.closest('.grocery-item').classList.toggle('checked',this.checked)">
+          <div class="grocery-text">
+            <span style="font-weight:600">${item.item}</span>
+            <span style="font-size:12px;color:var(--text-3);display:block">${item.uses[0]}${item.uses.length>1?` +${item.uses.length-1} more`:''}</span>
+          </div>
+        </div>
+      `).join('') : '<p style="color:var(--text-3);text-align:center;padding:20px">No meals planned yet.</p>'}
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--text-3);text-align:center">${items.length} items from your weekly meal plan</div>
+  `;
+}
+
+function printGroceryList() {
+  const content = document.getElementById('grocery-list')?.innerText || '';
+  const w = window.open('', '_blank');
+  w.document.write(`<pre style="font-family:sans-serif;padding:20px">${content}</pre>`);
+  w.print();
+}
+
+// ═══════════════════════════════════════════════════
+// SAVED MEALS
+// ═══════════════════════════════════════════════════
+let savedFilters = { search:'', minCal:'', maxCal:'', minProtein:'' };
+
+function renderSaved() {
+  const filtered = STATE.savedMeals.filter(m => {
+    if (savedFilters.search && !m.name.toLowerCase().includes(savedFilters.search.toLowerCase())) return false;
+    if (savedFilters.minCal && m.calories < parseFloat(savedFilters.minCal)) return false;
+    if (savedFilters.maxCal && m.calories > parseFloat(savedFilters.maxCal)) return false;
+    if (savedFilters.minProtein && m.protein < parseFloat(savedFilters.minProtein)) return false;
+    return true;
+  });
+
+  return `
+    <div style="font-size:20px;font-weight:800;margin-bottom:4px;letter-spacing:-.5px">Saved Meals</div>
+    <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">${STATE.savedMeals.length} saved · Filter by macros</div>
+
+    <div class="filter-row">
+      <input class="filter-input" placeholder="🔍 Search..." style="flex:1;width:auto" value="${savedFilters.search}" oninput="savedFilters.search=this.value;renderSavedInPlace()">
+      <input class="filter-input" type="number" placeholder="Min cal" value="${savedFilters.minCal}" oninput="savedFilters.minCal=this.value;renderSavedInPlace()">
+      <input class="filter-input" type="number" placeholder="Max cal" value="${savedFilters.maxCal}" oninput="savedFilters.maxCal=this.value;renderSavedInPlace()">
+      <input class="filter-input" type="number" placeholder="Min protein" value="${savedFilters.minProtein}" oninput="savedFilters.minProtein=this.value;renderSavedInPlace()">
+    </div>
+
+    <div id="saved-results">
+      ${filtered.length ? `<div class="saved-grid">
+        ${filtered.map(m => `
+          <div class="saved-card" onclick="expandSavedMeal('${m.id}')">
+            <div style="display:flex;align-items:start;justify-content:space-between">
+              <div class="saved-card-name">${m.name}</div>
+              <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteSaved('${m.id}')" style="flex-shrink:0;margin-left:8px">✕</button>
+            </div>
+            ${m.description ? `<div class="saved-card-desc">${m.description}</div>` : ''}
+            <div class="saved-card-chips">
+              <span class="chip chip-cal">🔥 ${m.calories} cal</span>
+              <span class="chip chip-protein">💪 ${m.protein}g P</span>
+              <span class="chip chip-carbs">🌾 ${m.carbs}g C</span>
+              <span class="chip chip-fat">🥑 ${m.fat}g F</span>
+            </div>
+            <div style="margin-top:8px"><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();addSavedToToday('${m.id}')">+ Add to today</button></div>
+          </div>
+        `).join('')}
+      </div>` : `<div class="empty-state"><div class="icon">🔖</div><p>${STATE.savedMeals.length ? 'No meals match your filters' : 'Save meals from the Today view to see them here'}</p></div>`}
+    </div>
+  `;
+}
+
+function renderSavedInPlace() {
+  const content = document.querySelector('.page-content');
+  if (content) content.innerHTML = renderSaved();
+}
+
+function deleteSaved(id) {
+  STATE.savedMeals = STATE.savedMeals.filter(m => m.id !== id);
+  saveState();
+  renderSavedInPlace();
+  showToast('Meal removed');
+}
+
+function expandSavedMeal(id) {
+  const meal = STATE.savedMeals.find(m => m.id === id);
+  if (!meal) return;
+  const modalHtml = `<div class="modal-overlay" id="meal-detail-modal" onclick="if(event.target.id==='meal-detail-modal')this.remove()">
+    <div class="modal-sheet">
+      ${renderRecipeCard(meal, id)}
+      <div class="modal-actions">
+        <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('meal-detail-modal').remove()">Close</button>
+        <button class="btn btn-primary" style="flex:1" onclick="addSavedToToday('${id}');document.getElementById('meal-detail-modal').remove()">+ Add to today</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function addSavedToToday(mealId) {
+  const meal = STATE.savedMeals.find(m => m.id === mealId);
+  if (!meal) return;
+  const dateStr = today();
+  const plan = getOrCreatePlan(dateStr);
+  const emptySlot = plan.slots.find(s => !s.meal && !s.open);
+  if (emptySlot) {
+    emptySlot.meal = { ...meal };
+    saveState();
+    showToast(`"${meal.name}" added to ${emptySlot.label}`);
+    if (STATE.currentView === 'today') renderTodayInPlace(dateStr);
+  } else {
+    // Add a new slot
+    const newSlot = { id: uid(), type:'meal', label:`Meal ${plan.slots.length+1}`, preference:'', meal: {...meal}, open: false };
+    plan.slots.push(newSlot);
+    saveState();
+    showToast(`"${meal.name}" added as new meal slot`);
+    if (STATE.currentView === 'today') renderTodayInPlace(dateStr);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════
+function renderSettings() {
+  const p = STATE.profile;
+  return `
+    <div style="font-size:20px;font-weight:800;margin-bottom:16px;letter-spacing:-.5px">Settings</div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Profile</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="s-name" value="${p.name}"></div>
+        <div class="form-group"><label class="form-label">Age</label><input class="form-input" id="s-age" type="number" value="${p.age}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Sex</label>
+          <select class="form-input" id="s-sex">
+            <option value="male" ${p.sex==='male'?'selected':''}>Male</option>
+            <option value="female" ${p.sex==='female'?'selected':''}>Female</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Weight (lbs)</label><input class="form-input" id="s-weight" type="number" value="${p.weightLbs}"></div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Daily Macro Targets</div>
+      <div class="macro-edit-grid" id="s-macro-grid">
+        <div class="macro-field calories">
+          <label><span class="dot" style="background:#10b981"></span>Calories</label>
+          <input type="number" id="sm-calories" value="${p.calories}" data-field="calories">
+          <div class="unit">kcal / day</div>
+        </div>
+        <div class="macro-field">
+          <label><span class="dot" style="background:#6366f1"></span>Protein</label>
+          <input type="number" id="sm-protein" value="${p.protein}" data-field="protein">
+          <div class="unit">grams</div>
+        </div>
+        <div class="macro-field">
+          <label><span class="dot" style="background:#f59e0b"></span>Carbs</label>
+          <input type="number" id="sm-carbs" value="${p.carbs}" data-field="carbs">
+          <div class="unit">grams</div>
+        </div>
+        <div class="macro-field">
+          <label><span class="dot" style="background:#f43f5e"></span>Fat</label>
+          <input type="number" id="sm-fat" value="${p.fat}" data-field="fat">
+          <div class="unit">grams</div>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="recalcTDEE()" style="margin-top:10px">↺ Recalculate from profile</button>
+    </div>
+
+    <div class="settings-section">
+      <div class="section-header" style="margin-bottom:12px">
+        <span class="settings-section-title" style="border:none;padding:0;margin:0">Pre-logged items</span>
+        <button class="pill" onclick="showAddFixedModal()">+ Add item</button>
+      </div>
+      ${STATE.fixedItems.length ? STATE.fixedItems.map(it => `
+        <div class="fixed-item-row">
+          <div style="flex:1">
+            <div class="name">${it.name}</div>
+            <div class="macros">${it.calories} cal · ${it.protein}g P · ${it.carbs}g C · ${it.fat}g F</div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="deleteFixedItemSettings('${it.id}')">✕</button>
+        </div>
+      `).join('') : '<p style="color:var(--text-3);font-size:14px">No pre-logged items yet.</p>'}
+    </div>
+
+<button class="btn btn-primary" id="save-settings-btn">Save Settings</button>
+    <div style="margin-top:12px">
+      <button class="btn btn-danger btn-sm" onclick="resetApp()">⚠️ Reset all data</button>
+    </div>
+  `;
+}
+
+function bindSettings() {
+  document.querySelectorAll('#s-macro-grid [data-field]').forEach(input => {
+    input.addEventListener('change', () => {
+      const field = input.dataset.field;
+      const cur = {
+        calories: parseFloat(document.getElementById('sm-calories').value)||STATE.profile.calories,
+        protein: parseFloat(document.getElementById('sm-protein').value)||STATE.profile.protein,
+        carbs: parseFloat(document.getElementById('sm-carbs').value)||STATE.profile.carbs,
+        fat: parseFloat(document.getElementById('sm-fat').value)||STATE.profile.fat
+      };
+      const updated = adjustMacros(field, input.value, cur);
+      ['calories','protein','carbs','fat'].forEach(f => {
+        const el = document.getElementById(`sm-${f}`);
+        if (el && el !== input) el.value = updated[f];
+      });
+    });
+  });
+
+  document.getElementById('save-settings-btn')?.addEventListener('click', () => {
+    STATE.profile.name = document.getElementById('s-name')?.value || STATE.profile.name;
+    STATE.profile.age = parseInt(document.getElementById('s-age')?.value) || STATE.profile.age;
+    STATE.profile.sex = document.getElementById('s-sex')?.value || STATE.profile.sex;
+    STATE.profile.weightLbs = parseFloat(document.getElementById('s-weight')?.value) || STATE.profile.weightLbs;
+    STATE.profile.calories = parseFloat(document.getElementById('sm-calories')?.value) || STATE.profile.calories;
+    STATE.profile.protein = parseFloat(document.getElementById('sm-protein')?.value) || STATE.profile.protein;
+    STATE.profile.carbs = parseFloat(document.getElementById('sm-carbs')?.value) || STATE.profile.carbs;
+    STATE.profile.fat = parseFloat(document.getElementById('sm-fat')?.value) || STATE.profile.fat;
+    saveState();
+    showToast('Settings saved ✓');
+  });
+}
+
+function recalcTDEE() {
+  const newMacros = calcTDEE(STATE.profile);
+  ['calories','protein','carbs','fat'].forEach(f => {
+    const el = document.getElementById(`sm-${f}`);
+    if (el) el.value = newMacros[f];
+  });
+  showToast('Recalculated from your profile');
+}
+
+function deleteFixedItemSettings(id) {
+  STATE.fixedItems = STATE.fixedItems.filter(f => f.id !== id);
+  saveState();
+  const content = document.querySelector('.page-content');
+  if (content) content.innerHTML = renderSettings();
+  bindSettings();
+}
+
+function showAddFixedModal() {
+  const html = `<div class="modal-overlay" id="add-fixed-modal" onclick="if(event.target.id==='add-fixed-modal')this.remove()">
+    <div class="modal-sheet">
+      <div class="modal-title">Add pre-logged item</div>
+      <div class="modal-sub">This item will be automatically counted toward your daily macros.</div>
+      <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="afm-name" placeholder="e.g. Protein Shake"></div>
+      <div class="form-row-3">
+        <div><label class="form-label" style="font-size:11px">Calories</label><input class="form-input" id="afm-cal" type="number" placeholder="140"></div>
+        <div><label class="form-label" style="font-size:11px">Protein (g)</label><input class="form-input" id="afm-prot" type="number" placeholder="30"></div>
+        <div><label class="form-label" style="font-size:11px">Carbs (g)</label><input class="form-input" id="afm-carbs" type="number" placeholder="5"></div>
+      </div>
+      <div style="margin-top:10px"><label class="form-label" style="font-size:11px">Fat (g)</label><input class="form-input" id="afm-fat" type="number" placeholder="2" style="max-width:120px"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('add-fixed-modal').remove()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1" onclick="addFixedFromModal()">Add Item</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function addFixedFromModal() {
+  const name = document.getElementById('afm-name')?.value.trim();
+  if (!name) { showToast('Please enter a name'); return; }
+  STATE.fixedItems.push({
+    id: uid(),
+    name,
+    calories: parseFloat(document.getElementById('afm-cal')?.value)||0,
+    protein: parseFloat(document.getElementById('afm-prot')?.value)||0,
+    carbs: parseFloat(document.getElementById('afm-carbs')?.value)||0,
+    fat: parseFloat(document.getElementById('afm-fat')?.value)||0
+  });
+  saveState();
+  document.getElementById('add-fixed-modal')?.remove();
+  const content = document.querySelector('.page-content');
+  if (content) { content.innerHTML = renderSettings(); bindSettings(); }
+  showToast('Item added ✓');
+}
+
+function showLogFoodModal(dateStr) {
+  const html = `<div class="modal-overlay" id="log-food-modal" onclick="if(event.target.id==='log-food-modal')this.remove()">
+    <div class="modal-sheet">
+      <div class="modal-title">Log a food</div>
+      <div class="modal-sub">Track anything outside your meal plan — a snack, drink, or extra bite.</div>
+      <div class="form-group"><label class="form-label">Food name</label><input class="form-input" id="lf-name" placeholder="e.g. Protein shake, banana, coffee with milk"></div>
+      <div class="form-row-3">
+        <div><label class="form-label" style="font-size:11px">Calories</label><input class="form-input" id="lf-cal" type="number" placeholder="0" min="0"></div>
+        <div><label class="form-label" style="font-size:11px">Protein (g)</label><input class="form-input" id="lf-prot" type="number" placeholder="0" min="0"></div>
+        <div><label class="form-label" style="font-size:11px">Carbs (g)</label><input class="form-input" id="lf-carbs" type="number" placeholder="0" min="0"></div>
+      </div>
+      <div style="margin-top:10px"><label class="form-label" style="font-size:11px">Fat (g)</label><input class="form-input" id="lf-fat" type="number" placeholder="0" min="0" style="max-width:120px"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('log-food-modal').remove()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1" onclick="addLoggedFood('${dateStr}')">Log Food</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  setTimeout(() => document.getElementById('lf-name')?.focus(), 100);
+}
+
+function addLoggedFood(dateStr) {
+  const name = document.getElementById('lf-name')?.value.trim();
+  if (!name) { showToast('Please enter a food name'); return; }
+  const plan = getOrCreatePlan(dateStr);
+  if (!plan.loggedFoods) plan.loggedFoods = [];
+  plan.loggedFoods.push({
+    id: uid(),
+    name,
+    calories: parseFloat(document.getElementById('lf-cal')?.value) || 0,
+    protein: parseFloat(document.getElementById('lf-prot')?.value) || 0,
+    carbs: parseFloat(document.getElementById('lf-carbs')?.value) || 0,
+    fat: parseFloat(document.getElementById('lf-fat')?.value) || 0
+  });
+  saveState();
+  document.getElementById('log-food-modal')?.remove();
+  renderTodayInPlace(dateStr);
+  showToast('Food logged ✓');
+}
+
+function removeLoggedFood(dateStr, foodId) {
+  const plan = STATE.dailyPlans[dateStr];
+  if (!plan) return;
+  plan.loggedFoods = (plan.loggedFoods || []).filter(f => f.id !== foodId);
+  saveState();
+  renderTodayInPlace(dateStr);
+}
+
+function resetApp() {
+  if (!confirm('This will delete all your data including meal history and saved meals. Are you sure?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  STATE = defaultState();
+  weekState = { activeDay: null, groceryMode: false };
+  savedFilters = { search:'', minCal:'', maxCal:'', minProtein:'' };
+  tempMacros = {};
+  render();
+}
+
+// ═══════════════════════════════════════════════════
+// BIND APP EVENTS
+// ═══════════════════════════════════════════════════
+function bindApp() {
+  if (STATE.currentView === 'settings') bindSettings();
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+render();
+</script>
+</body>
+</html>
