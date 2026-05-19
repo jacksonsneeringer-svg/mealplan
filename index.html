@@ -421,11 +421,27 @@ function macrosFromItems(items) {
 // Calorie weighting: snacks get much less than meals; lunch & dinner are biggest
 function slotWeight(slot) {
   if (slot.type === 'snack') return 0.08;
+  const cat = slot.category || '';
   const label = (slot.label || '').toLowerCase();
-  if (label.includes('breakfast')) return 0.25;
-  if (label.includes('lunch'))     return 0.32;
-  if (label.includes('dinner') || label.includes('supper')) return 0.32;
+  if (cat === 'dessert' || label.includes('dessert')) return 0.10;
+  if (cat === 'breakfast' || label.includes('breakfast')) return 0.25;
+  if (cat === 'lunch' || label.includes('lunch'))     return 0.32;
+  if (cat === 'dinner' || label.includes('dinner') || label.includes('supper')) return 0.32;
   return 0.28; // generic meal slot
+}
+
+// Derive a recipe mealType string from a slot
+function slotMealType(slot) {
+  const cat = slot.category || '';
+  if (cat) return cat;
+  // Legacy slots — infer from label
+  const label = (slot.label || '').toLowerCase();
+  if (label.includes('breakfast')) return 'breakfast';
+  if (label.includes('lunch'))     return 'lunch';
+  if (label.includes('dinner') || label.includes('supper')) return 'dinner';
+  if (label.includes('snack'))     return 'snack';
+  if (label.includes('dessert'))   return 'dessert';
+  return slot.type; // 'meal' or 'snack'
 }
 
 // Returns the weighted macro target for a single slot given remaining macros and all empty slots
@@ -456,12 +472,12 @@ function defaultSlots() {
   const cal = STATE.profile.calories;
   const snacks = cal < 1600 ? 1 : cal < 2400 ? 2 : 3;
   const slots = [
-    { id: uid(), type:'meal', label:'Breakfast', preference:'', meal:null, open:false, seenNames:[] },
-    { id: uid(), type:'meal', label:'Lunch', preference:'', meal:null, open:false, seenNames:[] },
-    { id: uid(), type:'meal', label:'Dinner', preference:'', meal:null, open:false, seenNames:[] }
+    { id: uid(), type:'meal', category:'breakfast', label:'Breakfast', preference:'', meal:null, open:false, seenNames:[] },
+    { id: uid(), type:'meal', category:'lunch',     label:'Lunch',     preference:'', meal:null, open:false, seenNames:[] },
+    { id: uid(), type:'meal', category:'dinner',    label:'Dinner',    preference:'', meal:null, open:false, seenNames:[] }
   ];
   for (let i = 0; i < snacks; i++) {
-    slots.push({ id: uid(), type:'snack', label:`Snack ${i+1}`, preference:'', meal:null, open:false, seenNames:[] });
+    slots.push({ id: uid(), type:'snack', category:'snack', label:`Snack ${i+1}`, preference:'', meal:null, open:false, seenNames:[] });
   }
   return slots;
 }
@@ -834,6 +850,43 @@ const RECIPE_DB = [
     ingredients:[{item:'Raw almonds',amount:20,unit:'g'},{item:'Cashews',amount:15,unit:'g'},{item:'Pumpkin seeds',amount:10,unit:'g'}],
     instructions:['Combine nuts and seeds in a small bowl.','Optional: toast in a dry pan 2-3 min with a pinch of salt and smoked paprika.','Portion into 45g serving. Enjoy as a portable snack.']},
 
+  // ─── DESSERTS ───
+  { id:'protein-mug-cake', name:'Chocolate Protein Mug Cake', keywords:['mug cake','chocolate cake','cake','chocolate','protein cake'], mealTypes:['dessert'],
+    description:'A rich, fudgy chocolate cake made in 90 seconds flat. High-protein and secretly guilt-free.',
+    prepTime:'3 min', cookTime:'2 min', baseCal:280, baseP:22, baseC:30, baseF:7,
+    ingredients:[{item:'Protein powder (vanilla)',amount:30,unit:'g'},{item:'Cocoa powder',amount:10,unit:'g'},{item:'Oat flour',amount:20,unit:'g'},{item:'Egg',amount:1,unit:'egg'},{item:'Almond milk',amount:60,unit:'ml'},{item:'Baking powder',amount:2,unit:'g'}],
+    instructions:['Whisk all dry ingredients together in a large mug.','Add egg and almond milk, stir until smooth with no lumps.','Microwave on high for 60-90 seconds until just set in the center (a little glossy on top is fine).','Let stand 1 min before eating — it firms up as it cools. Top with a few chocolate chips if you like.']},
+  { id:'frozen-yogurt-bark', name:'Frozen Yogurt Berry Bark', keywords:['yogurt bark','frozen yogurt','bark','berries','frozen dessert'], mealTypes:['dessert'],
+    description:'Thick Greek yogurt swirled with honey and studded with berries, frozen into a crunchy bark. It genuinely tastes like ice cream.',
+    prepTime:'8 min', cookTime:'0 min', baseCal:190, baseP:14, baseC:28, baseF:2,
+    ingredients:[{item:'Non-fat Greek yogurt',amount:200,unit:'g'},{item:'Mixed berries',amount:80,unit:'g'},{item:'Honey',amount:15,unit:'ml'},{item:'Granola',amount:20,unit:'g'}],
+    instructions:['Line a baking sheet with parchment paper.','Mix Greek yogurt and honey until smooth. Spread into a thin, even layer on the parchment.','Scatter mixed berries and granola over the top, pressing lightly.','Freeze at least 2 hours until solid. Break into irregular pieces and serve straight from the freezer.']},
+  { id:'banana-nice-cream', name:'Two-Ingredient Banana Nice Cream', keywords:['nice cream','banana ice cream','banana','ice cream','frozen banana'], mealTypes:['dessert'],
+    description:'Frozen bananas blended into a creamy, scoopable ice cream with no dairy, no added sugar, and no guilt.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:210, baseP:3, baseC:54, baseF:1,
+    ingredients:[{item:'Frozen banana',amount:240,unit:'g'},{item:'Almond milk',amount:30,unit:'ml'}],
+    instructions:['Slice ripe bananas and freeze in a single layer at least 4 hours (overnight is best).','Add frozen banana and almond milk to a blender or food processor.','Blend, scraping down the sides often, until perfectly smooth and creamy — about 2-3 minutes.','Serve immediately for soft-serve consistency, or freeze 30 more min for a firmer scoop.']},
+  { id:'protein-brownies', name:'Fudgy Protein Brownies', keywords:['brownies','brownie','chocolate brownies','protein brownies'], mealTypes:['dessert'],
+    description:'Dense, fudgy chocolate brownies packed with protein. They taste like the real thing and keep you on track.',
+    prepTime:'10 min', cookTime:'20 min', baseCal:320, baseP:24, baseC:32, baseF:10,
+    ingredients:[{item:'Protein powder (vanilla)',amount:60,unit:'g'},{item:'Cocoa powder',amount:20,unit:'g'},{item:'Natural peanut butter',amount:40,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Almond milk',amount:60,unit:'ml'},{item:'Honey',amount:20,unit:'ml'},{item:'Baking powder',amount:3,unit:'g'}],
+    instructions:['Preheat oven to 350°F (175°C). Line a small baking pan with parchment.','Whisk together protein powder, cocoa, and baking powder.','Mix in peanut butter, eggs, almond milk, and honey until a thick batter forms.','Spread evenly in the pan. Bake 18-22 min until the edges are set but the center is still slightly soft.','Let cool completely before slicing — they firm up significantly as they cool.']},
+  { id:'cottage-cheese-mousse', name:'Chocolate Cottage Cheese Mousse', keywords:['cottage cheese mousse','mousse','chocolate mousse','cottage cheese dessert'], mealTypes:['dessert'],
+    description:'Blended cottage cheese transforms into a silky, protein-rich chocolate mousse. Skeptics become believers after the first spoonful.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:220, baseP:20, baseC:18, baseF:8,
+    ingredients:[{item:'Low-fat cottage cheese',amount:180,unit:'g'},{item:'Cocoa powder',amount:12,unit:'g'},{item:'Honey',amount:15,unit:'ml'},{item:'Mixed berries',amount:50,unit:'g'}],
+    instructions:['Blend cottage cheese until completely smooth (about 60 seconds in a blender).','Add cocoa powder and honey. Blend again until fully combined and silky.','Taste and adjust sweetness as needed.','Transfer to a bowl, top with berries, and refrigerate 15 min if you prefer a thicker, chilled texture.']},
+  { id:'baked-cinnamon-apple', name:'Baked Cinnamon Apple', keywords:['baked apple','cinnamon apple','apple dessert','stuffed apple'], mealTypes:['dessert'],
+    description:'A whole apple baked until tender, stuffed with oats, cinnamon, and almond butter. Tastes like apple pie filling without the fuss.',
+    prepTime:'5 min', cookTime:'25 min', baseCal:240, baseP:5, baseC:44, baseF:7,
+    ingredients:[{item:'Apple (medium)',amount:1,unit:'apple'},{item:'Rolled oats',amount:20,unit:'g'},{item:'Natural peanut butter',amount:15,unit:'g'},{item:'Honey',amount:8,unit:'ml'}],
+    instructions:['Preheat oven to 375°F (190°C).','Core the apple, leaving the bottom intact to create a cup.','Mix oats, peanut butter, and honey. Stuff into the apple cavity, pressing down gently.','Place in a small baking dish with 2 tbsp water. Bake 20-25 min until the apple is soft and the filling is golden.','Let cool 3-5 min before serving. Dust with cinnamon.']},
+  { id:'dark-chocolate-bark', name:'Dark Chocolate Nut Bark', keywords:['chocolate bark','dark chocolate','bark','chocolate nuts'], mealTypes:['dessert'],
+    description:'Melted dark chocolate spread thin and topped with nuts and sea salt. Simple, satisfying, and portioned perfectly.',
+    prepTime:'8 min', cookTime:'5 min', baseCal:250, baseP:5, baseC:20, baseF:18,
+    ingredients:[{item:'Raw almonds',amount:30,unit:'g'},{item:'Cashews',amount:15,unit:'g'},{item:'Pumpkin seeds',amount:10,unit:'g'}],
+    instructions:['Melt dark chocolate chips in a microwave in 30-second bursts, stirring between each, until smooth.','Spread melted chocolate thinly on a parchment-lined tray.','Scatter nuts, seeds, and a pinch of sea salt over the top. Press lightly.','Refrigerate 20-30 min until fully set. Break into pieces and store in the fridge.']},
+
   // ─── SPECIAL RECIPES ───
   { id:'chicken-crust-pizza', name:'Chicken Crust Pizza', keywords:['chicken crust pizza','pizza','keto pizza','chicken pizza','low carb pizza'], mealTypes:['lunch','dinner'],
     description:'A genius low-carb pizza where the crust is made from seasoned ground chicken. Topped with marinara and bubbling mozzarella for all the pizza vibes.',
@@ -973,6 +1026,11 @@ const IMAC = {
   'cocoa':[2.28,0.20,0.58,0.14],
   'frozen peas':[0.81,0.054,0.14,0.004],
   'low-fat string cheese':[2.71,0.23,0.027,0.16],
+  // Dessert & baking
+  'honey':[3.04,0.003,0.82,0], 'granola':[4.71,0.10,0.57,0.18],
+  'dark chocolate chips':[5.46,0.05,0.60,0.31],
+  'chocolate chips':[5.46,0.05,0.60,0.31],
+  'ground chicken':[1.43,0.17,0,0.08],
   // Per-unit lookups [cal, p, c, f] — applied when unit is the key
 };
 // Per-unit macros [cal, p, c, f] per 1 unit
@@ -1034,9 +1092,15 @@ function scaleIngredient(ing, scale) {
 
 // ─── Built-in recipe generator ───
 function generateRecipe({ preference, targetCal, targetProt, targetCarbs, targetFat, mealType, excludeNames = [] }) {
-  let pool = RECIPE_DB.filter(r =>
-    mealType === 'snack' ? r.mealTypes.includes('snack') : r.mealTypes.some(t => t !== 'snack')
-  );
+  const specificTypes = ['breakfast','lunch','dinner','snack','dessert'];
+  let pool;
+  if (specificTypes.includes(mealType)) {
+    pool = RECIPE_DB.filter(r => r.mealTypes.includes(mealType));
+    if (!pool.length) pool = RECIPE_DB.filter(r => r.mealTypes.some(t => t !== 'snack' && t !== 'dessert'));
+  } else {
+    // Generic 'meal' — exclude snacks and desserts
+    pool = RECIPE_DB.filter(r => r.mealTypes.some(t => t !== 'snack' && t !== 'dessert'));
+  }
   // Filter out previously seen recipes; if all are excluded, reset to full pool
   const fresh = pool.filter(r => !excludeNames.includes(r.name));
   if (fresh.length > 0) pool = fresh;
@@ -1525,9 +1589,10 @@ function renderToday() {
 
     <div class="section-header">
       <span class="section-title">Meal Plan</span>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
         <button class="pill" onclick="addSlot('${dateStr}','meal')">+ Meal</button>
         <button class="pill" onclick="addSlot('${dateStr}','snack')">+ Snack</button>
+        <button class="pill" onclick="addSlot('${dateStr}','dessert')">+ Dessert</button>
       </div>
     </div>
 
@@ -1585,7 +1650,7 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
         <div class="slot-open-badge">${IC.unlock} Open slot — logged as flex<button style="background:none;border:none;cursor:pointer;margin-left:8px;color:#854d0e;font-size:12px" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Undo</button></div>
       ` : slot.meal ? renderRecipeCard(slot.meal, slot.id) : `
         <div class="slot-empty">
-          <input class="pref-input" id="pref-${slot.id}" placeholder="${isSnack?'Any snack preference? (e.g. chips and dip)':'What would you like? (e.g. overnight oats)'}" value="${slot.preference||''}">
+          <input class="pref-input" id="pref-${slot.id}" placeholder="${(()=>{const cat=slot.category||slotMealType(slot);if(cat==='snack')return 'Snack idea? (e.g. chips and dip)';if(cat==='breakfast')return 'What sounds good? (e.g. overnight oats)';if(cat==='lunch')return 'What sounds good? (e.g. turkey wrap)';if(cat==='dinner')return 'What sounds good? (e.g. dumplings)';if(cat==='dessert')return 'Craving something? (e.g. brownies)';return 'What would you like?';})()}" value="${slot.preference||''}">
           <button class="btn-generate" id="gen-${slot.id}" onclick="generateSlot('${dateStr}','${slot.id}')">
             ${IC.sparkle} Generate
           </button>
@@ -1668,16 +1733,29 @@ function toggleFixedItem(dateStr, itemId, checked) {
   renderTodayInPlace(dateStr);
 }
 
-function addSlot(dateStr, type) {
+function addSlot(dateStr, category) {
   const plan = getOrCreatePlan(dateStr);
-  const countOfType = plan.slots.filter(s => s.type === type).length;
+  const type = category === 'snack' ? 'snack' : 'meal';
+  let label;
+  if (category === 'snack') {
+    const n = plan.slots.filter(s => s.category === 'snack' || s.type === 'snack').length;
+    label = `Snack ${n + 1}`;
+  } else if (category === 'dessert') {
+    const n = plan.slots.filter(s => s.category === 'dessert').length;
+    label = n === 0 ? 'Dessert' : `Dessert ${n + 1}`;
+  } else {
+    const n = plan.slots.filter(s => s.category === 'meal' || (s.type === 'meal' && !s.category)).length;
+    label = `Meal ${n + 1}`;
+  }
   plan.slots.push({
     id: uid(),
     type,
-    label: type === 'meal' ? `Meal ${countOfType + 1}` : `Snack ${countOfType + 1}`,
+    category,
+    label,
     preference: '',
     meal: null,
-    open: false
+    open: false,
+    seenNames: []
   });
   saveState();
   renderTodayInPlace(dateStr);
@@ -1753,7 +1831,7 @@ async function generateSlot(dateStr, slotId) {
       targetProt: Math.round(remainProt),
       targetCarbs: Math.round(remainCarbs),
       targetFat: Math.round(remainFat),
-      mealType: slot.type,
+      mealType: slotMealType(slot),
       excludeNames: slot.seenNames || []
     });
     slot.meal = recipe;
@@ -1960,7 +2038,7 @@ async function planDay(dateStr) {
     const tCarbs = wt.carbs;
     const tFat   = wt.fat;
     try {
-      const recipe = await generateRecipe({ preference:slot.preference||'', targetCal:Math.round(tCal), targetProt:Math.round(tProt), targetCarbs:Math.round(tCarbs), targetFat:Math.round(tFat), mealType:slot.type });
+      const recipe = await generateRecipe({ preference:slot.preference||'', targetCal:Math.round(tCal), targetProt:Math.round(tProt), targetCarbs:Math.round(tCarbs), targetFat:Math.round(tFat), mealType:slotMealType(slot) });
       slot.meal = recipe;
       usedCal += recipe.calories||0;
       usedProt += recipe.protein||0;
