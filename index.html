@@ -1798,7 +1798,7 @@ const IC = {
   refresh:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.8-3.4L23 10"/><path d="M20.5 15a9 9 0 0 1-14.8 3.4L1 14"/></svg>`,
 };
 
-const LOGO_SVG = `<svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#ff8fa3"/><circle cx="16" cy="16" r="15" fill="url(#nGrad)" opacity="0.3"/><defs><linearGradient id="nGrad" x1="8" y1="5" x2="24" y2="27"><stop offset="0" stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient></defs><path d="M10 19 Q10 25 16 25 Q22 25 22 19 Z" fill="white" opacity="0.95"/><rect x="9.5" y="17" width="13" height="3" rx="1.5" fill="white" opacity="0.95"/><path d="M13 13 Q12 11 13 9" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.8"/><path d="M16 12 Q15 10 16 8" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.8"/><path d="M19 13 Q18 11 19 9" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.8"/></svg>`;
+const LOGO_SVG = `<svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lgBg" x1="4" y1="2" x2="32" y2="34"><stop offset="0%" stop-color="#ff8fa3"/><stop offset="100%" stop-color="#e8527a"/></linearGradient><linearGradient id="lgShine" x1="6" y1="4" x2="20" y2="18"><stop offset="0%" stop-color="white" stop-opacity="0.45"/><stop offset="100%" stop-color="white" stop-opacity="0"/></linearGradient><radialGradient id="rgBowl" cx="50%" cy="60%" r="55%"><stop offset="0%" stop-color="white" stop-opacity="0.15"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><circle cx="18" cy="18" r="17" fill="url(#lgBg)"/><circle cx="18" cy="18" r="17" fill="url(#lgShine)"/><ellipse cx="13" cy="11" rx="5" ry="3.5" fill="white" opacity="0.18" transform="rotate(-25 13 11)"/><rect x="8" y="18" width="20" height="4" rx="2" fill="white" opacity="0.97"/><rect x="8" y="18" width="20" height="2" rx="1" fill="rgba(220,80,110,0.18)"/><path d="M8.5 22 Q8 29 18 29 Q28 29 27.5 22 Z" fill="white" opacity="0.97"/><circle cx="14" cy="24.5" r="1.8" fill="#ffb3c6" opacity="0.7"/><circle cx="18" cy="26" r="1.4" fill="#ffd6e0" opacity="0.6"/><circle cx="22" cy="24.5" r="1.8" fill="#ffb3c6" opacity="0.7"/><path d="M14 15.5 Q13.1 13.2 14 11.2" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.88"/><path d="M18 15 Q17.1 12.7 18 10.7" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.88"/><path d="M22 15.5 Q21.1 13.2 22 11.2" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.88"/><path d="M28.5 9 L29.2 7 L29.9 9 L32 9.7 L29.9 10.4 L29.2 12.4 L28.5 10.4 L26.4 9.7 Z" fill="white" opacity="0.92"/><circle cx="29.2" cy="9.7" r="0.6" fill="white" opacity="0.5"/></svg>`;
 
 // ═══════════════════════════════════════════════════
 // ONBOARDING
@@ -2235,7 +2235,7 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
   return `<div class="meal-slot" id="slot-${slot.id}" data-slot-id="${slot.id}" draggable="true">
     <div class="slot-header">
       <span class="drag-handle" title="Drag to reorder">⠿</span>
-      <div>
+      <div style="flex:1">
         <div class="slot-title">${slot.label}</div>
         ${!slot.meal && !slot.open && slot.category !== 'nibbles' ? `<div class="slot-target">~${perSlotCal} cal · ${perSlotProt}g P target</div>` : ''}
         ${slot.meal ? `<div class="slot-target">${slot.meal.calories} cal · ${slot.meal.protein}g P · ${slot.meal.carbs}g C · ${slot.meal.fat}g F</div>` : ''}
@@ -2517,13 +2517,15 @@ async function generateSlot(dateStr, slotId) {
   };
   const wt = weightedSlotTarget(slot, remaining, stillEmpty);
   const isNibble = (slot.category === 'nibbles');
-  const remainCal   = isNibble ? 60 : Math.max(100, wt.cal);
+  const isSnackType = slot.type === 'snack' || slot.category === 'snack' || slot.category === 'dessert' || slot.category === 'nibbles';
+  const slotCalCap = isNibble ? 60 : isSnackType ? 400 : 1000;
+  const remainCal   = isNibble ? 60 : Math.min(Math.max(100, wt.cal), slotCalCap);
   const remainProt  = isNibble ? 1  : wt.prot;
   const remainCarbs = isNibble ? 5  : wt.carbs;
   const remainFat   = isNibble ? 1  : wt.fat;
 
   try {
-    const recipe = await generateRecipe({
+    let recipe = await generateRecipe({
       preference: slot.preference,
       targetCal: Math.round(remainCal),
       targetProt: Math.round(remainProt),
@@ -2532,6 +2534,11 @@ async function generateSlot(dateStr, slotId) {
       mealType: slotMealType(slot),
       excludeNames: slot.seenNames || []
     });
+    // Enforce hard per-slot-type calorie cap
+    if ((recipe.calories || 0) > slotCalCap) {
+      const r = slotCalCap / recipe.calories;
+      recipe = { ...recipe, calories: slotCalCap, protein: Math.round((recipe.protein||0)*r), carbs: Math.round((recipe.carbs||0)*r), fat: Math.round((recipe.fat||0)*r) };
+    }
     if (wouldExceedCalorieLimit(dateStr, recipe.calories || 0, slotId)) {
       showToast(`"${recipe.name}" (${recipe.calories} cal) would exceed daily calorie limit — try regenerating`, 4000);
       if (genBtn) {
@@ -2630,6 +2637,13 @@ function useSavedMeal(dateStr, slotId, mealId) {
   const slot = plan.slots.find(s => s.id === slotId);
   const meal = STATE.savedMeals.find(m => m.id === mealId);
   if (!slot || !meal) return;
+  const isSnackSlot = slot.type === 'snack' || slot.category === 'snack' || slot.category === 'dessert' || slot.category === 'nibbles';
+  const slotCalLimit = isSnackSlot ? 400 : 1000;
+  if ((meal.calories || 0) > slotCalLimit) {
+    showToast(`"${meal.name}" (${meal.calories} cal) exceeds the ${isSnackSlot ? 'snack' : 'meal'} limit of ${slotCalLimit} cal`, 3500);
+    closeSavedModal();
+    return;
+  }
   if (wouldExceedCalorieLimit(dateStr, meal.calories || 0, slotId)) {
     showToast(`Can't add "${meal.name}" — would exceed daily calorie limit`, 3000);
     closeSavedModal();
@@ -3104,33 +3118,202 @@ function addFixedFromModal() {
   showToast('Item added ✓');
 }
 
+// ── Compact food database (per 100g unless noted) ──
+const FOOD_DB = [
+  { names:['cheez-it','cheez it','cheezit','cheez its'], per100:{ cal:530, p:7, c:68, f:23 } },
+  { names:['chicken breast','chicken'], per100:{ cal:165, p:31, c:0, f:3.6 } },
+  { names:['ground beef','beef','steak'], per100:{ cal:250, p:26, c:0, f:15 } },
+  { names:['turkey breast','turkey'], per100:{ cal:189, p:29, c:0, f:7 } },
+  { names:['salmon'], per100:{ cal:208, p:20, c:0, f:13 } },
+  { names:['tuna','canned tuna'], per100:{ cal:116, p:26, c:0, f:1 } },
+  { names:['shrimp','prawns'], per100:{ cal:85, p:20, c:0, f:0.5 } },
+  { names:['pork loin','pork'], per100:{ cal:242, p:27, c:0, f:14 } },
+  { names:['white rice','cooked rice','rice'], per100:{ cal:130, p:2.7, c:28, f:0.3 } },
+  { names:['brown rice'], per100:{ cal:123, p:2.6, c:25.6, f:1 } },
+  { names:['pasta','spaghetti','noodles'], per100:{ cal:131, p:5, c:25, f:1.1 } },
+  { names:['rolled oats','oatmeal','oats'], per100:{ cal:389, p:17, c:66, f:7 } },
+  { names:['whole wheat bread','white bread','bread'], per100:{ cal:265, p:9, c:49, f:3.2 } },
+  { names:['tortilla','flour tortilla'], per100:{ cal:306, p:8, c:50, f:8 } },
+  { names:['potato chips','chips'], per100:{ cal:536, p:7, c:53, f:35 } },
+  { names:['crackers'], per100:{ cal:421, p:8, c:67, f:13 } },
+  { names:['granola bar','protein bar'], per100:{ cal:450, p:10, c:64, f:17 } },
+  { names:['granola'], per100:{ cal:450, p:8, c:64, f:19 } },
+  { names:['cereal'], per100:{ cal:379, p:8, c:84, f:2 } },
+  { names:['pizza','cheese pizza'], per100:{ cal:266, p:11, c:33, f:10 } },
+  { names:['burger','hamburger'], per100:{ cal:295, p:17, c:24, f:14 } },
+  { names:['eggs','egg'], per100:{ cal:155, p:13, c:1.1, f:11 } },
+  { names:['greek yogurt','greek yoghurt'], per100:{ cal:59, p:10, c:3.6, f:0.4 } },
+  { names:['cottage cheese'], per100:{ cal:98, p:11, c:3.4, f:4.3 } },
+  { names:['whole milk','milk'], per100:{ cal:61, p:3.2, c:4.8, f:3.3 } },
+  { names:['skim milk','non-fat milk'], per100:{ cal:35, p:3.4, c:5, f:0.1 } },
+  { names:['almond milk'], per100:{ cal:15, p:0.6, c:0.3, f:1.2 } },
+  { names:['cheddar','cheddar cheese'], per100:{ cal:402, p:25, c:1.3, f:33 } },
+  { names:['mozzarella'], per100:{ cal:280, p:28, c:2.2, f:17 } },
+  { names:['cream cheese'], per100:{ cal:342, p:6, c:4.1, f:34 } },
+  { names:['sour cream'], per100:{ cal:198, p:2.4, c:4.6, f:19 } },
+  { names:['butter'], per100:{ cal:717, p:0.9, c:0.1, f:81 } },
+  { names:['olive oil','oil'], per100:{ cal:884, p:0, c:0, f:100 } },
+  { names:['peanut butter'], per100:{ cal:588, p:25, c:20, f:50 } },
+  { names:['almond','almonds'], per100:{ cal:579, p:21, c:22, f:50 } },
+  { names:['walnuts','walnut'], per100:{ cal:654, p:15, c:14, f:65 } },
+  { names:['cashews','cashew'], per100:{ cal:553, p:18, c:30, f:44 } },
+  { names:['mixed nuts','nuts'], per100:{ cal:607, p:15, c:21, f:54 } },
+  { names:['avocado'], per100:{ cal:160, p:2, c:9, f:15 } },
+  { names:['banana'], per100:{ cal:89, p:1.1, c:23, f:0.3 } },
+  { names:['apple'], per100:{ cal:52, p:0.3, c:14, f:0.2 } },
+  { names:['orange'], per100:{ cal:47, p:0.9, c:12, f:0.1 } },
+  { names:['strawberry','strawberries'], per100:{ cal:32, p:0.7, c:8, f:0.3 } },
+  { names:['blueberry','blueberries'], per100:{ cal:57, p:0.7, c:14, f:0.3 } },
+  { names:['grapes','grape'], per100:{ cal:67, p:0.6, c:17, f:0.4 } },
+  { names:['sweet potato'], per100:{ cal:86, p:1.6, c:20, f:0.1 } },
+  { names:['potato','potatoes'], per100:{ cal:77, p:2, c:17, f:0.1 } },
+  { names:['broccoli'], per100:{ cal:34, p:2.8, c:7, f:0.4 } },
+  { names:['spinach'], per100:{ cal:23, p:2.9, c:3.6, f:0.4 } },
+  { names:['carrot','carrots'], per100:{ cal:41, p:0.9, c:10, f:0.2 } },
+  { names:['tomato','tomatoes'], per100:{ cal:18, p:0.9, c:3.9, f:0.2 } },
+  { names:['cucumber'], per100:{ cal:15, p:0.7, c:3.6, f:0.1 } },
+  { names:['corn','sweet corn'], per100:{ cal:96, p:3.4, c:21, f:1.5 } },
+  { names:['peas'], per100:{ cal:81, p:5.4, c:14, f:0.4 } },
+  { names:['edamame'], per100:{ cal:122, p:11, c:10, f:5 } },
+  { names:['hummus'], per100:{ cal:166, p:8, c:14, f:10 } },
+  { names:['tofu'], per100:{ cal:76, p:8, c:1.9, f:4.8 } },
+  { names:['lentils'], per100:{ cal:116, p:9, c:20, f:0.4 } },
+  { names:['chickpeas','garbanzo'], per100:{ cal:164, p:9, c:27, f:2.6 } },
+  { names:['black beans','kidney beans','beans'], per100:{ cal:132, p:8.7, c:24, f:0.5 } },
+  { names:['honey'], per100:{ cal:304, p:0.3, c:82, f:0 } },
+  { names:['dark chocolate','chocolate'], per100:{ cal:598, p:8, c:46, f:43 } },
+  { names:['ice cream'], per100:{ cal:207, p:3.5, c:24, f:11 } },
+  { names:['protein powder','whey protein','protein shake'], per100:{ cal:400, p:80, c:5, f:8 } },
+  { names:['orange juice'], per100:{ cal:45, p:0.7, c:10, f:0.2 } },
+  { names:['cola','soda','coke'], per100:{ cal:42, p:0, c:11, f:0 } },
+];
+
+function lookupFood(name, amountStr) {
+  const lower = name.toLowerCase().trim();
+  let matched = null;
+  for (const f of FOOD_DB) {
+    if (f.names.some(n => lower.includes(n) || n.includes(lower.replace(/s$/, '')))) {
+      matched = f;
+      break;
+    }
+  }
+  if (!matched) return null;
+
+  const a = amountStr.trim();
+  let grams = 0;
+  const mG   = a.match(/^([\d.]+)\s*g(?:rams?)?$/i);
+  const mOz  = a.match(/^([\d.]+)\s*oz(?:ounces?)?$/i);
+  const mMl  = a.match(/^([\d.]+)\s*ml$/i);
+  const mLbs = a.match(/^([\d.]+)\s*lbs?$/i);
+  const mKg  = a.match(/^([\d.]+)\s*kg$/i);
+  const mNum = a.match(/^([\d.]+)$/);
+  if (mG)   grams = parseFloat(mG[1]);
+  else if (mOz)  grams = parseFloat(mOz[1]) * 28.35;
+  else if (mMl)  grams = parseFloat(mMl[1]);
+  else if (mLbs) grams = parseFloat(mLbs[1]) * 453.6;
+  else if (mKg)  grams = parseFloat(mKg[1]) * 1000;
+  else if (mNum) grams = parseFloat(mNum[1]);
+  else return null;
+
+  const s = grams / 100;
+  return {
+    cal: Math.round(matched.per100.cal * s),
+    p: Math.round(matched.per100.p * s * 10) / 10,
+    c: Math.round(matched.per100.c * s * 10) / 10,
+    f: Math.round(matched.per100.f * s * 10) / 10
+  };
+}
+
+let logFoodState = { phase: 1, dateStr: '', foodName: '', amount: '', found: false };
+
 function showLogFoodModal(dateStr) {
-  const html = `<div class="modal-overlay" id="log-food-modal" onclick="if(event.target.id==='log-food-modal')this.remove()">
-    <div class="modal-sheet">
-      <div class="modal-title">Log a food</div>
-      <div class="modal-sub">Track anything outside your meal plan — a snack, drink, or extra bite.</div>
-      <div class="form-group"><label class="form-label">Food name</label><input class="form-input" id="lf-name" placeholder="e.g. Protein shake, banana, coffee with milk"></div>
+  logFoodState = { phase: 1, dateStr, foodName: '', amount: '', found: false };
+  renderLogFoodModal();
+}
+
+function renderLogFoodModal() {
+  document.getElementById('log-food-modal')?.remove();
+  const { phase, found, foodName, amount, dateStr } = logFoodState;
+  let inner = '';
+  if (phase === 1) {
+    inner = `
+      <div class="form-group"><label class="form-label">Food name</label>
+        <input class="form-input" id="lf-name" placeholder="e.g. Cheez-Its, chicken breast, banana" value="${foodName}"></div>
+      <div class="form-group"><label class="form-label">Amount</label>
+        <input class="form-input" id="lf-amount" placeholder="e.g. 100g, 2oz, 150 g" value="${amount}"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('log-food-modal').remove()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1" onclick="lookupLogFood()">Look up →</button>
+      </div>`;
+  } else {
+    const statusBanner = found
+      ? `<div style="background:#e5f8f0;border:1px solid var(--primary);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--primary-dark);margin-bottom:16px;display:flex;align-items:center;gap:6px">${IC.check} Found! Macros auto-filled — edit if needed.</div>`
+      : `<div style="background:#fff3ee;border:1px solid #f5a888;border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:#9a3412;margin-bottom:16px;display:flex;align-items:center;gap:6px">${IC.warn} Couldn't find this food — fill in the macros yourself.</div>`;
+    inner = `
+      ${statusBanner}
       <div class="form-row-3">
         <div><label class="form-label" style="font-size:11px">Calories</label><input class="form-input" id="lf-cal" type="number" placeholder="0" min="0"></div>
         <div><label class="form-label" style="font-size:11px">Protein (g)</label><input class="form-input" id="lf-prot" type="number" placeholder="0" min="0"></div>
         <div><label class="form-label" style="font-size:11px">Carbs (g)</label><input class="form-input" id="lf-carbs" type="number" placeholder="0" min="0"></div>
       </div>
-      <div style="margin-top:10px"><label class="form-label" style="font-size:11px">Fat (g)</label><input class="form-input" id="lf-fat" type="number" placeholder="0" min="0" style="max-width:120px"></div>
+      <div style="margin-top:10px"><label class="form-label" style="font-size:11px">Fat (g)</label>
+        <input class="form-input" id="lf-fat" type="number" placeholder="0" min="0" style="max-width:120px"></div>
       <div class="modal-actions">
-        <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('log-food-modal').remove()">Cancel</button>
-        <button class="btn btn-primary" style="flex:1" onclick="addLoggedFood('${dateStr}')">Log Food</button>
-      </div>
+        <button class="btn btn-secondary" style="flex:1" onclick="logFoodState.phase=1;renderLogFoodModal()">← Back</button>
+        <button class="btn btn-primary" style="flex:1" onclick="addLoggedFood('${dateStr}')">Confirm &amp; Log</button>
+      </div>`;
+  }
+  const subText = phase === 1 ? 'Enter a food name and how much you had.' : `${foodName} · ${amount}`;
+  const html = `<div class="modal-overlay" id="log-food-modal" onclick="if(event.target.id==='log-food-modal')this.remove()">
+    <div class="modal-sheet">
+      <div class="modal-title">Log a food</div>
+      <div class="modal-sub">${subText}</div>
+      ${inner}
     </div>
   </div>`;
   document.body.insertAdjacentHTML('beforeend', html);
-  setTimeout(() => document.getElementById('lf-name')?.focus(), 100);
+  if (phase === 1) {
+    setTimeout(() => document.getElementById('lf-name')?.focus(), 80);
+    const nameEl = document.getElementById('lf-name');
+    const amtEl  = document.getElementById('lf-amount');
+    if (nameEl && amtEl) {
+      // Allow pressing Enter in name field to jump to amount
+      nameEl.addEventListener('keydown', e => { if (e.key === 'Enter') amtEl.focus(); });
+      amtEl.addEventListener('keydown', e => { if (e.key === 'Enter') lookupLogFood(); });
+    }
+  } else if (found && logFoodState.macros) {
+    setTimeout(() => {
+      const m = logFoodState.macros;
+      const el = id => document.getElementById(id);
+      if (el('lf-cal'))   el('lf-cal').value   = m.cal;
+      if (el('lf-prot'))  el('lf-prot').value  = m.p;
+      if (el('lf-carbs')) el('lf-carbs').value = m.c;
+      if (el('lf-fat'))   el('lf-fat').value   = m.f;
+    }, 50);
+  } else {
+    setTimeout(() => document.getElementById('lf-cal')?.focus(), 80);
+  }
+}
+
+function lookupLogFood() {
+  const name   = document.getElementById('lf-name')?.value.trim();
+  const amount = document.getElementById('lf-amount')?.value.trim();
+  if (!name)   { showToast('Please enter a food name'); return; }
+  if (!amount) { showToast('Please enter an amount (e.g. 100g, 2oz)'); return; }
+  logFoodState.foodName = name;
+  logFoodState.amount   = amount;
+  logFoodState.phase    = 2;
+  const result = lookupFood(name, amount);
+  logFoodState.found  = !!result;
+  logFoodState.macros = result;
+  renderLogFoodModal();
 }
 
 function addLoggedFood(dateStr) {
-  const name = document.getElementById('lf-name')?.value.trim();
+  const name = logFoodState.foodName || document.getElementById('lf-name')?.value.trim();
   if (!name) { showToast('Please enter a food name'); return; }
-  const plan = getOrCreatePlan(dateStr);
   const newCalories = parseFloat(document.getElementById('lf-cal')?.value) || 0;
+  const plan = getOrCreatePlan(dateStr);
   if (wouldExceedCalorieLimit(dateStr, newCalories)) {
     showToast("Can't log food — would exceed daily calorie limit", 3000);
     return;
@@ -3139,7 +3322,7 @@ function addLoggedFood(dateStr) {
   plan.loggedFoods.push({
     id: uid(),
     name,
-    calories: parseFloat(document.getElementById('lf-cal')?.value) || 0,
+    calories: newCalories,
     protein: parseFloat(document.getElementById('lf-prot')?.value) || 0,
     carbs: parseFloat(document.getElementById('lf-carbs')?.value) || 0,
     fat: parseFloat(document.getElementById('lf-fat')?.value) || 0
