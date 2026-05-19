@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Forma – Smart Meal Planner</title>
+<title>Nommie – Your Meal Bestie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -849,6 +849,41 @@ const RECIPE_DB = [
     prepTime:'1 min', cookTime:'0 min', baseCal:210, baseP:6, baseC:8, baseF:18,
     ingredients:[{item:'Raw almonds',amount:20,unit:'g'},{item:'Cashews',amount:15,unit:'g'},{item:'Pumpkin seeds',amount:10,unit:'g'}],
     instructions:['Combine nuts and seeds in a small bowl.','Optional: toast in a dry pan 2-3 min with a pinch of salt and smoked paprika.','Portion into 45g serving. Enjoy as a portable snack.']},
+  { id:'caprese-skewers', name:'Mini Caprese Skewers', keywords:['caprese','mozzarella','tomato','skewers'], mealTypes:['snack'],
+    description:'Bite-sized mozzarella and cherry tomatoes drizzled with balsamic glaze. Fancy-feeling, zero-cook, totally delicious.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:190, baseP:12, baseC:8, baseF:12,
+    ingredients:[{item:'Fresh mozzarella pearls',amount:60,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Fresh basil leaves',amount:5,unit:'g'},{item:'Balsamic glaze',amount:10,unit:'ml'},{item:'Olive oil',amount:5,unit:'ml'}],
+    instructions:['Thread a tomato, basil leaf, and mozzarella pearl onto a toothpick.','Repeat until ingredients are used.','Drizzle with balsamic glaze and olive oil.','Season with flaky salt and black pepper. Serve immediately.']},
+  { id:'avocado-cucumber', name:'Avocado Cucumber Bites', keywords:['avocado','cucumber','avo','cucumber bites'], mealTypes:['snack'],
+    description:'Cool cucumber rounds topped with creamy seasoned avocado. Like avocado toast but lighter and crunchier.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:160, baseP:3, baseC:10, baseF:13,
+    ingredients:[{item:'Cucumber (large)',amount:1,unit:'cucumber'},{item:'Avocado (ripe)',amount:80,unit:'g'},{item:'Lemon juice',amount:8,unit:'ml'},{item:'Red pepper flakes',amount:1,unit:'pinch'}],
+    instructions:['Slice cucumber into thick rounds (about 1cm each).','Mash avocado with lemon juice, salt, and pepper until creamy.','Spoon a small dollop of avocado onto each cucumber round.','Top with red pepper flakes and a pinch of flaky salt.']},
+  { id:'turkey-roll-ups', name:'Turkey & Cheese Roll-Ups', keywords:['turkey','roll-ups','turkey roll','deli turkey'], mealTypes:['snack'],
+    description:'Thin slices of deli turkey rolled around crunchy veggies and a swipe of hummus. Protein-packed with zero cooking.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:180, baseP:20, baseC:8, baseF:7,
+    ingredients:[{item:'Deli turkey breast',amount:100,unit:'g'},{item:'Hummus',amount:30,unit:'g'},{item:'Carrot sticks',amount:40,unit:'g'},{item:'Baby spinach',amount:20,unit:'g'}],
+    instructions:['Lay out turkey slices flat.','Spread a thin layer of hummus on each slice.','Place a few spinach leaves and a carrot stick at one end.','Roll up tightly. Secure with a toothpick if needed.']},
+  { id:'mango-chili', name:'Mango Chili Lime Bites', keywords:['mango','mango chili lime','fruit snack'], mealTypes:['snack'],
+    description:'Sweet, spicy, tangy mango bites with chili and lime. A tropical snack that wakes up your taste buds.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:120, baseP:2, baseC:30, baseF:1,
+    ingredients:[{item:'Fresh mango',amount:200,unit:'g'},{item:'Lime juice',amount:15,unit:'ml'},{item:'Tajín or chili powder',amount:2,unit:'g'},{item:'Salt',amount:1,unit:'pinch'}],
+    instructions:['Peel and cube the mango into bite-sized pieces.','Toss with fresh lime juice.','Sprinkle generously with Tajín or chili powder and a pinch of salt.','Serve immediately or refrigerate up to 2 hours.']},
+  { id:'dark-choc-almonds', name:'Dark Chocolate Almonds', keywords:['dark chocolate','chocolate almonds','chocolate and nuts'], mealTypes:['snack'],
+    description:'Crunchy almonds coated in rich dark chocolate with a sprinkle of sea salt. Indulgent but totally reasonable.',
+    prepTime:'5 min', cookTime:'5 min', baseCal:230, baseP:5, baseC:18, baseF:16,
+    ingredients:[{item:'Raw almonds',amount:40,unit:'g'},{item:'Dark chocolate chips (70%+)',amount:30,unit:'g'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Melt chocolate chips in microwave in 30-second bursts, stirring each time, until smooth.','Add almonds and stir to coat.','Spread in a single layer on parchment paper.','Sprinkle with sea salt. Refrigerate 15-20 min until set. Break apart and enjoy.']},
+  { id:'smoothie-bites', name:'Frozen Yogurt Smoothie Bites', keywords:['smoothie bites','frozen yogurt bites','yogurt drops','frozen snack'], mealTypes:['snack'],
+    description:'Tiny frozen Greek yogurt bites swirled with berry puree. Pop straight from the freezer — like little ice cream morsels.',
+    prepTime:'8 min', cookTime:'0 min', baseCal:150, baseP:11, baseC:22, baseF:1,
+    ingredients:[{item:'Non-fat Greek yogurt',amount:150,unit:'g'},{item:'Mixed berries',amount:60,unit:'g'},{item:'Honey',amount:10,unit:'g'}],
+    instructions:['Mash berries with honey into a rough puree.','Swirl berry mixture into Greek yogurt — leave streaks, don\'t fully combine.','Drop teaspoon-sized dollops onto a parchment-lined tray.','Freeze at least 2 hours until solid. Pop off and store in a zip-lock bag in the freezer.']},
+  { id:'seedy-crackers-ricotta', name:'Ricotta & Honey Crispbreads', keywords:['ricotta','crispbread','ricotta toast','honey'], mealTypes:['snack'],
+    description:'Crispy crispbreads topped with whipped ricotta, honey, and a pinch of cinnamon. Feels fancy, takes 3 minutes.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:200, baseP:9, baseC:24, baseF:7,
+    ingredients:[{item:'Whole grain crispbreads',amount:3,unit:'piece'},{item:'Part-skim ricotta',amount:60,unit:'g'},{item:'Honey',amount:10,unit:'g'},{item:'Cinnamon',amount:1,unit:'pinch'}],
+    instructions:['Spread ricotta generously over each crispbread.','Drizzle with honey.','Dust with a pinch of cinnamon and flaky salt.','Serve immediately.']},
 
   // ─── DESSERTS ───
   { id:'protein-mug-cake', name:'Chocolate Protein Mug Cake', keywords:['mug cake','chocolate cake','cake','chocolate','protein cake'], mealTypes:['dessert'],
@@ -1158,7 +1193,7 @@ function renderApp() {
     <div class="nav-bar top" style="padding:0 4px">
       <div style="display:flex;align-items:center;padding:0 12px;gap:6px;flex-shrink:0;border-right:1px solid var(--border)">
         ${LOGO_SVG}
-        <span style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.5px">Forma</span>
+        <span style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.5px">Nommie</span>
       </div>
       ${['today','week','saved','settings'].map(tab => `
         <button class="nav-item ${v===tab?'active':''}" onclick="navigate('${tab}')">
@@ -1202,7 +1237,7 @@ const IC = {
   refresh:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.8-3.4L23 10"/><path d="M20.5 15a9 9 0 0 1-14.8 3.4L1 14"/></svg>`,
 };
 
-const LOGO_SVG = `<svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#5e9080"/><circle cx="16" cy="16" r="15" fill="url(#logoGrad)" opacity="0.3"/><defs><linearGradient id="logoGrad" x1="8" y1="5" x2="24" y2="27"><stop offset="0" stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient></defs><path d="M16 9c0 0-5.5 3.5-5.5 7.5a5.5 5.5 0 0 0 11 0c0-4-5.5-7.5-5.5-7.5z" fill="white" opacity="0.92"/><path d="M16 14v8" stroke="white" stroke-width="1.5" stroke-linecap="round"/><circle cx="21.5" cy="10.5" r="1.5" fill="white" opacity="0.45"/></svg>`;
+const LOGO_SVG = `<svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#ff8fa3"/><circle cx="16" cy="16" r="15" fill="url(#nGrad)" opacity="0.3"/><defs><linearGradient id="nGrad" x1="8" y1="5" x2="24" y2="27"><stop offset="0" stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient></defs><path d="M10 19 Q10 25 16 25 Q22 25 22 19 Z" fill="white" opacity="0.95"/><rect x="9.5" y="17" width="13" height="3" rx="1.5" fill="white" opacity="0.95"/><path d="M13 13 Q12 11 13 9" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.8"/><path d="M16 12 Q15 10 16 8" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.8"/><path d="M19 13 Q18 11 19 9" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.8"/></svg>`;
 
 // ═══════════════════════════════════════════════════
 // ONBOARDING
@@ -1223,8 +1258,8 @@ function renderOnboarding() {
 
   return `<div class="onboard-wrap">
     <div class="onboard-header">
-      <div class="onboard-logo">${LOGO_SVG}<span>Forma</span></div>
-      <p style="color:var(--text-3);font-size:13px;letter-spacing:0.3px">nourish yourself, every day</p>
+      <div class="onboard-logo">${LOGO_SVG}<span>Nommie</span></div>
+      <p style="color:var(--text-3);font-size:13px;letter-spacing:0.3px">eating cute, one meal at a time</p>
     </div>
     <div class="onboard-body">
       <div class="step-indicator">${dots}</div>
@@ -1519,9 +1554,11 @@ function renderToday() {
     carbs: Math.max(0, target.carbs - consumed.carbs),
     fat: Math.max(0, target.fat - consumed.fat)
   };
-  const calPct = Math.min(1, consumed.calories / target.calories);
+  const rawCalPct = consumed.calories / target.calories;
+  const calPct = Math.min(1, rawCalPct);
   const circumference = 2 * Math.PI * 44;
   const offset = circumference * (1 - calPct);
+  const ringColor = rawCalPct >= 1 ? '#ff5555' : rawCalPct >= 0.8 ? '#ffd700' : 'white';
 
   return `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
@@ -1537,7 +1574,7 @@ function renderToday() {
         <div class="ring-wrap">
           <svg viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="8"/>
-            <circle cx="50" cy="50" r="44" fill="none" stroke="white" stroke-width="8"
+            <circle cx="50" cy="50" r="44" fill="none" stroke="${ringColor}" stroke-width="8"
               stroke-dasharray="${circumference.toFixed(2)}"
               stroke-dashoffset="${offset.toFixed(2)}"
               stroke-linecap="round"/>
@@ -1550,19 +1587,23 @@ function renderToday() {
         <div class="summary-right">
           <div class="label">Remaining calories</div>
           <div class="big-num">${remaining.calories}</div>
-          <div class="sub">${consumed.calories > target.calories ? `${IC.warn} Over target` : `${Math.round(calPct*100)}% of daily goal`}</div>
+          <div class="sub">${consumed.calories > target.calories ? `${IC.warn} Over target` : `${Math.round(rawCalPct*100)}% of daily goal`}</div>
         </div>
       </div>
       <div class="macro-bars">
         ${[
-          { label:'Protein', val:consumed.protein, tgt:target.protein, unit:'g', color:'rgba(255,255,255,0.9)' },
-          { label:'Carbs', val:consumed.carbs, tgt:target.carbs, unit:'g', color:'rgba(255,255,255,0.75)' },
-          { label:'Fat', val:consumed.fat, tgt:target.fat, unit:'g', color:'rgba(255,255,255,0.6)' }
-        ].map(m => `<div class="macro-bar-item">
-          <label>${m.label}</label>
-          <div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.min(100,m.val/m.tgt*100).toFixed(1)}%;background:${m.color}"></div></div>
-          <div class="macro-bar-nums">${m.val}/${m.tgt}${m.unit}</div>
-        </div>`).join('')}
+          { label:'Protein', val:consumed.protein, tgt:target.protein, unit:'g', base:'rgba(255,255,255,0.9)' },
+          { label:'Carbs', val:consumed.carbs, tgt:target.carbs, unit:'g', base:'rgba(255,255,255,0.75)' },
+          { label:'Fat', val:consumed.fat, tgt:target.fat, unit:'g', base:'rgba(255,255,255,0.6)' }
+        ].map(m => {
+          const mPct = m.tgt > 0 ? m.val / m.tgt : 0;
+          const barColor = mPct >= 1 ? '#ff5555' : mPct >= 0.8 ? '#ffd700' : m.base;
+          return `<div class="macro-bar-item">
+            <label>${m.label}</label>
+            <div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.min(100,mPct*100).toFixed(1)}%;background:${barColor}"></div></div>
+            <div class="macro-bar-nums">${m.val}/${m.tgt}${m.unit}</div>
+          </div>`;
+        }).join('')}
       </div>
     </div>
 
