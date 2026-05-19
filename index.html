@@ -263,9 +263,30 @@ a{color:inherit;text-decoration:none}
 .saved-card:hover{border-color:var(--primary)}
 .radio-card.selected{border-color:var(--primary);background:var(--primary-light)}
 .radio-card:hover{border-color:var(--primary)}
+
+/* ── Background Bubbles ── */
+#bg-bubbles{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.bbub{position:absolute;border-radius:50%;animation:bubFloat ease-in-out infinite}
+@keyframes bubFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.06)}}
+
+/* ── Drag & Drop ── */
+.meal-slot[draggable]{cursor:default}
+.drag-handle{cursor:grab;color:var(--text-3);padding:2px 6px;font-size:16px;line-height:1;flex-shrink:0;touch-action:none}
+.drag-handle:active{cursor:grabbing}
+.meal-slot.dragging{opacity:.45;box-shadow:none}
+.meal-slot.drag-over{outline:2.5px dashed var(--primary);outline-offset:2px}
+
+/* ── Add Meal Category Cards ── */
+.meal-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.meal-type-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 10px;border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s;background:var(--surface);text-align:center}
+.meal-type-card:hover{border-color:var(--primary);background:var(--primary-light)}
+.meal-type-card .mti{font-size:28px}
+.meal-type-card .mtl{font-size:13px;font-weight:700;color:var(--text)}
+.meal-type-card .mts{font-size:11px;color:var(--text-3)}
 </style>
 </head>
 <body>
+<div id="bg-bubbles"></div>
 <div id="app"></div>
 
 <script>
@@ -1150,7 +1171,324 @@ const RECIPE_DB = [
     description:'A single light, airy rice cake — the ultimate low-calorie crunch. Good plain, or with the faintest smear of something savory.',
     prepTime:'0 min', cookTime:'0 min', baseCal:35, baseP:1, baseC:7, baseF:0,
     ingredients:[{item:'Plain rice cake',amount:1,unit:'cake'}],
-    instructions:['Eat as-is for pure crunch.','Optional: a very thin smear of miso paste or hot sauce for extra flavor.']}
+    instructions:['Eat as-is for pure crunch.','Optional: a very thin smear of miso paste or hot sauce for extra flavor.']},
+  { id:'radish-salt', name:'Radish Slices with Sea Salt', keywords:['radish','radishes','sliced radish'], mealTypes:['nibbles'],
+    description:'Paper-thin radish slices with a pinch of flaky sea salt. Peppery, crunchy, and basically zero calories.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:8, baseP:0, baseC:2, baseF:0,
+    ingredients:[{item:'Radishes',amount:5,unit:'radishes'},{item:'Flaky sea salt',amount:1,unit:'pinch'}],
+    instructions:['Slice radishes into thin rounds.','Arrange on a small plate and sprinkle with sea salt.']},
+  { id:'snap-peas-plain', name:'Raw Snap Peas', keywords:['snap peas','sugar snap peas','snap pea'], mealTypes:['nibbles'],
+    description:'Crunchy sugar snap peas straight from the bag. Sweet, fresh, and satisfying to munch.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:30, baseP:2, baseC:6, baseF:0,
+    ingredients:[{item:'Sugar snap peas',amount:50,unit:'g'}],
+    instructions:['Rinse snap peas and eat cold.','Pull off the string along the seam if desired.']},
+  { id:'frozen-grapes', name:'Frozen Grapes', keywords:['frozen grapes','grapes','frozen fruit'], mealTypes:['nibbles'],
+    description:'Frozen grapes taste like tiny popsicles. They take longer to eat than fresh grapes and feel indulgent for 30 calories.',
+    prepTime:'5 min + freeze', cookTime:'0 min', baseCal:30, baseP:0, baseC:8, baseF:0,
+    ingredients:[{item:'Grapes',amount:50,unit:'g'}],
+    instructions:['Wash grapes and spread on a lined baking sheet.','Freeze for at least 2 hours.','Eat straight from the freezer.']},
+  { id:'frozen-blueberries', name:'Frozen Blueberries', keywords:['frozen blueberries','blueberries','frozen fruit'], mealTypes:['nibbles'],
+    description:'Frozen blueberries turn into little flavor bombs. Cold, sweet, and satisfying from the freezer.',
+    prepTime:'0 min', cookTime:'0 min', baseCal:25, baseP:0, baseC:6, baseF:0,
+    ingredients:[{item:'Frozen blueberries',amount:45,unit:'g'}],
+    instructions:['Scoop directly from the freezer bag into a small bowl.','Eat with a small spoon.']},
+  { id:'apple-cinnamon', name:'Apple Slices with Cinnamon', keywords:['apple','apple slices','cinnamon apple'], mealTypes:['nibbles'],
+    description:'Crisp apple slices dusted with cinnamon. Naturally sweet and satisfying.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:35, baseP:0, baseC:9, baseF:0,
+    ingredients:[{item:'Apple (small)',amount:0.5,unit:'apple'},{item:'Ground cinnamon',amount:1,unit:'pinch'}],
+    instructions:['Core and slice half an apple.','Dust lightly with cinnamon and eat immediately.']},
+  { id:'bell-pepper-strips', name:'Bell Pepper Strips', keywords:['bell pepper','pepper strips','raw pepper'], mealTypes:['nibbles'],
+    description:'Sweet, crisp bell pepper strips — naturally sweet with a satisfying crunch. Zero effort, near-zero calories.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:25, baseP:1, baseC:6, baseF:0,
+    ingredients:[{item:'Bell pepper (any color)',amount:100,unit:'g'}],
+    instructions:['Slice bell pepper into long strips.','Eat as-is or dip in a splash of hot sauce.']},
+  { id:'watermelon-cubes', name:'Watermelon Cubes with Tajin', keywords:['watermelon','watermelon chunks','melon'], mealTypes:['nibbles'],
+    description:'Juicy watermelon cubes with a shake of Tajin. Incredibly refreshing and almost calorie-free for the volume.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:30, baseP:1, baseC:7, baseF:0,
+    ingredients:[{item:'Watermelon cubes',amount:120,unit:'g'},{item:'Tajin or lime juice',amount:1,unit:'to taste'}],
+    instructions:['Cut watermelon into bite-sized cubes.','Dust with Tajin or a squeeze of lime.']},
+  { id:'peach-slices', name:'Fresh Peach Slices', keywords:['peach','peach slices','fresh peach'], mealTypes:['nibbles'],
+    description:'Ripe peach slices — naturally sweet, juicy, and only 35 calories for a satisfying serving.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:35, baseP:1, baseC:9, baseF:0,
+    ingredients:[{item:'Peach (small)',amount:1,unit:'small peach'}],
+    instructions:['Slice peach and discard pit.','Eat chilled for best flavor.']},
+  { id:'plum-halves', name:'Sliced Plum', keywords:['plum','plums','fresh plum'], mealTypes:['nibbles'],
+    description:'A ripe plum sliced in half — deep, sweet-tart flavor for only 30 calories.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:30, baseP:0, baseC:8, baseF:0,
+    ingredients:[{item:'Plum (small)',amount:1,unit:'plum'}],
+    instructions:['Halve the plum and remove the pit.','Eat chilled.']},
+  { id:'edamame-handful', name:'Edamame Pods', keywords:['edamame','soybeans','edamame pods'], mealTypes:['nibbles'],
+    description:'Steamed edamame pods lightly salted. Fun to eat pod by pod, good source of plant protein.',
+    prepTime:'3 min', cookTime:'4 min', baseCal:50, baseP:4, baseC:4, baseF:2,
+    ingredients:[{item:'Frozen edamame in shell',amount:80,unit:'g'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Microwave frozen edamame for 3-4 minutes.','Sprinkle with sea salt and squeeze pods open to eat beans.']},
+  { id:'pickled-ginger', name:'Pickled Ginger', keywords:['pickled ginger','gari','sushi ginger'], mealTypes:['nibbles'],
+    description:'The pale pink pickled ginger you find next to sushi. Cleanses the palate and satisfies salty-sour cravings for almost nothing.',
+    prepTime:'0 min', cookTime:'0 min', baseCal:15, baseP:0, baseC:4, baseF:0,
+    ingredients:[{item:'Pickled ginger (sushi ginger)',amount:30,unit:'g'}],
+    instructions:['Eat straight from the jar, a few pieces at a time.']},
+  { id:'wakame-salad', name:'Wakame Seaweed Salad', keywords:['wakame','seaweed salad','seaweed','wakame salad'], mealTypes:['nibbles'],
+    description:'Tangy, chewy wakame seaweed tossed with sesame oil and rice vinegar. Deeply savory and very low calorie.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:30, baseP:1, baseC:4, baseF:1,
+    ingredients:[{item:'Dried wakame seaweed',amount:5,unit:'g'},{item:'Rice vinegar',amount:10,unit:'ml'},{item:'Sesame oil',amount:2,unit:'ml'},{item:'Soy sauce',amount:5,unit:'ml'}],
+    instructions:['Soak wakame in cold water for 5 minutes until rehydrated. Drain.','Toss with rice vinegar, sesame oil, and soy sauce.','Serve chilled.']},
+  { id:'cucumber-vinegar', name:'Cucumber & Rice Vinegar', keywords:['cucumber vinegar','pickled cucumber','quick pickles'], mealTypes:['nibbles'],
+    description:'Cucumber slices marinated in rice vinegar and a pinch of salt. Quick, refreshing, tangy.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:15, baseP:1, baseC:3, baseF:0,
+    ingredients:[{item:'Cucumber',amount:120,unit:'g'},{item:'Rice vinegar',amount:15,unit:'ml'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Slice cucumber thinly.','Toss with rice vinegar and sea salt.','Let sit 2-3 minutes, then eat.']},
+  { id:'pickled-jalapenos', name:'Pickled Jalapeño Rings', keywords:['jalapenos','pickled jalapenos','spicy pickles'], mealTypes:['nibbles'],
+    description:'Briny, spicy pickled jalapeño rings straight from the jar. Near-zero calories and great for killing spicy cravings.',
+    prepTime:'0 min', cookTime:'0 min', baseCal:10, baseP:0, baseC:2, baseF:0,
+    ingredients:[{item:'Pickled jalapeño rings',amount:30,unit:'g'}],
+    instructions:['Eat straight from the jar.','Great on their own or layered on a rice cake.']},
+  { id:'airpopped-popcorn', name:'Air-Popped Popcorn', keywords:['popcorn','air popped popcorn','plain popcorn'], mealTypes:['nibbles'],
+    description:'Plain air-popped popcorn — 2 whole cups for only 60 calories. High volume, satisfying crunch, basically free.',
+    prepTime:'3 min', cookTime:'3 min', baseCal:60, baseP:2, baseC:12, baseF:1,
+    ingredients:[{item:'Popcorn kernels',amount:20,unit:'g'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Pop kernels in an air popper or in a paper bag in the microwave.','Sprinkle with sea salt.','Eat slowly to make it last.']},
+  { id:'kiwi-half', name:'Kiwi Halves', keywords:['kiwi','kiwi fruit','kiwi snack'], mealTypes:['nibbles'],
+    description:'Halved kiwis to eat with a spoon — tangy, bright, and only 35 calories each.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:35, baseP:1, baseC:8, baseF:0,
+    ingredients:[{item:'Kiwi',amount:1,unit:'kiwi'}],
+    instructions:['Slice kiwi in half crosswise.','Scoop out with a small spoon like a tiny bowl.']},
+  { id:'tangerine', name:'Small Tangerine', keywords:['tangerine','clementine','mandarin orange'], mealTypes:['nibbles'],
+    description:'A small, easy-peel tangerine. Sweet, citrusy, satisfying, and only 40 calories.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:40, baseP:1, baseC:10, baseF:0,
+    ingredients:[{item:'Tangerine or clementine',amount:1,unit:'small'}],
+    instructions:['Peel and separate into segments.','Eat slowly, segment by segment.']},
+  { id:'baby-carrots', name:'Baby Carrots with Hot Sauce', keywords:['baby carrots','carrot sticks','baby carrot'], mealTypes:['nibbles'],
+    description:'Crunchy baby carrots with a side of hot sauce. Very low calorie, very satisfying to munch through.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:25, baseP:1, baseC:6, baseF:0,
+    ingredients:[{item:'Baby carrots',amount:5,unit:'carrots'},{item:'Hot sauce',amount:1,unit:'to taste'}],
+    instructions:['Rinse baby carrots.','Dip in hot sauce or eat plain.']},
+  { id:'steamed-broccoli-florets', name:'Steamed Broccoli Florets', keywords:['broccoli','steamed broccoli','broccoli snack'], mealTypes:['nibbles'],
+    description:'A small bowl of steamed broccoli florets with a squeeze of lemon. Filling, nutritious, incredibly low calorie.',
+    prepTime:'2 min', cookTime:'3 min', baseCal:20, baseP:2, baseC:4, baseF:0,
+    ingredients:[{item:'Broccoli florets',amount:80,unit:'g'},{item:'Lemon juice',amount:5,unit:'ml'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Microwave broccoli with a splash of water for 2-3 minutes.','Squeeze lemon over and sprinkle with salt.']},
+  { id:'iceberg-lettuce-wrap', name:'Iceberg Lettuce Cups', keywords:['lettuce wrap','iceberg lettuce','lettuce cups'], mealTypes:['nibbles'],
+    description:'Crisp iceberg lettuce leaves used as edible cups. Fill with a pinch of salt and eat for almost zero calories.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:10, baseP:1, baseC:2, baseF:0,
+    ingredients:[{item:'Iceberg lettuce',amount:3,unit:'leaves'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Separate large lettuce leaves into cups.','Sprinkle with salt and eat like a taco shell.']},
+  { id:'low-sodium-broth', name:'Warm Low-Sodium Broth', keywords:['broth','bone broth','chicken broth','vegetable broth'], mealTypes:['nibbles'],
+    description:'A warm mug of low-sodium chicken or veggie broth. Deeply satisfying when you want something warm but not caloric.',
+    prepTime:'1 min', cookTime:'2 min', baseCal:10, baseP:1, baseC:1, baseF:0,
+    ingredients:[{item:'Low-sodium broth (any type)',amount:240,unit:'ml'}],
+    instructions:['Heat broth in a small saucepan or microwave until hot.','Pour into a mug and sip slowly.']},
+  { id:'herbal-tea', name:'Herbal Tea with Stevia', keywords:['herbal tea','tea','chamomile','peppermint tea'], mealTypes:['nibbles'],
+    description:'A mug of warm herbal tea lightly sweetened with stevia. Zero real calories, soothing, and great for cutting late-night cravings.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:2, baseP:0, baseC:1, baseF:0,
+    ingredients:[{item:'Herbal tea bag',amount:1,unit:'bag'},{item:'Stevia drops or packet',amount:1,unit:'to taste'}],
+    instructions:['Steep tea bag in hot water for 3-4 minutes.','Add stevia to taste.','Drink slowly and enjoy the warmth.']},
+  { id:'jicama-sticks', name:'Jicama Sticks with Lime', keywords:['jicama','jicama sticks','jicama snack'], mealTypes:['nibbles'],
+    description:'Crisp, mildly sweet jicama sticks with a squeeze of lime and a dash of chili. Crunchy and refreshing.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:25, baseP:0, baseC:6, baseF:0,
+    ingredients:[{item:'Jicama, peeled and sliced',amount:80,unit:'g'},{item:'Lime juice',amount:5,unit:'ml'},{item:'Chili powder',amount:1,unit:'pinch'}],
+    instructions:['Peel jicama and cut into thin sticks.','Squeeze lime juice over and dust with chili powder.']},
+  { id:'mung-bean-sprouts', name:'Mung Bean Sprouts with Soy', keywords:['sprouts','bean sprouts','mung bean'], mealTypes:['nibbles'],
+    description:'Fresh mung bean sprouts tossed with a tiny bit of soy sauce. Crispy, watery, satisfying texture.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:15, baseP:1, baseC:3, baseF:0,
+    ingredients:[{item:'Mung bean sprouts',amount:80,unit:'g'},{item:'Soy sauce',amount:5,unit:'ml'}],
+    instructions:['Rinse sprouts and drain well.','Toss with soy sauce and eat cold.']},
+  { id:'radish-kimchi', name:'Kkakdugi (Radish Kimchi)', keywords:['radish kimchi','kkakdugi','daikon kimchi'], mealTypes:['nibbles'],
+    description:'Cubed fermented daikon radish kimchi. Crunchy, spicy, tangy, probiotic-rich, and only 20 calories a serving.',
+    prepTime:'0 min', cookTime:'0 min', baseCal:20, baseP:1, baseC:4, baseF:0,
+    ingredients:[{item:'Kkakdugi (radish kimchi)',amount:60,unit:'g'}],
+    instructions:['Scoop into a small bowl.','Eat with chopsticks or a fork.']},
+  { id:'konjac-noodles', name:'Plain Konjac Noodles', keywords:['konjac noodles','shirataki noodles','zero calorie noodles'], mealTypes:['nibbles'],
+    description:'Rinsed konjac noodles with a drizzle of soy sauce. Virtually zero calories with a satisfying chewy texture.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:10, baseP:0, baseC:2, baseF:0,
+    ingredients:[{item:'Konjac/shirataki noodles',amount:200,unit:'g'},{item:'Soy sauce',amount:5,unit:'ml'}],
+    instructions:['Rinse konjac noodles very well under cold water.','Drain thoroughly and toss with soy sauce.']},
+  { id:'spirulina-water', name:'Spirulina Lemon Water', keywords:['spirulina','spirulina water','green drink'], mealTypes:['nibbles'],
+    description:'Cold water blended with a tiny bit of spirulina and lemon juice. Bright, earthy, energizing and basically zero calories.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:5, baseP:1, baseC:1, baseF:0,
+    ingredients:[{item:'Cold water',amount:300,unit:'ml'},{item:'Spirulina powder',amount:1,unit:'g'},{item:'Lemon juice',amount:10,unit:'ml'}],
+    instructions:['Add spirulina powder to water.','Squeeze in lemon juice and stir or shake well.','Drink immediately.']},
+  { id:'frozen-mango-bites', name:'Frozen Mango Bites', keywords:['frozen mango','mango bites','frozen mango chunks'], mealTypes:['nibbles'],
+    description:'Frozen mango chunks eaten straight from the freezer like little tropical popsicles.',
+    prepTime:'0 min', cookTime:'0 min', baseCal:50, baseP:1, baseC:13, baseF:0,
+    ingredients:[{item:'Frozen mango chunks',amount:80,unit:'g'}],
+    instructions:['Let frozen mango sit at room temperature for 2-3 minutes to slightly soften.','Eat with a small fork or your hands.']},
+  { id:'black-coffee', name:'Black Coffee', keywords:['black coffee','coffee','espresso'], mealTypes:['nibbles'],
+    description:'A shot of espresso or a mug of black coffee. Zero calories, suppresses appetite, and gives you a little energy boost.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:5, baseP:0, baseC:0, baseF:0,
+    ingredients:[{item:'Black coffee or espresso',amount:240,unit:'ml'}],
+    instructions:['Brew as usual.','Drink black, no cream or sugar.']},
+  { id:'cold-sparkling-water-mint', name:'Sparkling Water with Fresh Mint', keywords:['sparkling water','soda water','mint water','fizzy water'], mealTypes:['nibbles'],
+    description:'Ice-cold sparkling water with torn mint leaves. Zero calories, bubbly, and surprisingly satisfying for a craving.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:0, baseP:0, baseC:0, baseF:0,
+    ingredients:[{item:'Sparkling water',amount:350,unit:'ml'},{item:'Fresh mint leaves',amount:4,unit:'leaves'},{item:'Ice',amount:1,unit:'handful'}],
+    instructions:['Fill a tall glass with ice.','Tear mint leaves to release oils and add to glass.','Pour sparkling water over and drink cold.']},
+  { id:'zucchini-chips', name:'Baked Zucchini Chips', keywords:['zucchini chips','baked zucchini','courgette chips'], mealTypes:['nibbles'],
+    description:'Thinly sliced zucchini baked until crispy. Satisfying crunch for only 35 calories.',
+    prepTime:'5 min', cookTime:'20 min', baseCal:35, baseP:2, baseC:5, baseF:1,
+    ingredients:[{item:'Zucchini',amount:150,unit:'g'},{item:'Sea salt',amount:1,unit:'pinch'},{item:'Cooking spray',amount:1,unit:'spray'}],
+    instructions:['Preheat oven to 220°C (425°F).','Slice zucchini paper-thin on a mandoline or with a sharp knife.','Lay flat on a baking sheet, spray lightly with cooking spray, and salt.','Bake 18-22 minutes until golden and crispy at the edges.']},
+  { id:'tomato-gazpacho-shot', name:'Tomato Gazpacho Shot', keywords:['gazpacho','tomato soup','cold soup'], mealTypes:['nibbles'],
+    description:'A small cold shot of simple gazpacho — blended tomatoes, cucumber, garlic, and vinegar. Deeply savory for 25 calories.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:25, baseP:1, baseC:5, baseF:0,
+    ingredients:[{item:'Cherry tomatoes',amount:100,unit:'g'},{item:'Cucumber',amount:40,unit:'g'},{item:'Red wine vinegar',amount:5,unit:'ml'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Blend tomatoes, cucumber, vinegar, and salt until smooth.','Strain if desired.','Chill and pour into a small glass to drink.']},
+  { id:'celery-hot-sauce', name:'Celery Sticks with Hot Sauce', keywords:['celery hot sauce','celery sticks','hot sauce celery'], mealTypes:['nibbles'],
+    description:'Celery sticks dipped in your favorite hot sauce. Crisp, spicy, and practically zero calories.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:12, baseP:1, baseC:3, baseF:0,
+    ingredients:[{item:'Celery stalks',amount:3,unit:'stalks'},{item:'Hot sauce',amount:5,unit:'ml'}],
+    instructions:['Cut celery into 3-inch sticks.','Dip in hot sauce and eat.']},
+  { id:'endive-lemon', name:'Endive Leaves with Lemon', keywords:['endive','belgian endive','endive snack'], mealTypes:['nibbles'],
+    description:'Crisp Belgian endive leaves with a squeeze of lemon and a pinch of salt. Slightly bitter, very refreshing.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:12, baseP:1, baseC:2, baseF:0,
+    ingredients:[{item:'Belgian endive',amount:1,unit:'head'},{item:'Lemon juice',amount:5,unit:'ml'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Separate endive leaves and arrange on a plate.','Squeeze lemon over and sprinkle with salt.']},
+  { id:'sun-dried-tomatoes', name:'Sun-Dried Tomatoes', keywords:['sun dried tomatoes','sundried tomatoes','dried tomatoes'], mealTypes:['nibbles'],
+    description:'A few chewy sun-dried tomatoes. Intensely flavored and satisfying in small quantities.',
+    prepTime:'0 min', cookTime:'0 min', baseCal:15, baseP:1, baseC:3, baseF:0,
+    ingredients:[{item:'Sun-dried tomatoes (packed in oil, drained)',amount:15,unit:'g'}],
+    instructions:['Pat dry and eat 2-3 pieces slowly to savor the intense tomato flavor.']},
+  { id:'capers-cucumber', name:'Capers on Cucumber Rounds', keywords:['capers','caper cucumber','capers on cucumber'], mealTypes:['nibbles'],
+    description:'Cool cucumber rounds topped with briny capers and a tiny squeeze of lemon. Elegant and basically calorie-free.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:15, baseP:1, baseC:3, baseF:0,
+    ingredients:[{item:'Cucumber',amount:100,unit:'g'},{item:'Capers',amount:10,unit:'g'},{item:'Lemon juice',amount:3,unit:'ml'}],
+    instructions:['Slice cucumber into ¼-inch rounds.','Top each round with 2-3 capers and a squeeze of lemon.']},
+  { id:'dragon-fruit-cubes', name:'Dragon Fruit Cubes', keywords:['dragon fruit','pitaya','dragon fruit snack'], mealTypes:['nibbles'],
+    description:'Bright pink or white dragon fruit cubed and served cold. Mild, refreshing, and visually beautiful.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:40, baseP:1, baseC:9, baseF:0,
+    ingredients:[{item:'Dragon fruit (pitaya)',amount:80,unit:'g'}],
+    instructions:['Halve dragon fruit and scoop out flesh.','Cut into cubes and serve cold.']},
+  { id:'starfruit-slices', name:'Starfruit Slices', keywords:['starfruit','carambola','star fruit'], mealTypes:['nibbles'],
+    description:'Thin slices of starfruit — naturally star-shaped and mildly sweet-tart. Fun to eat and under 30 calories.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:25, baseP:1, baseC:7, baseF:0,
+    ingredients:[{item:'Starfruit (carambola)',amount:100,unit:'g'}],
+    instructions:['Slice starfruit crosswise to reveal the star shape.','Eat as-is or with a squeeze of lemon.']},
+  { id:'melon-cubes', name:'Cantaloupe Cubes', keywords:['cantaloupe','melon','honeydew','cantaloupe snack'], mealTypes:['nibbles'],
+    description:'Sweet, fragrant cantaloupe cubes straight from the fridge. High water content, very low calorie.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:30, baseP:1, baseC:7, baseF:0,
+    ingredients:[{item:'Cantaloupe',amount:120,unit:'g'}],
+    instructions:['Cut cantaloupe into bite-sized cubes.','Serve chilled.']},
+  { id:'mandarin-segments', name:'Mandarin Orange Segments', keywords:['mandarin orange','mandarin','orange segments'], mealTypes:['nibbles'],
+    description:'Sweet, juicy mandarin orange segments. Easy to peel, sweet, and only 40 calories.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:40, baseP:1, baseC:10, baseF:0,
+    ingredients:[{item:'Mandarin orange',amount:1,unit:'medium'}],
+    instructions:['Peel mandarin and separate into segments.','Eat slowly, one segment at a time.']},
+  { id:'lychees-chilled', name:'Chilled Lychees', keywords:['lychee','lychees','lychee fruit'], mealTypes:['nibbles'],
+    description:'Chilled lychees are floral, fragrant, and sweet — satisfying to peel open one by one.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:50, baseP:1, baseC:13, baseF:0,
+    ingredients:[{item:'Lychees',amount:5,unit:'lychees'}],
+    instructions:['Chill lychees in the fridge.','Peel and remove seed before eating.']},
+  { id:'bok-choy-soy', name:'Baby Bok Choy with Soy', keywords:['bok choy','baby bok choy','bok choy snack'], mealTypes:['nibbles'],
+    description:'Quickly blanched baby bok choy tossed with a splash of soy sauce and sesame oil. Clean, savory, and barely any calories.',
+    prepTime:'2 min', cookTime:'3 min', baseCal:20, baseP:2, baseC:3, baseF:1,
+    ingredients:[{item:'Baby bok choy',amount:100,unit:'g'},{item:'Soy sauce',amount:5,unit:'ml'},{item:'Sesame oil',amount:2,unit:'ml'}],
+    instructions:['Blanch bok choy in boiling water for 2 minutes.','Drain and toss with soy sauce and sesame oil.']},
+  { id:'artichoke-hearts', name:'Marinated Artichoke Hearts', keywords:['artichoke hearts','marinated artichoke','artichoke'], mealTypes:['nibbles'],
+    description:'Tender marinated artichoke hearts straight from the jar. Savory, slightly tangy, and filling in small portions.',
+    prepTime:'0 min', cookTime:'0 min', baseCal:40, baseP:1, baseC:5, baseF:2,
+    ingredients:[{item:'Marinated artichoke hearts (drained)',amount:50,unit:'g'}],
+    instructions:['Drain artichoke hearts from the jar.','Eat as-is or halve them for a smaller bite.']},
+  { id:'shirataki-miso', name:'Shirataki Noodles with Miso', keywords:['shirataki','shirataki noodles','konjac miso'], mealTypes:['nibbles'],
+    description:'Rinsed shirataki noodles in a quick miso broth. Warm, savory, filling, and only 20 calories.',
+    prepTime:'3 min', cookTime:'3 min', baseCal:20, baseP:1, baseC:4, baseF:1,
+    ingredients:[{item:'Shirataki noodles',amount:200,unit:'g'},{item:'White miso paste',amount:8,unit:'g'},{item:'Hot water',amount:120,unit:'ml'}],
+    instructions:['Rinse shirataki noodles very well and drain.','Dissolve miso in hot water to make a quick broth.','Add noodles to broth and eat warm.']},
+  { id:'mini-peppers-cottage', name:'Mini Peppers with Cottage Cheese', keywords:['mini peppers','stuffed peppers','cottage cheese peppers'], mealTypes:['nibbles'],
+    description:'Sweet mini bell peppers filled with a small scoop of cottage cheese. Crunchy, creamy, and surprisingly filling.',
+    prepTime:'4 min', cookTime:'0 min', baseCal:50, baseP:5, baseC:5, baseF:1,
+    ingredients:[{item:'Mini sweet peppers',amount:3,unit:'peppers'},{item:'Low-fat cottage cheese',amount:40,unit:'g'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Halve mini peppers and remove seeds.','Fill each half with a small scoop of cottage cheese.','Sprinkle with sea salt.']},
+  { id:'puffed-corn-cakes', name:'Puffed Corn Cakes', keywords:['corn cakes','puffed corn','corn rice cake'], mealTypes:['nibbles'],
+    description:'Light, airy puffed corn cakes with a lightly salted crunch. Two whole cakes for only 40 calories.',
+    prepTime:'0 min', cookTime:'0 min', baseCal:40, baseP:1, baseC:9, baseF:0,
+    ingredients:[{item:'Puffed corn cakes',amount:2,unit:'cakes'}],
+    instructions:['Eat as-is.','Optional: a tiny smear of miso or hot sauce for extra flavor.']},
+  { id:'nori-sesame', name:'Sesame Nori Sheets', keywords:['nori','sesame nori','nori sesame','seasoned seaweed'], mealTypes:['nibbles'],
+    description:'Crispy roasted nori sheets seasoned with sesame oil. A more flavorful version of plain seaweed.',
+    prepTime:'0 min', cookTime:'0 min', baseCal:30, baseP:2, baseC:2, baseF:2,
+    ingredients:[{item:'Sesame-flavored nori snack sheets',amount:1,unit:'pack (6g)'}],
+    instructions:['Open the pack and eat sheet by sheet.','Fold each sheet before eating for extra crunch.']},
+  { id:'cherry-tomatoes-balsamic', name:'Cherry Tomatoes with Balsamic', keywords:['cherry tomatoes balsamic','tomatoes balsamic','caprese bites'], mealTypes:['nibbles'],
+    description:'Sweet cherry tomatoes drizzled with a tiny bit of balsamic glaze. Elegant and barely any calories.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:30, baseP:1, baseC:6, baseF:0,
+    ingredients:[{item:'Cherry tomatoes',amount:90,unit:'g'},{item:'Balsamic glaze',amount:5,unit:'ml'}],
+    instructions:['Halve tomatoes and place in a bowl.','Drizzle with balsamic glaze and toss lightly.']},
+  { id:'frozen-edamame-shelled', name:'Frozen Shelled Edamame', keywords:['shelled edamame','frozen edamame','edamame beans'], mealTypes:['nibbles'],
+    description:'Frozen shelled edamame beans, lightly salted. No pods to deal with — just pop the beans straight from the cup.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:60, baseP:5, baseC:5, baseF:2,
+    ingredients:[{item:'Frozen shelled edamame',amount:60,unit:'g'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Microwave edamame in a bowl for 2-3 minutes.','Sprinkle with sea salt and eat with a small fork.']},
+  { id:'half-banana', name:'Half a Frozen Banana', keywords:['banana','frozen banana','half banana'], mealTypes:['nibbles'],
+    description:'Half a frozen banana — creamy, sweet, and it melts slowly so it feels like a treat.',
+    prepTime:'0 min', cookTime:'0 min', baseCal:45, baseP:1, baseC:12, baseF:0,
+    ingredients:[{item:'Banana (frozen)',amount:0.5,unit:'banana'}],
+    instructions:['Peel and freeze a banana ahead of time.','Break off half and eat frozen, letting it soften slightly as you eat.']},
+  { id:'apple-slices-hot-sauce', name:'Apple Slices with Chili & Lime', keywords:['apple chili lime','spicy apple','mexican apple'], mealTypes:['nibbles'],
+    description:'Crisp apple slices with chili powder and a squeeze of lime — a Mexican street-food twist. Crunchy, sweet-spicy, and addictive.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:35, baseP:0, baseC:9, baseF:0,
+    ingredients:[{item:'Apple (small)',amount:0.5,unit:'apple'},{item:'Chili powder',amount:1,unit:'pinch'},{item:'Lime juice',amount:5,unit:'ml'}],
+    instructions:['Core and slice apple into wedges.','Squeeze lime over slices and dust with chili powder.']},
+  { id:'chilled-green-tea', name:'Chilled Green Tea', keywords:['green tea','iced green tea','cold green tea'], mealTypes:['nibbles'],
+    description:'Cold-brewed or chilled green tea. Zero calories, full of antioxidants, and great for suppressing appetite.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:0, baseP:0, baseC:0, baseF:0,
+    ingredients:[{item:'Green tea bag or loose leaf',amount:1,unit:'bag'},{item:'Cold or hot water',amount:300,unit:'ml'},{item:'Ice',amount:1,unit:'handful'}],
+    instructions:['Brew green tea and let cool, or cold-brew overnight in the fridge.','Pour over ice and drink unsweetened.']},
+  { id:'watermelon-radish-slices', name:'Watermelon Radish Slices', keywords:['watermelon radish','daikon','rainbow radish'], mealTypes:['nibbles'],
+    description:'Sliced watermelon radish reveals a brilliant fuchsia center. Mildly sweet, crisp, and stunning to look at.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:15, baseP:1, baseC:3, baseF:0,
+    ingredients:[{item:'Watermelon radish (or daikon)',amount:80,unit:'g'},{item:'Rice vinegar',amount:5,unit:'ml'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Thinly slice the radish crosswise to reveal the pink center.','Toss with a splash of rice vinegar and sea salt.']},
+
+  // ─── LOW-CALORIE MEALS ───
+  { id:'zucchini-noodles-turkey', name:'Zucchini Noodles with Turkey Marinara', keywords:['zucchini noodles','zoodles','turkey marinara','low calorie pasta'], mealTypes:['dinner','lunch'],
+    description:'Spiralized zucchini as pasta with a lean turkey marinara sauce. All the satisfaction of a pasta dish at under 290 calories.',
+    prepTime:'10 min', cookTime:'15 min', baseCal:285, baseP:28, baseC:18, baseF:9,
+    ingredients:[{item:'Zucchini, spiralized',amount:300,unit:'g'},{item:'Ground turkey (93% lean)',amount:120,unit:'g'},{item:'Marinara sauce',amount:80,unit:'ml'},{item:'Garlic, minced',amount:5,unit:'g'},{item:'Olive oil',amount:5,unit:'ml'},{item:'Fresh basil',amount:5,unit:'g'}],
+    instructions:['Cook ground turkey in a skillet over medium-high heat until browned. Add garlic.','Add marinara sauce and simmer 5 minutes.','Sauté spiralized zucchini in a separate pan with a tiny bit of olive oil for 2-3 minutes — do not overcook.','Plate zucchini and top with turkey marinara.','Garnish with fresh basil.']},
+  { id:'cauliflower-fried-rice-shrimp', name:'Cauliflower Fried Rice with Shrimp', keywords:['cauliflower fried rice','cauliflower rice','shrimp fried rice','low carb fried rice'], mealTypes:['dinner','lunch'],
+    description:'Riced cauliflower stir-fried with shrimp, egg, and vegetables. Tastes remarkably like fried rice at under 310 calories.',
+    prepTime:'10 min', cookTime:'12 min', baseCal:305, baseP:30, baseC:16, baseF:11,
+    ingredients:[{item:'Cauliflower rice (fresh or frozen)',amount:250,unit:'g'},{item:'Large shrimp, peeled',amount:150,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Frozen peas and carrots',amount:60,unit:'g'},{item:'Low-sodium soy sauce',amount:15,unit:'ml'},{item:'Sesame oil',amount:5,unit:'ml'},{item:'Green onions',amount:20,unit:'g'}],
+    instructions:['Heat a wok or large skillet over high heat.','Scramble eggs quickly, push to the side.','Add shrimp and cook until pink, 2-3 minutes.','Add cauliflower rice and frozen veggies. Stir-fry 4-5 minutes.','Season with soy sauce and sesame oil. Garnish with green onions.']},
+  { id:'asian-lettuce-wraps', name:'Asian Chicken Lettuce Wraps', keywords:['lettuce wraps','asian lettuce wraps','pg chang','chicken lettuce'], mealTypes:['lunch','dinner'],
+    description:'Savory minced chicken with water chestnuts in crisp lettuce cups. Light, fresh, and deeply satisfying.',
+    prepTime:'8 min', cookTime:'12 min', baseCal:295, baseP:30, baseC:14, baseF:10,
+    ingredients:[{item:'Ground chicken',amount:150,unit:'g'},{item:'Water chestnuts, diced',amount:50,unit:'g'},{item:'Butter lettuce leaves',amount:6,unit:'leaves'},{item:'Low-sodium soy sauce',amount:20,unit:'ml'},{item:'Hoisin sauce',amount:10,unit:'ml'},{item:'Ginger, minced',amount:5,unit:'g'},{item:'Green onions',amount:20,unit:'g'}],
+    instructions:['Cook ground chicken in a skillet over medium-high until cooked through.','Add ginger and cook 1 minute.','Stir in soy sauce, hoisin, and water chestnuts.','Spoon mixture into lettuce cups.','Top with sliced green onions.']},
+  { id:'egg-white-veggie-scramble', name:'Egg White & Veggie Scramble', keywords:['egg white','egg white scramble','veggie scramble','low calorie eggs'], mealTypes:['breakfast'],
+    description:'Fluffy egg whites loaded with colorful vegetables. High protein, very low calorie, and ready in 8 minutes.',
+    prepTime:'5 min', cookTime:'8 min', baseCal:220, baseP:26, baseC:14, baseF:6,
+    ingredients:[{item:'Egg whites',amount:6,unit:'egg whites'},{item:'Spinach',amount:60,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Bell pepper, diced',amount:60,unit:'g'},{item:'Mushrooms, sliced',amount:60,unit:'g'},{item:'Cooking spray',amount:1,unit:'spray'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
+    instructions:['Sauté vegetables in a non-stick pan with cooking spray over medium heat until softened.','Whisk egg whites with salt and pepper.','Pour egg whites over vegetables.','Fold gently until just set.','Serve immediately.']},
+  { id:'shrimp-ceviche', name:'Shrimp Ceviche', keywords:['ceviche','shrimp ceviche','seafood ceviche'], mealTypes:['lunch','dinner'],
+    description:'Light, bright shrimp ceviche with lime, cilantro, and cucumber. No cooking required — the lime juice does all the work.',
+    prepTime:'15 min', cookTime:'0 min', baseCal:200, baseP:26, baseC:12, baseF:4,
+    ingredients:[{item:'Large shrimp, peeled',amount:200,unit:'g'},{item:'Lime juice',amount:60,unit:'ml'},{item:'Cucumber, diced',amount:80,unit:'g'},{item:'Cherry tomatoes',amount:60,unit:'g'},{item:'Red onion, diced',amount:30,unit:'g'},{item:'Fresh cilantro',amount:10,unit:'g'},{item:'Jalapeño, minced',amount:5,unit:'g'}],
+    instructions:['Chop shrimp into ½-inch pieces.','Toss with lime juice and let "cook" in the fridge for 10-12 minutes until opaque.','Mix in remaining ingredients.','Taste and adjust salt and lime.','Serve with extra lime wedges.']},
+  { id:'turkey-lettuce-wraps-low-cal', name:'Turkey & Avocado Lettuce Cups', keywords:['turkey wrap','lettuce cups','turkey lettuce wrap','low calorie wrap'], mealTypes:['lunch'],
+    description:'Deli turkey layered with avocado, tomato, and mustard in crisp romaine cups. Fast, fresh, no cooking needed.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:270, baseP:24, baseC:10, baseF:14,
+    ingredients:[{item:'Deli turkey breast',amount:100,unit:'g'},{item:'Romaine lettuce leaves',amount:4,unit:'leaves'},{item:'Avocado, sliced',amount:50,unit:'g'},{item:'Cherry tomatoes',amount:60,unit:'g'},{item:'Dijon mustard',amount:10,unit:'g'}],
+    instructions:['Lay romaine leaves flat as cups.','Layer turkey slices in each leaf.','Top with avocado slices, halved tomatoes, and a smear of Dijon mustard.']},
+  { id:'miso-glazed-cod', name:'Miso-Glazed Cod', keywords:['miso cod','miso glazed fish','miso glazed cod','nobu cod'], mealTypes:['dinner'],
+    description:'Silky cod fillets glazed with sweet white miso and broiled until caramelized. Restaurant quality at 260 calories.',
+    prepTime:'10 min + marinate', cookTime:'10 min', baseCal:265, baseP:35, baseC:14, baseF:6,
+    ingredients:[{item:'Cod fillet',amount:200,unit:'g'},{item:'White miso paste',amount:30,unit:'g'},{item:'Honey',amount:10,unit:'g'},{item:'Mirin or rice vinegar',amount:10,unit:'ml'},{item:'Low-sodium soy sauce',amount:5,unit:'ml'}],
+    instructions:['Mix miso, honey, mirin, and soy sauce into a smooth glaze.','Coat cod fillets and marinate at least 30 minutes (or overnight).','Broil on high for 8-10 minutes until glazed and just cooked through.','Serve with steamed greens.']},
+  { id:'cauliflower-soup', name:'Creamy Cauliflower Soup', keywords:['cauliflower soup','cream of cauliflower','cauliflower bisque'], mealTypes:['lunch','dinner'],
+    description:'A velvety cauliflower soup with garlic and a hint of nutmeg. Incredibly satisfying for only 180 calories a bowl.',
+    prepTime:'10 min', cookTime:'20 min', baseCal:180, baseP:7, baseC:22, baseF:8,
+    ingredients:[{item:'Cauliflower florets',amount:400,unit:'g'},{item:'Onion, diced',amount:80,unit:'g'},{item:'Garlic, minced',amount:5,unit:'g'},{item:'Low-sodium broth',amount:500,unit:'ml'},{item:'Almond milk',amount:100,unit:'ml'},{item:'Olive oil',amount:8,unit:'ml'},{item:'Nutmeg',amount:1,unit:'pinch'}],
+    instructions:['Sauté onion and garlic in olive oil until soft.','Add cauliflower and broth. Bring to a boil.','Simmer 15 minutes until cauliflower is very soft.','Blend until silky smooth.','Stir in almond milk and a pinch of nutmeg. Season well.']},
+  { id:'thai-cucumber-chicken', name:'Thai Cucumber Chicken Salad', keywords:['thai salad','cucumber chicken salad','thai cucumber'], mealTypes:['lunch','dinner'],
+    description:'Shredded chicken tossed with cucumber, fresh herbs, and a tangy Thai dressing. Light, bright, and intensely flavorful.',
+    prepTime:'10 min', cookTime:'0 min', baseCal:300, baseP:32, baseC:15, baseF:10,
+    ingredients:[{item:'Chicken breast, cooked and shredded',amount:150,unit:'g'},{item:'Cucumber, diced',amount:120,unit:'g'},{item:'Cherry tomatoes',amount:60,unit:'g'},{item:'Red onion, thinly sliced',amount:30,unit:'g'},{item:'Fresh cilantro',amount:10,unit:'g'},{item:'Lime juice',amount:20,unit:'ml'},{item:'Fish sauce or soy sauce',amount:10,unit:'ml'},{item:'Chili flakes',amount:1,unit:'pinch'}],
+    instructions:['Combine shredded chicken, cucumber, tomatoes, and red onion in a bowl.','Whisk together lime juice, fish sauce, and chili flakes for the dressing.','Toss salad with dressing.','Garnish with fresh cilantro.']},
+  { id:'egg-drop-soup', name:'Egg Drop Soup', keywords:['egg drop soup','chinese egg drop','egg soup'], mealTypes:['lunch','dinner','snack'],
+    description:'Silky wisps of egg in a savory ginger broth. Classic Chinese comfort food at just 120 calories.',
+    prepTime:'5 min', cookTime:'8 min', baseCal:120, baseP:10, baseC:6, baseF:5,
+    ingredients:[{item:'Low-sodium chicken broth',amount:480,unit:'ml'},{item:'Eggs',amount:2,unit:'egg'},{item:'Cornstarch',amount:8,unit:'g'},{item:'Ginger, minced',amount:3,unit:'g'},{item:'Low-sodium soy sauce',amount:10,unit:'ml'},{item:'Green onions',amount:15,unit:'g'}],
+    instructions:['Bring broth to a boil with ginger and soy sauce.','Mix cornstarch with 2 tbsp cold water; stir into broth to thicken slightly.','Beat eggs in a bowl.','Slowly drizzle eggs into the gently simmering broth while stirring in a circular motion.','Top with sliced green onions.']}
 ];
 
 // ─── Ingredient macro lookup ───
@@ -1781,7 +2119,7 @@ function renderToday() {
   const calPct = Math.min(1, rawCalPct);
   const circumference = 2 * Math.PI * 44;
   const offset = circumference * (1 - calPct);
-  const ringColor = rawCalPct >= 1 ? '#ff5555' : rawCalPct >= 0.8 ? '#ffd700' : 'white';
+  const ringColor = rawCalPct >= 1 ? '#fca5a5' : rawCalPct >= 0.8 ? '#fed7aa' : 'white';
 
   return `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
@@ -1815,12 +2153,12 @@ function renderToday() {
       </div>
       <div class="macro-bars">
         ${[
-          { label:'Protein', val:consumed.protein, tgt:target.protein, unit:'g', base:'rgba(255,255,255,0.9)' },
-          { label:'Carbs', val:consumed.carbs, tgt:target.carbs, unit:'g', base:'rgba(255,255,255,0.75)' },
-          { label:'Fat', val:consumed.fat, tgt:target.fat, unit:'g', base:'rgba(255,255,255,0.6)' }
+          { label:'Protein', val:consumed.protein, tgt:target.protein, unit:'g', base:'#c4b5fd' },
+          { label:'Carbs', val:consumed.carbs, tgt:target.carbs, unit:'g', base:'#fde68a' },
+          { label:'Fat', val:consumed.fat, tgt:target.fat, unit:'g', base:'#fbcfe8' }
         ].map(m => {
           const mPct = m.tgt > 0 ? m.val / m.tgt : 0;
-          const barColor = mPct >= 1 ? '#ff5555' : mPct >= 0.8 ? '#ffd700' : m.base;
+          const barColor = mPct >= 1 ? '#fca5a5' : mPct >= 0.8 ? '#fed7aa' : m.base;
           return `<div class="macro-bar-item">
             <label>${m.label}</label>
             <div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.min(100,mPct*100).toFixed(1)}%;background:${barColor}"></div></div>
@@ -1855,7 +2193,7 @@ function renderToday() {
       <span class="section-title">Meal Plan</span>
       <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
         <button class="pill" onclick="resetDailyPlan()" style="background:#fef2f2;border-color:#fecaca;color:#ef4444">${IC.refresh} Reset day</button>
-        <button class="pill" onclick="addSlot('${dateStr}','meal')">+ Meal</button>
+        <button class="pill" onclick="showAddMealModal('${dateStr}')">+ Meal</button>
         <button class="pill" onclick="addSlot('${dateStr}','snack')">+ Snack</button>
         <button class="pill" onclick="addSlot('${dateStr}','dessert')">+ Dessert</button>
         <button class="pill" onclick="addSlot('${dateStr}','nibbles')">+ Nibbles</button>
@@ -1894,8 +2232,9 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
   const targetCal = slot.meal ? slot.meal.calories : perSlotCal;
   const isSnack = slot.type === 'snack';
 
-  return `<div class="meal-slot" id="slot-${slot.id}">
+  return `<div class="meal-slot" id="slot-${slot.id}" data-slot-id="${slot.id}" draggable="true">
     <div class="slot-header">
+      <span class="drag-handle" title="Drag to reorder">⠿</span>
       <div>
         <div class="slot-title">${slot.label}</div>
         ${!slot.meal && !slot.open && slot.category !== 'nibbles' ? `<div class="slot-target">~${perSlotCal} cal · ${perSlotProt}g P target</div>` : ''}
@@ -2012,6 +2351,15 @@ function addSlot(dateStr, category) {
   } else if (category === 'nibbles') {
     const n = plan.slots.filter(s => s.category === 'nibbles').length;
     label = n === 0 ? 'Nibbles' : `Nibbles ${n + 1}`;
+  } else if (category === 'breakfast') {
+    const n = plan.slots.filter(s => s.category === 'breakfast').length;
+    label = n === 0 ? 'Breakfast' : `Breakfast ${n + 1}`;
+  } else if (category === 'lunch') {
+    const n = plan.slots.filter(s => s.category === 'lunch').length;
+    label = n === 0 ? 'Lunch' : `Lunch ${n + 1}`;
+  } else if (category === 'dinner') {
+    const n = plan.slots.filter(s => s.category === 'dinner').length;
+    label = n === 0 ? 'Dinner' : `Dinner ${n + 1}`;
   } else {
     const n = plan.slots.filter(s => s.category === 'meal' || (s.type === 'meal' && !s.category)).length;
     label = `Meal ${n + 1}`;
@@ -2056,7 +2404,87 @@ function renderTodayInPlace(dateStr) {
 }
 
 function bindToday() {
-  // Input preferences are bound inline
+  initDragDrop(today());
+}
+
+let dragSrcId = null;
+
+function initDragDrop(dateStr) {
+  const slots = document.querySelectorAll('.meal-slot[data-slot-id]');
+  slots.forEach(el => {
+    el.addEventListener('dragstart', e => {
+      dragSrcId = el.dataset.slotId;
+      setTimeout(() => el.classList.add('dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      document.querySelectorAll('.meal-slot').forEach(s => s.classList.remove('drag-over'));
+    });
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('.meal-slot').forEach(s => s.classList.remove('drag-over'));
+      if (el.dataset.slotId !== dragSrcId) el.classList.add('drag-over');
+    });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      el.classList.remove('drag-over');
+      if (dragSrcId && dragSrcId !== el.dataset.slotId) {
+        reorderSlots(dateStr, dragSrcId, el.dataset.slotId);
+      }
+    });
+  });
+}
+
+function reorderSlots(dateStr, srcId, targetId) {
+  const plan = STATE.dailyPlans[dateStr];
+  if (!plan) return;
+  const srcIdx = plan.slots.findIndex(s => s.id === srcId);
+  const tgtIdx = plan.slots.findIndex(s => s.id === targetId);
+  if (srcIdx === -1 || tgtIdx === -1) return;
+  const [moved] = plan.slots.splice(srcIdx, 1);
+  plan.slots.splice(tgtIdx, 0, moved);
+  saveState();
+  renderTodayInPlace(dateStr);
+}
+
+function showAddMealModal(dateStr) {
+  const html = `<div class="modal-overlay" id="add-meal-modal" onclick="if(event.target.id==='add-meal-modal')closeAddMealModal()">
+    <div class="modal-sheet">
+      <div class="modal-title">Add a meal</div>
+      <div class="modal-sub">What type of meal would you like to add?</div>
+      <div class="meal-type-grid">
+        <div class="meal-type-card" onclick="addSlot('${dateStr}','breakfast');closeAddMealModal()">
+          <span class="mti">🌅</span><span class="mtl">Breakfast</span><span class="mts">Morning fuel</span>
+        </div>
+        <div class="meal-type-card" onclick="addSlot('${dateStr}','lunch');closeAddMealModal()">
+          <span class="mti">🥗</span><span class="mtl">Lunch</span><span class="mts">Midday meal</span>
+        </div>
+        <div class="meal-type-card" onclick="addSlot('${dateStr}','dinner');closeAddMealModal()">
+          <span class="mti">🍽️</span><span class="mtl">Dinner</span><span class="mts">Evening meal</span>
+        </div>
+        <div class="meal-type-card" onclick="addCustomMeal('${dateStr}');closeAddMealModal()">
+          <span class="mti">✏️</span><span class="mtl">Custom</span><span class="mts">Name it yourself</span>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function closeAddMealModal() {
+  document.getElementById('add-meal-modal')?.remove();
+}
+
+function addCustomMeal(dateStr) {
+  const name = prompt('What would you like to call this meal?', 'Custom Meal');
+  if (!name?.trim()) return;
+  const plan = getOrCreatePlan(dateStr);
+  plan.slots.push({ id: uid(), type:'meal', category:'meal', label: name.trim(), preference:'', meal:null, open:false, seenNames:[] });
+  saveState();
+  renderTodayInPlace(dateStr);
 }
 
 async function generateSlot(dateStr, slotId) {
@@ -2819,6 +3247,27 @@ function bindApp() {
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
+function initBubbles() {
+  const container = document.getElementById('bg-bubbles');
+  if (!container) return;
+  const defs = [
+    { size:200, x:6,  y:4,  color:'rgba(196,181,253,0.32)', dur:9  },
+    { size:140, x:78, y:2,  color:'rgba(253,186,116,0.26)', dur:11 },
+    { size:220, x:48, y:68, color:'rgba(134,239,172,0.22)', dur:13 },
+    { size:100, x:88, y:42, color:'rgba(196,181,253,0.18)', dur:7  },
+    { size:170, x:2,  y:52, color:'rgba(165,243,252,0.28)', dur:10 },
+    { size:110, x:62, y:22, color:'rgba(253,186,116,0.20)', dur:12 },
+    { size:150, x:28, y:38, color:'rgba(167,243,208,0.20)', dur:14 },
+    { size: 90, x:42, y:12, color:'rgba(251,207,232,0.30)', dur:8  },
+    { size:130, x:92, y:75, color:'rgba(196,181,253,0.22)', dur:16 },
+    { size: 80, x:18, y:85, color:'rgba(134,239,172,0.25)', dur:6  },
+  ];
+  container.innerHTML = defs.map(b =>
+    `<div class="bbub" style="width:${b.size}px;height:${b.size}px;left:${b.x}%;top:${b.y}%;background:${b.color};animation-duration:${b.dur}s;animation-delay:${-(b.dur/2)}s"></div>`
+  ).join('');
+}
+
+initBubbles();
 render();
 setInterval(checkMidnightReset, 60000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) checkMidnightReset(); });
