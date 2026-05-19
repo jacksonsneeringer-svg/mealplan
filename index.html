@@ -420,6 +420,7 @@ function macrosFromItems(items) {
 
 // Calorie weighting: snacks get much less than meals; lunch & dinner are biggest
 function slotWeight(slot) {
+  if (slot.category === 'nibbles') return 0; // nibbles don't draw from the macro budget
   if (slot.type === 'snack') return 0.08;
   const cat = slot.category || '';
   const label = (slot.label || '').toLowerCase();
@@ -441,6 +442,7 @@ function slotMealType(slot) {
   if (label.includes('dinner') || label.includes('supper')) return 'dinner';
   if (label.includes('snack'))     return 'snack';
   if (label.includes('dessert'))   return 'dessert';
+  if (label.includes('nibble'))    return 'nibbles';
   return slot.type; // 'meal' or 'snack'
 }
 
@@ -1088,7 +1090,64 @@ const RECIPE_DB = [
     description:'Chilled cottage cheese with crisp cucumber, a drizzle of olive oil, and everything bagel seasoning. Savory, high-protein, and refreshing.',
     prepTime:'3 min', cookTime:'0 min', baseCal:165, baseP:18, baseC:8, baseF:5,
     ingredients:[{item:'Low-fat cottage cheese',amount:150,unit:'g'},{item:'Cucumber, diced',amount:80,unit:'g'},{item:'Olive oil',amount:5,unit:'ml'},{item:'Salt and pepper',amount:1,unit:'to taste'},{item:'Red pepper flakes',amount:1,unit:'pinch'}],
-    instructions:['Spoon cottage cheese into a bowl.','Top with diced cucumber.','Drizzle with olive oil.','Season with salt, pepper, and a pinch of red pepper flakes.','Stir gently and enjoy cold.']}
+    instructions:['Spoon cottage cheese into a bowl.','Top with diced cucumber.','Drizzle with olive oil.','Season with salt, pepper, and a pinch of red pepper flakes.','Stir gently and enjoy cold.']},
+
+  // ─── NIBBLES ───
+  { id:'dill-pickles', name:'Dill Pickle Spears', keywords:['pickles','dill pickles','pickle','gherkin'], mealTypes:['nibbles'],
+    description:'Crunchy, briny dill pickle spears straight from the jar. Almost zero calories, deeply satisfying to crunch on.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:10, baseP:0, baseC:2, baseF:0,
+    ingredients:[{item:'Dill pickle spears',amount:3,unit:'spears'}],
+    instructions:['Pull 3 spears straight from the jar.','Eat and enjoy.']},
+  { id:'sauerkraut-bowl', name:'Sauerkraut Bowl', keywords:['sauerkraut','fermented cabbage','kraut'], mealTypes:['nibbles'],
+    description:'A small bowl of tangy fermented sauerkraut. Gut-friendly, almost calorie-free, and oddly addictive.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:27, baseP:1, baseC:5, baseF:0,
+    ingredients:[{item:'Sauerkraut',amount:100,unit:'g'}],
+    instructions:['Scoop sauerkraut into a small bowl.','Eat cold straight from the bowl.']},
+  { id:'konjac-jelly', name:'Konjac Jelly Cups', keywords:['konjac','konjac jelly','konnyaku jelly','shirataki'], mealTypes:['nibbles'],
+    description:'Wobbly, refreshing konjac jelly cups. Essentially zero calories with a satisfying bouncy texture.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:15, baseP:0, baseC:4, baseF:0,
+    ingredients:[{item:'Konjac jelly cups',amount:2,unit:'cups'}],
+    instructions:['Peel back the lid on each cup.','Squeeze or scoop the jelly out and enjoy.']},
+  { id:'cucumber-rounds', name:'Cucumber Rounds with Tajin', keywords:['cucumber','cucumber slices','tajin','cucumber snack'], mealTypes:['nibbles'],
+    description:'Cool, crisp cucumber rounds dusted with tangy Tajin or a squeeze of lemon and sea salt. Refreshing and nearly calorie-free.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:18, baseP:1, baseC:4, baseF:0,
+    ingredients:[{item:'Cucumber (medium)',amount:150,unit:'g'},{item:'Tajin or lemon juice',amount:1,unit:'to taste'},{item:'Sea salt',amount:1,unit:'pinch'}],
+    instructions:['Slice cucumber into rounds about ¼ inch thick.','Lay on a plate and sprinkle with Tajin or a squeeze of lemon and a pinch of salt.','Eat immediately while cold.']},
+  { id:'cherry-tomatoes', name:'Cherry Tomatoes with Flaky Salt', keywords:['cherry tomatoes','tomatoes','tomato','grape tomatoes'], mealTypes:['nibbles'],
+    description:'A handful of sweet cherry tomatoes with a pinch of flaky sea salt. Simple, fresh, and barely registers on the calorie scale.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:27, baseP:1, baseC:5, baseF:0,
+    ingredients:[{item:'Cherry tomatoes',amount:100,unit:'g'},{item:'Flaky sea salt',amount:1,unit:'pinch'}],
+    instructions:['Rinse tomatoes and pile into a small bowl.','Sprinkle with flaky salt and eat.']},
+  { id:'miso-soup', name:'Simple Miso Soup', keywords:['miso soup','miso','dashi','japanese soup'], mealTypes:['nibbles'],
+    description:'A warm, savory mug of miso soup. Deeply comforting and only about 35 calories — perfect for staving off hunger between meals.',
+    prepTime:'2 min', cookTime:'2 min', baseCal:35, baseP:2, baseC:5, baseF:1,
+    ingredients:[{item:'White miso paste',amount:15,unit:'g'},{item:'Hot water',amount:240,unit:'ml'},{item:'Green onion, sliced',amount:5,unit:'g'}],
+    instructions:['Dissolve miso paste in a mug with a small amount of the hot water first — don\'t boil miso directly.','Add remaining hot water and stir.','Top with sliced green onion.']},
+  { id:'nori-snack-sheets', name:'Roasted Nori Sheets', keywords:['nori','seaweed','nori snacks','seaweed snacks'], mealTypes:['nibbles'],
+    description:'Thin, crispy roasted seaweed sheets with a savory, salty bite. One of the lowest-calorie snacks you can eat that still feels like a real snack.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:20, baseP:2, baseC:1, baseF:1,
+    ingredients:[{item:'Roasted nori snack sheets',amount:1,unit:'pack (5g)'}],
+    instructions:['Open the pack.','Eat sheet by sheet or fold them up for a satisfying crunch.']},
+  { id:'olives', name:'Mixed Olives', keywords:['olives','kalamata','mixed olives','olive'], mealTypes:['nibbles'],
+    description:'A small bowl of briny, meaty olives. Rich in flavor with healthy fats — satisfying in small quantities.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:45, baseP:0, baseC:2, baseF:4,
+    ingredients:[{item:'Mixed olives',amount:30,unit:'g'}],
+    instructions:['Count out about 8-10 olives into a small bowl.','Eat slowly — the brininess makes them satisfying in small amounts.']},
+  { id:'kimchi', name:'Kimchi', keywords:['kimchi','fermented','korean','kimchi snack'], mealTypes:['nibbles'],
+    description:'Spicy, tangy fermented kimchi straight from the jar. Packed with probiotics and barely any calories.',
+    prepTime:'1 min', cookTime:'0 min', baseCal:15, baseP:1, baseC:2, baseF:0,
+    ingredients:[{item:'Kimchi',amount:60,unit:'g'}],
+    instructions:['Scoop kimchi into a small bowl or eat straight from the jar.','Use chopsticks or a fork — it\'s spicy and messy.']},
+  { id:'celery-mustard', name:'Celery Sticks with Mustard', keywords:['celery','celery sticks','mustard','celery snack'], mealTypes:['nibbles'],
+    description:'Crisp, hydrating celery sticks with a side of sharp yellow or Dijon mustard for dipping. Crunchy, near-zero calories, and weirdly satisfying.',
+    prepTime:'2 min', cookTime:'0 min', baseCal:18, baseP:1, baseC:3, baseF:0,
+    ingredients:[{item:'Celery stalks',amount:3,unit:'stalks'},{item:'Yellow or Dijon mustard',amount:15,unit:'g'}],
+    instructions:['Rinse and cut celery stalks into sticks.','Arrange on a plate with a small ramekin of mustard for dipping.']},
+  { id:'rice-cake', name:'Plain Rice Cake', keywords:['rice cake','rice cakes','puffed rice'], mealTypes:['nibbles'],
+    description:'A single light, airy rice cake — the ultimate low-calorie crunch. Good plain, or with the faintest smear of something savory.',
+    prepTime:'0 min', cookTime:'0 min', baseCal:35, baseP:1, baseC:7, baseF:0,
+    ingredients:[{item:'Plain rice cake',amount:1,unit:'cake'}],
+    instructions:['Eat as-is for pure crunch.','Optional: a very thin smear of miso paste or hot sauce for extra flavor.']}
 ];
 
 // ─── Ingredient macro lookup ───
@@ -1288,14 +1347,14 @@ function scaleIngredient(ing, scale) {
 
 // ─── Built-in recipe generator ───
 function generateRecipe({ preference, targetCal, targetProt, targetCarbs, targetFat, mealType, excludeNames = [] }) {
-  const specificTypes = ['breakfast','lunch','dinner','snack','dessert'];
+  const specificTypes = ['breakfast','lunch','dinner','snack','dessert','nibbles'];
   let pool;
   if (specificTypes.includes(mealType)) {
     pool = RECIPE_DB.filter(r => r.mealTypes.includes(mealType));
-    if (!pool.length) pool = RECIPE_DB.filter(r => r.mealTypes.some(t => t !== 'snack' && t !== 'dessert'));
+    if (!pool.length && mealType !== 'nibbles') pool = RECIPE_DB.filter(r => r.mealTypes.some(t => t !== 'snack' && t !== 'dessert' && t !== 'nibbles'));
   } else {
-    // Generic 'meal' — exclude snacks and desserts
-    pool = RECIPE_DB.filter(r => r.mealTypes.some(t => t !== 'snack' && t !== 'dessert'));
+    // Generic 'meal' — exclude snacks, desserts, and nibbles
+    pool = RECIPE_DB.filter(r => r.mealTypes.some(t => t !== 'snack' && t !== 'dessert' && t !== 'nibbles'));
   }
   // Filter out previously seen recipes; if all are excluded, reset to full pool
   const fresh = pool.filter(r => !excludeNames.includes(r.name));
@@ -1795,6 +1854,7 @@ function renderToday() {
         <button class="pill" onclick="addSlot('${dateStr}','meal')">+ Meal</button>
         <button class="pill" onclick="addSlot('${dateStr}','snack')">+ Snack</button>
         <button class="pill" onclick="addSlot('${dateStr}','dessert')">+ Dessert</button>
+        <button class="pill" onclick="addSlot('${dateStr}','nibbles')">+ Nibbles</button>
       </div>
     </div>
 
@@ -1834,7 +1894,7 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
     <div class="slot-header">
       <div>
         <div class="slot-title">${slot.label}</div>
-        ${!slot.meal && !slot.open ? `<div class="slot-target">~${perSlotCal} cal · ${perSlotProt}g P target</div>` : ''}
+        ${!slot.meal && !slot.open && slot.category !== 'nibbles' ? `<div class="slot-target">~${perSlotCal} cal · ${perSlotProt}g P target</div>` : ''}
         ${slot.meal ? `<div class="slot-target">${slot.meal.calories} cal · ${slot.meal.protein}g P · ${slot.meal.carbs}g C · ${slot.meal.fat}g F</div>` : ''}
       </div>
       <div class="slot-actions">
@@ -1852,7 +1912,7 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
         <div class="slot-open-badge">${IC.unlock} Open slot — logged as flex<button style="background:none;border:none;cursor:pointer;margin-left:8px;color:#854d0e;font-size:12px" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Undo</button></div>
       ` : slot.meal ? renderRecipeCard(slot.meal, slot.id) : `
         <div class="slot-empty">
-          <input class="pref-input" id="pref-${slot.id}" placeholder="${(()=>{const cat=slot.category||slotMealType(slot);if(cat==='snack')return 'Snack idea? (e.g. chips and dip)';if(cat==='breakfast')return 'What sounds good? (e.g. overnight oats)';if(cat==='lunch')return 'What sounds good? (e.g. turkey wrap)';if(cat==='dinner')return 'What sounds good? (e.g. dumplings)';if(cat==='dessert')return 'Craving something? (e.g. brownies)';return 'What would you like?';})()}" value="${slot.preference||''}">
+          <input class="pref-input" id="pref-${slot.id}" placeholder="${(()=>{const cat=slot.category||slotMealType(slot);if(cat==='snack')return 'Snack idea? (e.g. chips and dip)';if(cat==='breakfast')return 'What sounds good? (e.g. overnight oats)';if(cat==='lunch')return 'What sounds good? (e.g. turkey wrap)';if(cat==='dinner')return 'What sounds good? (e.g. dumplings)';if(cat==='dessert')return 'Craving something? (e.g. brownies)';if(cat==='nibbles')return 'Something to nibble on? (e.g. pickles, nori)';return 'What would you like?';})()}" value="${slot.preference||''}">
           <button class="btn-generate" id="gen-${slot.id}" onclick="generateSlot('${dateStr}','${slot.id}')">
             ${IC.sparkle} Generate
           </button>
@@ -1945,6 +2005,9 @@ function addSlot(dateStr, category) {
   } else if (category === 'dessert') {
     const n = plan.slots.filter(s => s.category === 'dessert').length;
     label = n === 0 ? 'Dessert' : `Dessert ${n + 1}`;
+  } else if (category === 'nibbles') {
+    const n = plan.slots.filter(s => s.category === 'nibbles').length;
+    label = n === 0 ? 'Nibbles' : `Nibbles ${n + 1}`;
   } else {
     const n = plan.slots.filter(s => s.category === 'meal' || (s.type === 'meal' && !s.category)).length;
     label = `Meal ${n + 1}`;
@@ -2021,10 +2084,11 @@ async function generateSlot(dateStr, slotId) {
     fat:      Math.max(0, STATE.profile.fat       - fixedTotals.fat      - filledTotals.fat)
   };
   const wt = weightedSlotTarget(slot, remaining, stillEmpty);
-  const remainCal   = Math.max(100, wt.cal);
-  const remainProt  = wt.prot;
-  const remainCarbs = wt.carbs;
-  const remainFat   = wt.fat;
+  const isNibble = (slot.category === 'nibbles');
+  const remainCal   = isNibble ? 60 : Math.max(100, wt.cal);
+  const remainProt  = isNibble ? 1  : wt.prot;
+  const remainCarbs = isNibble ? 5  : wt.carbs;
+  const remainFat   = isNibble ? 1  : wt.fat;
 
   try {
     const recipe = await generateRecipe({
