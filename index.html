@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nommie – Your Meal Bestie</title>
+<title>Nommie | Your Meal Bestie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="icon" id="app-favicon" type="image/svg+xml" href="">
@@ -2183,7 +2183,7 @@ function renderToday() {
           { label:'Fat', val:consumed.fat, tgt:target.fat, unit:'g', base:'#fbcfe8' }
         ].map(m => {
           const mPct = m.tgt > 0 ? m.val / m.tgt : 0;
-          const barColor = mPct >= 1 ? '#fca5a5' : mPct >= 0.8 ? '#fed7aa' : m.base;
+          const barColor = mPct >= 1 ? '#fca5a5' : mPct >= 0.8 ? '#fef08a' : '#fff';
           return `<div class="macro-bar-item">
             <label>${m.label}</label>
             <div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.min(100,mPct*100).toFixed(1)}%;background:${barColor}"></div></div>
@@ -2698,7 +2698,7 @@ function renderWeek() {
       <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
         <button class="btn btn-secondary btn-sm" onclick="resetWeeklyPlan()" style="color:#ef4444;border-color:#fecaca">${IC.refresh} Reset week</button>
         <button class="btn btn-secondary btn-sm" onclick="saveAsWeeklyTemplate()">${IC.bookmark} Save as template</button>
-        <button class="btn btn-secondary btn-sm" onclick="planWholeWeek()" id="plan-week-btn">${IC.sparkle} Plan Week</button>
+        <button class="btn btn-secondary btn-sm" onclick="showPlanWeekModal()" id="plan-week-btn">${IC.sparkle} Plan Week</button>
       </div>
     </div>
     ${STATE.weeklyTemplate ? `<div style="background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--primary-dark)">Weekly template active — meals auto-apply at midnight each day.</div>` : ''}
@@ -2745,14 +2745,29 @@ function renderWeekDayDetail(dateStr) {
     </div>
     ${plan.slots.map(slot => `
       <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
-        <div style="flex:1">
+        <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:600">${slot.label}</div>
-          ${slot.meal ? `<div style="font-size:12px;color:var(--text-2)">${slot.meal.name} — ${slot.meal.calories} cal, ${slot.meal.protein}g P</div>` : `<div style="font-size:12px;color:var(--text-3)">Not planned</div>`}
+          ${slot.meal
+            ? `<div style="font-size:12px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${slot.meal.name} — ${slot.meal.calories} cal, ${slot.meal.protein}g P</div>`
+            : `<div style="font-size:12px;color:var(--text-3)">Not planned</div>`}
         </div>
-        ${slot.meal ? `<button class="btn btn-danger btn-sm" onclick="clearWeekSlot('${dateStr}','${slot.id}')">✕</button>` : ''}
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          ${slot.meal ? `
+            <button class="btn btn-secondary btn-sm" id="wgen-${slot.id}" onclick="weekGenerateSlot('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px" title="Regenerate">${IC.sparkle}</button>
+            <button class="btn btn-secondary btn-sm" onclick="weekShowUseSaved('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px" title="Swap from saved">${IC.bookmark}</button>
+            <button class="btn btn-danger btn-sm" onclick="clearWeekSlot('${dateStr}','${slot.id}')" style="padding:4px 7px">✕</button>
+          ` : `
+            <button class="btn btn-secondary btn-sm" id="wgen-${slot.id}" onclick="weekGenerateSlot('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px">${IC.sparkle}</button>
+            <button class="btn btn-secondary btn-sm" onclick="weekShowUseSaved('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px" title="Pick from saved">${IC.bookmark}</button>
+          `}
+        </div>
       </div>
     `).join('')}
-    ${dateStr === today() ? `<button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="navigate('today')">Open Today's planner →</button>` : ''}
+    <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+      ${dateStr === today() ? `<button class="btn btn-secondary btn-sm" onclick="navigate('today')">Open Today →</button>` : ''}
+      <button class="btn btn-secondary btn-sm" onclick="weekAddSlot('${dateStr}','meal')">+ Meal</button>
+      <button class="btn btn-secondary btn-sm" onclick="weekAddSlot('${dateStr}','snack')">+ Snack</button>
+    </div>
   </div>`;
 }
 
@@ -2765,6 +2780,111 @@ function clearWeekSlot(dateStr, slotId) {
   const plan = STATE.dailyPlans[dateStr];
   const slot = plan?.slots.find(s=>s.id===slotId);
   if (slot) { slot.meal = null; saveState(); render(); }
+}
+
+function weekAddSlot(dateStr, type) {
+  const plan = getOrCreatePlan(dateStr);
+  const cat = type === 'snack' ? 'snack' : 'meal';
+  const count = plan.slots.filter(s => s.category === cat || s.type === type).length + 1;
+  const label = type === 'snack' ? `Snack ${count}` : `Meal ${count}`;
+  plan.slots.push({ id: uid(), type, category: cat, label, preference: '', meal: null, open: false, seenNames: [] });
+  saveState();
+  render();
+}
+
+async function weekGenerateSlot(dateStr, slotId) {
+  const btn = document.getElementById(`wgen-${slotId}`);
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner spinner-dark"></span>'; }
+  const plan = getOrCreatePlan(dateStr);
+  const slot = plan.slots.find(s => s.id === slotId);
+  if (!slot) return;
+  const prevMeal = slot.meal;
+  slot.meal = null; // temporarily clear so budget calc excludes this slot
+  const { totals: fixedTotals } = getActiveFixedTotals(dateStr);
+  let usedCal = fixedTotals.calories, usedProt = fixedTotals.protein, usedCarbs = fixedTotals.carbs, usedFat = fixedTotals.fat;
+  plan.slots.filter(s => s.meal).forEach(s => {
+    usedCal += s.meal.calories || 0; usedProt += s.meal.protein || 0;
+    usedCarbs += s.meal.carbs || 0; usedFat += s.meal.fat || 0;
+  });
+  const stillEmpty = plan.slots.filter(s => !s.meal);
+  const remaining = {
+    calories: Math.max(0, STATE.profile.calories - usedCal),
+    protein:  Math.max(0, STATE.profile.protein  - usedProt),
+    carbs:    Math.max(0, STATE.profile.carbs    - usedCarbs),
+    fat:      Math.max(0, STATE.profile.fat      - usedFat)
+  };
+  const wt = weightedSlotTarget(slot, remaining, stillEmpty);
+  try {
+    const recipe = await generateRecipe({
+      preference: slot.preference || '',
+      targetCal:   Math.round(Math.max(100, wt.cal)),
+      targetProt:  Math.round(wt.prot),
+      targetCarbs: Math.round(wt.carbs),
+      targetFat:   Math.round(wt.fat),
+      mealType:    slotMealType(slot)
+    });
+    slot.meal = recipe;
+    saveState();
+    render();
+  } catch(e) {
+    slot.meal = prevMeal; // restore on failure
+    showToast(`Error: ${e.message}`, 3000);
+    render();
+  }
+}
+
+function weekShowUseSaved(dateStr, slotId) {
+  const plan = STATE.dailyPlans[dateStr] || getOrCreatePlan(dateStr);
+  const slot = plan.slots.find(s => s.id === slotId);
+  if (!slot) return;
+  document.getElementById('week-saved-modal')?.remove();
+  const listHtml = STATE.savedMeals.length
+    ? STATE.savedMeals.map(m => `
+        <div class="saved-card" onclick="weekUseSavedMeal('${dateStr}','${slotId}','${m.id}')">
+          <div class="saved-card-name">${m.name}</div>
+          <div class="saved-card-chips">
+            <span class="chip chip-cal">${m.calories} cal</span>
+            <span class="chip chip-protein">${m.protein}g P</span>
+          </div>
+        </div>`).join('')
+    : '<div class="empty-state"><p>No saved meals yet — build one in the Saved tab.</p></div>';
+  const html = `<div class="modal-overlay" id="week-saved-modal" onclick="if(event.target.id==='week-saved-modal')this.remove()">
+    <div class="modal-sheet">
+      <div class="modal-title">Choose a saved meal</div>
+      <div class="modal-sub">Pick a meal for ${slot.label}</div>
+      <input class="form-input" id="wsaved-search" placeholder="Search..." style="margin-bottom:12px" oninput="filterWeekSavedModal(this.value,'${dateStr}','${slotId}')">
+      <div id="wsaved-modal-list">${listHtml}</div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function filterWeekSavedModal(q, dateStr, slotId) {
+  const list = document.getElementById('wsaved-modal-list');
+  if (!list) return;
+  const lower = q.toLowerCase();
+  const filtered = STATE.savedMeals.filter(m => m.name.toLowerCase().includes(lower));
+  list.innerHTML = filtered.length
+    ? filtered.map(m => `
+        <div class="saved-card" onclick="weekUseSavedMeal('${dateStr}','${slotId}','${m.id}')">
+          <div class="saved-card-name">${m.name}</div>
+          <div class="saved-card-chips">
+            <span class="chip chip-cal">${m.calories} cal</span>
+            <span class="chip chip-protein">${m.protein}g P</span>
+          </div>
+        </div>`).join('')
+    : '<div class="empty-state"><p>No matches</p></div>';
+}
+
+function weekUseSavedMeal(dateStr, slotId, mealId) {
+  const plan = getOrCreatePlan(dateStr);
+  const slot = plan.slots.find(s => s.id === slotId);
+  const meal = STATE.savedMeals.find(m => m.id === mealId);
+  if (!slot || !meal) return;
+  slot.meal = { ...meal };
+  saveState();
+  document.getElementById('week-saved-modal')?.remove();
+  render();
 }
 
 async function planDay(dateStr) {
@@ -2805,17 +2925,133 @@ async function planDay(dateStr) {
   render();
 }
 
-async function planWholeWeek() {
+function showPlanWeekModal() {
+  const p = STATE.profile;
+  document.getElementById('plan-week-modal')?.remove();
+  const html = `<div class="modal-overlay" id="plan-week-modal" onclick="if(event.target.id==='plan-week-modal')this.remove()">
+    <div class="modal-sheet">
+      <div class="modal-title">${IC.sparkle} Plan Your Week</div>
+      <div class="modal-sub">Customize targets and variety before generating.</div>
+
+      <div class="form-label" style="margin-bottom:8px">Daily Targets <span style="font-size:11px;font-weight:400;color:var(--text-3)">(defaults from settings)</span></div>
+      <div class="macro-edit-grid" style="margin-bottom:16px">
+        <div class="macro-field calories">
+          <label><span class="dot" style="background:var(--primary)"></span>Calories</label>
+          <input type="number" id="pw-calories" value="${p.calories}">
+          <div class="unit">kcal / day</div>
+        </div>
+        <div class="macro-field">
+          <label><span class="dot" style="background:var(--protein)"></span>Protein</label>
+          <input type="number" id="pw-protein" value="${p.protein}">
+          <div class="unit">grams</div>
+        </div>
+        <div class="macro-field">
+          <label><span class="dot" style="background:var(--carbs)"></span>Carbs</label>
+          <input type="number" id="pw-carbs" value="${p.carbs}">
+          <div class="unit">grams</div>
+        </div>
+        <div class="macro-field">
+          <label><span class="dot" style="background:var(--fat)"></span>Fat</label>
+          <input type="number" id="pw-fat" value="${p.fat}">
+          <div class="unit">grams</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Ingredients to use <span style="font-size:11px;font-weight:400;color:var(--text-3)">(optional)</span></label>
+        <textarea class="form-input" id="pw-ingredients" rows="2" placeholder="e.g. chicken breast, broccoli, brown rice..." style="resize:none"></textarea>
+      </div>
+
+      <div class="form-label" style="margin-bottom:8px">Variety per category <span style="font-size:11px;font-weight:400;color:var(--text-3)">(unique meals per week, 1–7)</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+        ${[['breakfast','Breakfasts'],['lunch','Lunches'],['dinner','Dinners'],['snack','Snacks'],['dessert','Desserts'],['nibbles','Nibbles']].map(([id,label]) => `
+        <div class="macro-field">
+          <label style="font-size:10px">${label}</label>
+          <input type="number" id="pw-${id}" value="7" min="1" max="7" style="font-size:18px">
+          <div class="unit">/ week</div>
+        </div>`).join('')}
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('plan-week-modal').remove()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1" onclick="submitPlanWeek()">${IC.sparkle} Generate</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function submitPlanWeek() {
+  const targets = {
+    calories: parseFloat(document.getElementById('pw-calories').value) || STATE.profile.calories,
+    protein:  parseFloat(document.getElementById('pw-protein').value)  || STATE.profile.protein,
+    carbs:    parseFloat(document.getElementById('pw-carbs').value)    || STATE.profile.carbs,
+    fat:      parseFloat(document.getElementById('pw-fat').value)      || STATE.profile.fat
+  };
+  const ingredientsToUse = document.getElementById('pw-ingredients').value.trim();
+  const mealCounts = {};
+  ['breakfast','lunch','dinner','snack','dessert','nibbles'].forEach(cat => {
+    const v = parseInt(document.getElementById(`pw-${cat}`)?.value);
+    if (!isNaN(v)) mealCounts[cat] = Math.max(1, Math.min(7, v));
+  });
+  document.getElementById('plan-week-modal').remove();
+  planWholeWeek({ targets, ingredientsToUse, mealCounts });
+}
+
+async function planWholeWeek(opts = {}) {
+  const { targets: customTargets, ingredientsToUse = '', mealCounts = {} } = opts;
+  const targets = customTargets || STATE.profile;
   const dates = getWeekDates();
   const btn = document.getElementById('plan-week-btn');
-  if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spinner spinner-dark"></span> Starting...`; }
+  if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spinner spinner-dark"></span> Planning...`; }
 
-  // Seed variety tracker with any meals already on the plan this week
-  const usedNames = new Set();
+  // Collect all empty slots grouped by category for pool generation
+  const categorySlots = {};
   dates.forEach(d => {
-    const plan = STATE.dailyPlans[d];
-    if (plan) plan.slots.forEach(s => { if (s.meal?.name) usedNames.add(s.meal.name); });
+    const plan = getOrCreatePlan(d);
+    plan.slots.filter(s => !s.meal).forEach(slot => {
+      const cat = slotMealType(slot);
+      if (!categorySlots[cat]) categorySlots[cat] = [];
+      categorySlots[cat].push({ slot, dateStr: d });
+    });
   });
+
+  // Pre-generate meal pools for categories with limited variety
+  const mealPools = {};
+  for (const [cat, slots] of Object.entries(categorySlots)) {
+    const desired = mealCounts[cat] != null ? Math.max(1, Math.min(slots.length, mealCounts[cat])) : null;
+    if (desired !== null && desired < slots.length) {
+      if (btn) btn.innerHTML = `<span class="spinner spinner-dark"></span> Building ${cat} pool...`;
+      mealPools[cat] = [];
+      const poolExclude = [];
+      const { totals: fixedTotals } = getActiveFixedTotals(slots[0].dateStr);
+      const roughRemaining = {
+        calories: Math.max(0, targets.calories - fixedTotals.calories),
+        protein:  Math.max(0, targets.protein  - fixedTotals.protein),
+        carbs:    Math.max(0, targets.carbs    - fixedTotals.carbs),
+        fat:      Math.max(0, targets.fat      - fixedTotals.fat)
+      };
+      const roughWt = weightedSlotTarget(slots[0].slot, roughRemaining, slots.map(s => s.slot));
+      for (let i = 0; i < desired; i++) {
+        try {
+          const recipe = await generateRecipe({
+            preference: (slots[0].slot.preference || '') + (ingredientsToUse ? ` Use these ingredients: ${ingredientsToUse}` : ''),
+            targetCal:   Math.round(Math.max(100, roughWt.cal)),
+            targetProt:  Math.round(roughWt.prot),
+            targetCarbs: Math.round(roughWt.carbs),
+            targetFat:   Math.round(roughWt.fat),
+            mealType: cat,
+            excludeNames: poolExclude
+          });
+          mealPools[cat].push(recipe);
+          poolExclude.push(recipe.name);
+        } catch(e) { /* skip failed pool entries */ }
+      }
+    }
+  }
+
+  // Track pool index per category for cycling
+  const catPoolIdx = {};
 
   const dayResults = [];
   let totalFilled = 0;
@@ -2834,11 +3070,10 @@ async function planWholeWeek() {
     }
 
     const { totals: fixedTotals } = getActiveFixedTotals(d);
-    let usedCal  = fixedTotals.calories;
-    let usedProt = fixedTotals.protein;
+    let usedCal   = fixedTotals.calories;
+    let usedProt  = fixedTotals.protein;
     let usedCarbs = fixedTotals.carbs;
-    let usedFat  = fixedTotals.fat;
-    // Include already-filled slots in the macro budget
+    let usedFat   = fixedTotals.fat;
     plan.slots.filter(s => s.meal).forEach(s => {
       usedCal   += s.meal.calories || 0;
       usedProt  += s.meal.protein  || 0;
@@ -2850,34 +3085,45 @@ async function planWholeWeek() {
     let dayErrors = 0;
 
     for (const slot of emptySlots) {
-      const stillEmpty = plan.slots.filter(s => !s.meal);
-      const remaining = {
-        calories: Math.max(0, STATE.profile.calories - usedCal),
-        protein:  Math.max(0, STATE.profile.protein  - usedProt),
-        carbs:    Math.max(0, STATE.profile.carbs     - usedCarbs),
-        fat:      Math.max(0, STATE.profile.fat       - usedFat)
-      };
-      const wt = weightedSlotTarget(slot, remaining, stillEmpty);
-      try {
-        const recipe = await generateRecipe({
-          preference: slot.preference || '',
-          targetCal:   Math.round(Math.max(100, wt.cal)),
-          targetProt:  Math.round(wt.prot),
-          targetCarbs: Math.round(wt.carbs),
-          targetFat:   Math.round(wt.fat),
-          mealType:    slotMealType(slot),
-          excludeNames: [...usedNames]
-        });
-        slot.meal  = recipe;
-        usedNames.add(recipe.name);
-        usedCal   += recipe.calories || 0;
-        usedProt  += recipe.protein  || 0;
-        usedCarbs += recipe.carbs    || 0;
-        usedFat   += recipe.fat      || 0;
+      const cat = slotMealType(slot);
+      const pool = mealPools[cat];
+      if (pool && pool.length > 0) {
+        const idx = (catPoolIdx[cat] || 0) % pool.length;
+        catPoolIdx[cat] = (catPoolIdx[cat] || 0) + 1;
+        slot.meal = { ...pool[idx] };
+        usedCal   += slot.meal.calories || 0;
+        usedProt  += slot.meal.protein  || 0;
+        usedCarbs += slot.meal.carbs    || 0;
+        usedFat   += slot.meal.fat      || 0;
         dayFilled++;
-      } catch(e) {
-        dayErrors++;
-        totalErrors++;
+      } else {
+        const stillEmpty = plan.slots.filter(s => !s.meal);
+        const remaining = {
+          calories: Math.max(0, targets.calories - usedCal),
+          protein:  Math.max(0, targets.protein  - usedProt),
+          carbs:    Math.max(0, targets.carbs     - usedCarbs),
+          fat:      Math.max(0, targets.fat       - usedFat)
+        };
+        const wt = weightedSlotTarget(slot, remaining, stillEmpty);
+        try {
+          const recipe = await generateRecipe({
+            preference: (slot.preference || '') + (ingredientsToUse ? ` Use these ingredients: ${ingredientsToUse}` : ''),
+            targetCal:   Math.round(Math.max(100, wt.cal)),
+            targetProt:  Math.round(wt.prot),
+            targetCarbs: Math.round(wt.carbs),
+            targetFat:   Math.round(wt.fat),
+            mealType: cat
+          });
+          slot.meal  = recipe;
+          usedCal   += recipe.calories || 0;
+          usedProt  += recipe.protein  || 0;
+          usedCarbs += recipe.carbs    || 0;
+          usedFat   += recipe.fat      || 0;
+          dayFilled++;
+        } catch(e) {
+          dayErrors++;
+          totalErrors++;
+        }
       }
     }
 
@@ -2886,12 +3132,13 @@ async function planWholeWeek() {
     dayResults.push({ date: d, dayLabel, filled: dayFilled, errors: dayErrors, cal: Math.round(usedCal), prot: Math.round(usedProt), carbs: Math.round(usedCarbs), fat: Math.round(usedFat) });
   }
 
+  if (btn) { btn.disabled = false; btn.innerHTML = `${IC.sparkle} Plan Week`; }
   render();
-  showWeekPlanSummary(dayResults, totalFilled, totalErrors);
+  showWeekPlanSummary(dayResults, totalFilled, totalErrors, targets);
 }
 
-function showWeekPlanSummary(results, totalFilled, totalErrors) {
-  const target = STATE.profile;
+function showWeekPlanSummary(results, totalFilled, totalErrors, target) {
+  target = target || STATE.profile;
   const rows = results.map(r => {
     if (r.skipped) return `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px">
@@ -3024,7 +3271,7 @@ function renderSaved() {
   return `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
       <div style="font-size:20px;font-weight:800;letter-spacing:-.5px">Saved Meals</div>
-      <button class="btn btn-primary btn-sm" onclick="showBuildMealModal()" style="gap:4px;font-size:11px;padding:4px 9px">+ Build a Meal</button>
+      <button class="btn btn-primary btn-sm" onclick="showBuildMealModal()" style="gap:4px;font-size:12px;padding:9px 11px;align-self:flex-end">+ Build a Meal</button>
     </div>
     <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">${STATE.savedMeals.length} saved · Filter by macros</div>
 
