@@ -470,6 +470,14 @@ function getOrCreatePlan(dateStr) {
 
 function defaultSlots() {
   const cal = STATE.profile.calories;
+  // Under 1500 cal: two meals + one snack
+  if (cal < 1500) {
+    return [
+      { id: uid(), type:'meal', category:'lunch',  label:'Lunch',  preference:'', meal:null, open:false, seenNames:[] },
+      { id: uid(), type:'meal', category:'dinner', label:'Dinner', preference:'', meal:null, open:false, seenNames:[] },
+      { id: uid(), type:'snack', category:'snack', label:'Snack 1', preference:'', meal:null, open:false, seenNames:[] }
+    ];
+  }
   const snacks = cal < 1600 ? 1 : cal < 2400 ? 2 : 3;
   const slots = [
     { id: uid(), type:'meal', category:'breakfast', label:'Breakfast', preference:'', meal:null, open:false, seenNames:[] },
@@ -831,7 +839,7 @@ const RECIPE_DB = [
     prepTime:'8 min', cookTime:'18 min', baseCal:490, baseP:48, baseC:48, baseF:10,
     ingredients:[{item:'Canned tuna in water',amount:60,unit:'g'},{item:'Chicken breast',amount:160,unit:'g'},{item:'White rice (cooked)',amount:160,unit:'g'},{item:'Asparagus',amount:100,unit:'g'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Garlic, minced',amount:3,unit:'clove'},{item:'Lemon juice',amount:15,unit:'ml'},{item:'Italian seasoning',amount:3,unit:'g'}],
     instructions:['Preheat oven to 400°F.','Season protein with garlic, Italian seasoning, olive oil, salt, and pepper.','Arrange on a baking sheet with asparagus.','Roast 15-18 min until cooked through and flaky.','Drizzle with lemon juice. Serve over rice.']},
-  { id:'shrimp-fried-rice', name:'High-Protein Shrimp Fried Rice', keywords:['fried rice','shrimp fried rice','rice'], mealTypes:['dinner'],
+  { id:'shrimp-fried-rice-2', name:'High-Protein Shrimp Fried Rice', keywords:['fried rice','shrimp fried rice','rice'], mealTypes:['dinner'],
     description:'Better-than-takeout shrimp fried rice packed with vegetables and protein. Ready in 15 minutes.',
     prepTime:'8 min', cookTime:'12 min', baseCal:560, baseP:38, baseC:68, baseF:10,
     ingredients:[{item:'Large shrimp, peeled',amount:180,unit:'g'},{item:'White rice (cooked)',amount:200,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Snap peas',amount:60,unit:'g'},{item:'Carrot sticks',amount:60,unit:'g'},{item:'Low-sodium soy sauce',amount:20,unit:'ml'},{item:'Sesame oil',amount:6,unit:'ml'},{item:'Garlic and ginger, minced',amount:8,unit:'g'}],
@@ -956,7 +964,131 @@ const RECIPE_DB = [
     description:'A baked sweet potato loaded with creamy smashed avocado and a soft-baked egg. Three superfoods layered into one gorgeous, nourishing meal.',
     prepTime:'5 min', cookTime:'55 min', baseCal:430, baseP:18, baseC:46, baseF:20,
     ingredients:[{item:'Sweet potato (medium)',amount:200,unit:'g'},{item:'Ripe avocado',amount:80,unit:'g'},{item:'Egg',amount:1,unit:'egg'},{item:'Olive oil',amount:5,unit:'ml'},{item:'Salt and pepper',amount:1,unit:'to taste'},{item:'Red pepper flakes',amount:1,unit:'pinch'},{item:'Fresh chives or cilantro',amount:5,unit:'g'}],
-    instructions:['Preheat oven to 400°F. Prick sweet potato all over with a fork and bake 40-45 min until completely tender.','Slice the potato open lengthwise and fluff the flesh gently. Drizzle with olive oil and season with salt.','Mash and spread avocado directly over the sweet potato flesh.','Use a spoon to make a small well in the center and crack an egg into it.','Return to oven and bake 8-12 min until the egg white is just set but the yolk is still soft. Finish with salt, pepper, red pepper flakes, and fresh herbs.']}
+    instructions:['Preheat oven to 400°F. Prick sweet potato all over with a fork and bake 40-45 min until completely tender.','Slice the potato open lengthwise and fluff the flesh gently. Drizzle with olive oil and season with salt.','Mash and spread avocado directly over the sweet potato flesh.','Use a spoon to make a small well in the center and crack an egg into it.','Return to oven and bake 8-12 min until the egg white is just set but the yolk is still soft. Finish with salt, pepper, red pepper flakes, and fresh herbs.']},
+
+  // ─── BREAKFAST (additional) ───
+  { id:'ricotta-berry-toast', name:'Ricotta Berry Toast', keywords:['ricotta toast','ricotta','berry toast'], mealTypes:['breakfast'],
+    description:'Creamy ricotta spread thick on golden toast, piled with fresh berries and a drizzle of honey. Light, protein-rich, and effortlessly good.',
+    prepTime:'5 min', cookTime:'2 min', baseCal:360, baseP:16, baseC:48, baseF:9,
+    ingredients:[{item:'Whole wheat bread',amount:2,unit:'slice'},{item:'Part-skim ricotta',amount:80,unit:'g'},{item:'Mixed berries',amount:100,unit:'g'},{item:'Honey',amount:10,unit:'g'},{item:'Lemon zest',amount:1,unit:'pinch'}],
+    instructions:['Toast bread until golden and crisp.','Spread ricotta generously over each slice.','Top with fresh berries.','Drizzle with honey and finish with lemon zest.','Serve immediately.']},
+
+  { id:'egg-muffin-cups', name:'Turkey & Spinach Egg Muffin Cups', keywords:['egg cups','muffin cups','egg muffins','baked eggs'], mealTypes:['breakfast'],
+    description:'Bite-sized baked egg cups loaded with turkey, spinach, and melted cheese. Meal-prep friendly and satisfying any morning of the week.',
+    prepTime:'8 min', cookTime:'18 min', baseCal:350, baseP:34, baseC:6, baseF:18,
+    ingredients:[{item:'Eggs',amount:4,unit:'egg'},{item:'Deli turkey breast',amount:80,unit:'g'},{item:'Baby spinach',amount:50,unit:'g'},{item:'Shredded cheese',amount:30,unit:'g'},{item:'Bell pepper, diced',amount:50,unit:'g'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
+    instructions:['Preheat oven to 350°F. Grease a 6-cup muffin tin well.','Chop turkey into small pieces. Distribute turkey, spinach, and bell pepper among the cups.','Crack or pour egg mixture evenly into each cup.','Top with shredded cheese.','Bake 15-18 min until eggs are just set. Cool 2 min before removing.']},
+
+  { id:'banana-pb-protein-oats', name:'Peanut Butter Banana Protein Oats', keywords:['protein oats','peanut butter oats','banana oats'], mealTypes:['breakfast'],
+    description:'Warm oatmeal stirred with protein powder and swirled with peanut butter. Thick, rich, and built to keep you full until dinner.',
+    prepTime:'3 min', cookTime:'5 min', baseCal:470, baseP:32, baseC:58, baseF:14,
+    ingredients:[{item:'Rolled oats',amount:80,unit:'g'},{item:'Protein powder (vanilla)',amount:25,unit:'g'},{item:'Natural peanut butter',amount:20,unit:'g'},{item:'Banana',amount:1,unit:'banana'},{item:'Almond milk',amount:200,unit:'ml'},{item:'Cinnamon',amount:1,unit:'g'}],
+    instructions:['Bring almond milk to a gentle boil in a small saucepan.','Add oats and cook over medium-low heat 4-5 min, stirring frequently.','Remove from heat. Stir in protein powder until no lumps remain.','Transfer to bowl. Swirl in peanut butter.','Top with banana slices and a dusting of cinnamon.']},
+
+  { id:'spinach-feta-omelette', name:'Spinach & Feta Omelette', keywords:['omelette','spinach omelette','feta omelette'], mealTypes:['breakfast'],
+    description:'A golden omelette folded around wilted spinach, creamy feta, and cherry tomatoes. Feels like a café breakfast, ready in 10 minutes.',
+    prepTime:'5 min', cookTime:'8 min', baseCal:380, baseP:30, baseC:8, baseF:24,
+    ingredients:[{item:'Eggs',amount:3,unit:'egg'},{item:'Baby spinach',amount:60,unit:'g'},{item:'Feta cheese',amount:40,unit:'g'},{item:'Cherry tomatoes',amount:60,unit:'g'},{item:'Olive oil',amount:8,unit:'ml'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
+    instructions:['Whisk eggs with salt and pepper until light and frothy.','Heat olive oil in a non-stick pan over medium heat. Sauté spinach and tomatoes 2-3 min.','Push vegetables to one side. Pour eggs into the pan and swirl to coat.','Let eggs set on the bottom, then gently lift the edges to let runny egg flow under.','Add feta to one half. Fold omelette over and slide onto a plate.']},
+
+  // ─── LUNCH (additional) ───
+  { id:'lentil-soup', name:'Red Lentil Vegetable Soup', keywords:['lentil soup','lentil','soup','vegetarian','vegan'], mealTypes:['lunch','dinner'],
+    description:'A rich, warming red lentil soup thick with vegetables and cumin. Completely plant-based, deeply satisfying, and better the next day.',
+    prepTime:'10 min', cookTime:'25 min', baseCal:410, baseP:20, baseC:64, baseF:8,
+    ingredients:[{item:'Red lentils (dry)',amount:120,unit:'g'},{item:'Carrot, diced',amount:80,unit:'g'},{item:'Onion, diced',amount:80,unit:'g'},{item:'Canned diced tomatoes',amount:150,unit:'g'},{item:'Garlic cloves',amount:3,unit:'clove'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Cumin and smoked paprika',amount:4,unit:'g'},{item:'Whole wheat bread',amount:1,unit:'slice'}],
+    instructions:['Sauté onion and carrot in olive oil over medium heat 5 min until softened.','Add garlic, cumin, and smoked paprika. Stir 1 min.','Add lentils, diced tomatoes, and 3 cups water. Bring to a boil.','Reduce heat and simmer 20 min until lentils are completely soft.','Use an immersion blender to partially blend — leave some texture. Season well. Serve with bread.']},
+
+  { id:'asian-chicken-lettuce-wraps', name:'Asian Chicken Lettuce Wraps', keywords:['lettuce wraps','asian lettuce wraps','chicken lettuce wraps'], mealTypes:['lunch'],
+    description:'Savory minced chicken in a ginger-hoisin sauce cradled in crunchy lettuce cups. Fresh, light, and full of bold flavor.',
+    prepTime:'10 min', cookTime:'10 min', baseCal:370, baseP:36, baseC:22, baseF:14,
+    ingredients:[{item:'Ground chicken',amount:200,unit:'g'},{item:'Romaine lettuce',amount:120,unit:'g'},{item:'Water chestnuts, diced',amount:50,unit:'g'},{item:'Garlic and ginger, minced',amount:10,unit:'g'},{item:'Low-sodium soy sauce',amount:20,unit:'ml'},{item:'Sesame oil',amount:8,unit:'ml'},{item:'Hoisin sauce',amount:15,unit:'g'},{item:'Green onions',amount:20,unit:'g'}],
+    instructions:['Cook ground chicken in sesame oil over medium-high heat, breaking into fine crumbles.','Add garlic and ginger. Cook 1 min until fragrant.','Stir in water chestnuts, soy sauce, and hoisin. Cook 2-3 min until glossy.','Taste and adjust seasoning.','Spoon mixture into lettuce cups. Garnish with sliced green onions.']},
+
+  { id:'turkey-mediterranean-salad', name:'Mediterranean Turkey Protein Salad', keywords:['turkey salad','mediterranean salad','protein salad'], mealTypes:['lunch'],
+    description:'Diced turkey, chickpeas, cucumber, and tomatoes tossed in a bright lemon-herb dressing. A complete, satisfying lunch with no cooking required.',
+    prepTime:'10 min', cookTime:'0 min', baseCal:390, baseP:38, baseC:30, baseF:12,
+    ingredients:[{item:'Deli turkey breast',amount:150,unit:'g'},{item:'Cucumber, diced',amount:120,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Chickpeas (canned, drained)',amount:80,unit:'g'},{item:'Red onion, diced',amount:30,unit:'g'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Lemon juice',amount:15,unit:'ml'},{item:'Fresh parsley',amount:10,unit:'g'}],
+    instructions:['Chop turkey into bite-sized pieces.','Combine turkey, cucumber, tomatoes, chickpeas, and red onion in a large bowl.','Whisk olive oil, lemon juice, salt, and pepper together for the dressing.','Pour dressing over the salad and toss well.','Garnish with fresh parsley. Serve immediately or refrigerate up to 2 hours.']},
+
+  { id:'black-bean-burrito-bowl', name:'Black Bean Burrito Bowl', keywords:['burrito bowl','black bean bowl','vegetarian bowl'], mealTypes:['lunch','dinner'],
+    description:'A hearty vegetarian burrito bowl with spiced black beans, rice, corn, and all the fixings. Faster than Chipotle and a lot healthier.',
+    prepTime:'8 min', cookTime:'10 min', baseCal:490, baseP:20, baseC:74, baseF:12,
+    ingredients:[{item:'Black beans (canned, drained)',amount:180,unit:'g'},{item:'White rice (cooked)',amount:160,unit:'g'},{item:'Corn',amount:60,unit:'g'},{item:'Avocado',amount:60,unit:'g'},{item:'Salsa',amount:60,unit:'g'},{item:'Non-fat Greek yogurt',amount:40,unit:'g'},{item:'Taco seasoning',amount:8,unit:'g'},{item:'Lime juice',amount:10,unit:'ml'}],
+    instructions:['Heat beans in a small pan with taco seasoning and 2 tbsp water until hot.','Warm rice if needed.','Build the bowl: rice base, then seasoned beans, corn, and avocado.','Top with salsa and Greek yogurt as sour cream.','Squeeze lime juice over everything before eating.']},
+
+  // ─── DINNER (additional) ───
+  { id:'thai-basil-chicken', name:'Thai Basil Chicken (Pad Kra Pao)', keywords:['thai','pad kra pao','thai chicken','basil chicken'], mealTypes:['dinner'],
+    description:'Punchy, aromatic minced chicken in a savory oyster-soy glaze with fresh basil over jasmine rice. A Thai takeout classic made in 20 minutes.',
+    prepTime:'10 min', cookTime:'10 min', baseCal:540, baseP:42, baseC:56, baseF:12,
+    ingredients:[{item:'Ground chicken',amount:220,unit:'g'},{item:'White rice (cooked)',amount:180,unit:'g'},{item:'Fresh basil leaves',amount:20,unit:'g'},{item:'Bell pepper, sliced',amount:60,unit:'g'},{item:'Garlic and ginger, minced',amount:10,unit:'g'},{item:'Low-sodium soy sauce',amount:15,unit:'ml'},{item:'Oyster sauce',amount:15,unit:'ml'},{item:'Sesame oil',amount:5,unit:'ml'}],
+    instructions:['Cook ground chicken in sesame oil over high heat, breaking into fine crumbles. Season with salt.','Add garlic and ginger. Cook 1 min until fragrant.','Add bell pepper, soy sauce, and oyster sauce. Stir fry 3-4 min until glossy.','Remove from heat and fold in fresh basil leaves until just wilted.','Serve immediately over rice.']},
+
+  { id:'sheet-pan-chicken-potatoes', name:'Sheet Pan Lemon Garlic Chicken & Potatoes', keywords:['sheet pan','sheet pan chicken','lemon garlic chicken'], mealTypes:['dinner'],
+    description:'Juicy lemon-garlic chicken thighs roasting alongside golden potatoes and crisp green beans — all on one pan with minimal cleanup.',
+    prepTime:'10 min', cookTime:'35 min', baseCal:560, baseP:44, baseC:46, baseF:18,
+    ingredients:[{item:'Bone-in chicken thighs',amount:220,unit:'g'},{item:'Baby potatoes, halved',amount:200,unit:'g'},{item:'Green beans',amount:100,unit:'g'},{item:'Olive oil',amount:12,unit:'ml'},{item:'Garlic cloves',amount:4,unit:'clove'},{item:'Lemon juice',amount:20,unit:'ml'},{item:'Italian seasoning',amount:3,unit:'g'}],
+    instructions:['Preheat oven to 425°F.','Toss potatoes and green beans with half the olive oil, salt, and pepper.','Rub chicken with remaining olive oil, minced garlic, lemon juice, and Italian seasoning.','Arrange chicken skin-side up on a sheet pan. Scatter vegetables around it.','Roast 30-35 min until chicken skin is deeply golden and cooked through.']},
+
+  { id:'black-bean-tacos', name:'Crispy Black Bean Tacos', keywords:['black bean tacos','vegetarian tacos','bean tacos'], mealTypes:['dinner'],
+    description:'Crispy corn tortillas stuffed with smoky spiced black beans, fresh avocado, and tangy salsa. A fast, satisfying vegetarian dinner.',
+    prepTime:'10 min', cookTime:'10 min', baseCal:490, baseP:18, baseC:66, baseF:16,
+    ingredients:[{item:'Black beans (canned, drained)',amount:200,unit:'g'},{item:'Small corn tortillas',amount:3,unit:'tortilla'},{item:'Avocado',amount:70,unit:'g'},{item:'Shredded cheese',amount:30,unit:'g'},{item:'Salsa',amount:50,unit:'g'},{item:'Taco seasoning',amount:10,unit:'g'},{item:'Non-fat Greek yogurt',amount:40,unit:'g'}],
+    instructions:['Heat beans in a pan with taco seasoning and a splash of water until hot and fragrant.','Lightly mash half the beans for a creamier filling.','Toast tortillas in a dry pan 1 min per side until slightly crispy.','Fill each tortilla with beans, sliced avocado, and cheese.','Top with salsa and a dollop of Greek yogurt.']},
+
+  { id:'garlic-shrimp-pasta', name:'Garlic Butter Shrimp Pasta', keywords:['shrimp pasta','garlic shrimp pasta','pasta'], mealTypes:['dinner'],
+    description:'Plump shrimp tossed with pasta in a light garlic-butter sauce with cherry tomatoes and spinach. A restaurant-quality dinner ready in 20 minutes.',
+    prepTime:'8 min', cookTime:'15 min', baseCal:570, baseP:40, baseC:62, baseF:14,
+    ingredients:[{item:'Large shrimp, peeled',amount:200,unit:'g'},{item:'Penne pasta (dry)',amount:100,unit:'g'},{item:'Garlic cloves',amount:4,unit:'clove'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Butter',amount:10,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Baby spinach',amount:50,unit:'g'},{item:'Lemon juice',amount:15,unit:'ml'},{item:'Parmesan cheese',amount:15,unit:'g'}],
+    instructions:['Cook pasta per package directions. Reserve ¼ cup pasta water before draining.','Cook shrimp in olive oil over medium-high heat 2 min per side until pink. Remove.','Add butter and garlic to the same pan. Cook 1-2 min.','Add tomatoes and cook 3 min until blistered. Add spinach and wilt.','Return shrimp and pasta. Toss with lemon juice and pasta water. Top with Parmesan.']},
+
+  { id:'herb-pork-tenderloin', name:'Herb-Roasted Pork Tenderloin', keywords:['pork','pork tenderloin','roasted pork'], mealTypes:['dinner'],
+    description:'A lean pork tenderloin coated in garlic and herbs, roasted until perfectly juicy alongside golden potatoes and asparagus.',
+    prepTime:'10 min', cookTime:'28 min', baseCal:510, baseP:48, baseC:34, baseF:18,
+    ingredients:[{item:'Pork tenderloin',amount:220,unit:'g'},{item:'Baby potatoes, halved',amount:160,unit:'g'},{item:'Asparagus',amount:100,unit:'g'},{item:'Olive oil',amount:12,unit:'ml'},{item:'Garlic cloves',amount:3,unit:'clove'},{item:'Italian seasoning',amount:3,unit:'g'},{item:'Dijon mustard',amount:12,unit:'g'}],
+    instructions:['Preheat oven to 425°F.','Rub pork all over with Dijon mustard, minced garlic, Italian seasoning, salt, and pepper.','Toss potatoes with olive oil, salt, and pepper. Arrange on a sheet pan.','Place pork on top of the potatoes. Roast 15 min.','Add asparagus drizzled with olive oil. Roast 8-10 min more until pork reaches 145°F. Rest 5 min before slicing.']},
+
+  { id:'salmon-miso-bowl', name:'Miso-Glazed Salmon Bowl', keywords:['miso salmon','miso glaze','salmon bowl','japanese'], mealTypes:['dinner'],
+    description:'Salmon glazed with a sweet-savory miso marinade, broiled until caramelized and served over rice with steamed broccoli.',
+    prepTime:'10 min', cookTime:'12 min', baseCal:570, baseP:44, baseC:56, baseF:14,
+    ingredients:[{item:'Salmon fillet',amount:200,unit:'g'},{item:'White rice (cooked)',amount:180,unit:'g'},{item:'Broccoli florets',amount:100,unit:'g'},{item:'Low-sodium soy sauce',amount:15,unit:'ml'},{item:'Honey',amount:12,unit:'g'},{item:'Sesame oil',amount:5,unit:'ml'},{item:'Garlic and ginger, minced',amount:8,unit:'g'}],
+    instructions:['Mix soy sauce, honey, sesame oil, garlic, and ginger to make the glaze.','Marinate salmon in half the glaze for 5-10 min.','Broil salmon on high 4-5 min per side until caramelized and cooked through.','Steam broccoli until tender-crisp.','Serve salmon and broccoli over rice. Drizzle remaining glaze over the bowl.']},
+
+  // ─── SNACKS (additional) ───
+  { id:'baked-chickpeas', name:'Crispy Spiced Chickpeas', keywords:['baked chickpeas','crispy chickpeas','chickpeas'], mealTypes:['snack'],
+    description:'Chickpeas roasted until irresistibly crunchy with smoked paprika and garlic salt. The one healthy snack that actually feels like a treat.',
+    prepTime:'3 min', cookTime:'25 min', baseCal:220, baseP:10, baseC:30, baseF:6,
+    ingredients:[{item:'Chickpeas (canned, drained)',amount:200,unit:'g'},{item:'Olive oil',amount:8,unit:'ml'},{item:'Smoked paprika',amount:2,unit:'g'},{item:'Garlic powder',amount:1,unit:'g'},{item:'Salt',amount:1,unit:'pinch'}],
+    instructions:['Preheat oven to 400°F. Drain chickpeas and pat completely dry with paper towels — this is key for crispiness.','Toss with olive oil, smoked paprika, garlic powder, and salt.','Spread in a single layer on a baking sheet.','Roast 20-25 min, shaking the pan halfway, until golden and crunchy.','Let cool 5 min before eating — they crisp up further as they cool.']},
+
+  { id:'protein-energy-bites', name:'No-Bake Protein Energy Bites', keywords:['energy bites','protein bites','energy balls','no bake'], mealTypes:['snack'],
+    description:'Chewy, chocolatey bites packed with oats, peanut butter, and protein. Batch prep on Sunday for grab-and-go snacks all week.',
+    prepTime:'10 min', cookTime:'0 min', baseCal:200, baseP:9, baseC:22, baseF:9,
+    ingredients:[{item:'Rolled oats',amount:35,unit:'g'},{item:'Natural peanut butter',amount:25,unit:'g'},{item:'Honey',amount:12,unit:'g'},{item:'Protein powder (vanilla)',amount:15,unit:'g'},{item:'Dark chocolate chips (70%+)',amount:10,unit:'g'}],
+    instructions:['Combine oats, peanut butter, honey, and protein powder in a bowl.','Stir until a thick, cohesive dough forms. If too dry, add ½ tsp more honey.','Fold in chocolate chips.','Refrigerate 20 min until firm enough to roll.','Roll into 4-5 balls. Store in the fridge up to a week.']},
+
+  { id:'cucumber-tuna-bites', name:'Tuna & Cottage Cheese Cucumber Bites', keywords:['cucumber bites','tuna bites','salmon snack'], mealTypes:['snack'],
+    description:'Cool cucumber rounds topped with a creamy tuna and cottage cheese mixture. An elegant, protein-rich snack with zero cooking.',
+    prepTime:'5 min', cookTime:'0 min', baseCal:160, baseP:22, baseC:5, baseF:4,
+    ingredients:[{item:'Cucumber',amount:1,unit:'cucumber'},{item:'Canned tuna in water',amount:80,unit:'g'},{item:'Low-fat cottage cheese',amount:50,unit:'g'},{item:'Lemon juice',amount:5,unit:'ml'},{item:'Capers',amount:8,unit:'g'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
+    instructions:['Slice cucumber into thick rounds (about 1 cm each).','Drain tuna and mix with cottage cheese, lemon juice, and a pinch of salt.','Spoon a small amount of the tuna mixture onto each cucumber round.','Top with a caper or two.','Serve immediately or refrigerate up to 1 hour.']},
+
+  { id:'mozzarella-tomato', name:'Fresh Mozzarella & Tomato', keywords:['mozzarella','tomato mozzarella','caprese snack'], mealTypes:['snack'],
+    description:'Fresh mozzarella slices layered with ripe tomatoes, drizzled with good olive oil and flaky salt. Simple Italian perfection.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:190, baseP:12, baseC:6, baseF:13,
+    ingredients:[{item:'Fresh mozzarella pearls',amount:70,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Olive oil',amount:5,unit:'ml'},{item:'Fresh basil leaves',amount:5,unit:'g'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
+    instructions:['Halve the cherry tomatoes.','Arrange tomatoes and mozzarella on a plate, alternating them.','Tuck fresh basil leaves between the pieces.','Drizzle with olive oil and season generously with flaky salt and black pepper.','Serve immediately.']},
+
+  { id:'pear-almond-butter', name:'Pear Slices with Almond Butter', keywords:['pear','almond butter','pear and almond butter'], mealTypes:['snack'],
+    description:'Crisp, sweet pear slices with creamy almond butter. A simple, satisfying snack with great texture and natural sweetness.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:250, baseP:6, baseC:32, baseF:12,
+    ingredients:[{item:'Pear (medium)',amount:1,unit:'medium'},{item:'Almond butter',amount:25,unit:'g'}],
+    instructions:['Slice pear into thin wedges, removing the core.','Arrange on a plate alongside almond butter for dipping.','Optional: sprinkle with a pinch of cinnamon.']},
+
+  { id:'cottage-cheese-cucumber', name:'Cottage Cheese & Cucumber Bowl', keywords:['cottage cheese cucumber','cottage cheese snack','cucumber snack'], mealTypes:['snack'],
+    description:'Chilled cottage cheese with crisp cucumber, a drizzle of olive oil, and everything bagel seasoning. Savory, high-protein, and refreshing.',
+    prepTime:'3 min', cookTime:'0 min', baseCal:165, baseP:18, baseC:8, baseF:5,
+    ingredients:[{item:'Low-fat cottage cheese',amount:150,unit:'g'},{item:'Cucumber, diced',amount:80,unit:'g'},{item:'Olive oil',amount:5,unit:'ml'},{item:'Salt and pepper',amount:1,unit:'to taste'},{item:'Red pepper flakes',amount:1,unit:'pinch'}],
+    instructions:['Spoon cottage cheese into a bowl.','Top with diced cucumber.','Drizzle with olive oil.','Season with salt, pepper, and a pinch of red pepper flakes.','Stir gently and enjoy cold.']}
 ];
 
 // ─── Ingredient macro lookup ───
@@ -1080,6 +1212,20 @@ const IMAC = {
   'dark chocolate chips':[5.46,0.05,0.60,0.31],
   'chocolate chips':[5.46,0.05,0.60,0.31],
   'ground chicken':[1.43,0.17,0,0.08],
+  'pork tenderloin':[1.43,0.22,0,0.041],
+  'water chestnuts, diced':[0.97,0.015,0.24,0.001], 'water chestnuts':[0.97,0.015,0.24,0.001],
+  'hoisin sauce':[2.20,0.044,0.44,0.044],
+  'baby potatoes, halved':[0.69,0.018,0.16,0.001], 'potato':[0.77,0.020,0.17,0.001],
+  'green beans':[0.31,0.018,0.070,0.002],
+  'red lentils':[3.53,0.25,0.60,0.011], 'lentils':[3.53,0.25,0.60,0.011],
+  'red lentils (dry)':[3.53,0.25,0.60,0.011],
+  'carrot, diced':[0.41,0.009,0.096,0.002],
+  'fresh basil leaves':[0.22,0.032,0.026,0.006], 'fresh basil':[0.22,0.032,0.026,0.006],
+  'dijon mustard':[0.94,0.056,0.056,0.056],
+  'canned diced tomatoes':[0.24,0.013,0.045,0.002],
+  'fresh parsley':[0.36,0.030,0.064,0.008],
+  'part-skim ricotta':[1.34,0.091,0.030,0.096], 'ricotta':[1.34,0.091,0.030,0.096],
+  'lemon zest':[0, 0, 0, 0],
   // Per-unit lookups [cal, p, c, f] — applied when unit is the key
 };
 // Per-unit macros [cal, p, c, f] per 1 unit
@@ -1100,6 +1246,7 @@ const IMAC_UNIT = {
   'spray':       [0, 0, 0, 0],
   'to taste':    [0, 0, 0, 0],
   'piece':       [60, 6, 0.5, 3.5],   // low-fat string cheese stick ~28g
+  'cucumber':    [22, 1, 5, 0.1],     // whole medium cucumber ~140g
 };
 
 function ingMacros(ing, scale) {
