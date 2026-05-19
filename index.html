@@ -286,6 +286,7 @@ function defaultState() {
     fixedItems: [],
     savedMeals: [],
     dailyPlans: {},
+    weeklyTemplate: null,
     apiKey: '',
     apiProvider: 'openai',
     currentView: 'today',
@@ -304,6 +305,8 @@ let STATE = (() => {
 function saveState() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch(e) {}
 }
+
+let lastKnownDate = today();
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -1851,6 +1854,7 @@ function renderToday() {
     <div class="section-header">
       <span class="section-title">Meal Plan</span>
       <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+        <button class="pill" onclick="resetDailyPlan()" style="background:#fef2f2;border-color:#fecaca;color:#ef4444">${IC.refresh} Reset day</button>
         <button class="pill" onclick="addSlot('${dateStr}','meal')">+ Meal</button>
         <button class="pill" onclick="addSlot('${dateStr}','snack')">+ Snack</button>
         <button class="pill" onclick="addSlot('${dateStr}','dessert')">+ Dessert</button>
@@ -2219,13 +2223,18 @@ function renderWeek() {
   if (weekState.groceryMode) return renderGroceryList(dates);
 
   return `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px">
+      <div style="flex-shrink:0">
         <div style="font-size:20px;font-weight:800;letter-spacing:-.5px">This Week</div>
         <div style="font-size:13px;color:var(--text-2)">${formatDate(dates[0])} – ${formatDate(dates[6])}</div>
       </div>
-      <button class="btn btn-secondary btn-sm" onclick="planWholeWeek()" id="plan-week-btn">${IC.sparkle} Plan Week</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+        <button class="btn btn-secondary btn-sm" onclick="resetWeeklyPlan()" style="color:#ef4444;border-color:#fecaca">${IC.refresh} Reset week</button>
+        <button class="btn btn-secondary btn-sm" onclick="saveAsWeeklyTemplate()">${IC.bookmark} Save as template</button>
+        <button class="btn btn-secondary btn-sm" onclick="planWholeWeek()" id="plan-week-btn">${IC.sparkle} Plan Week</button>
+      </div>
     </div>
+    ${STATE.weeklyTemplate ? `<div style="background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--primary-dark)">Weekly template active — meals auto-apply at midnight each day.</div>` : ''}
 
     <div class="week-grid">
       ${dates.map(d => {
@@ -2564,6 +2573,15 @@ function renderSettings() {
     </div>
 
 <button class="btn btn-primary" id="save-settings-btn">Save Settings</button>
+
+    <div class="settings-section" style="margin-top:16px">
+      <div class="settings-section-title">Weekly Template</div>
+      ${STATE.weeklyTemplate
+        ? `<p style="font-size:14px;color:var(--text-2);margin-bottom:12px">A weekly template is active. Your daily meal plan will auto-update at midnight to match the template for that day of the week.</p>
+           <button class="btn btn-danger btn-sm" onclick="clearWeeklyTemplate()">Remove template</button>`
+        : `<p style="font-size:14px;color:var(--text-3)">No weekly template set. Plan your week in the Week view and tap <strong>Save as template</strong> to enable automatic midnight updates.</p>`}
+    </div>
+
     <div style="margin-top:12px">
       <button class="btn btn-danger btn-sm" onclick="resetApp()">Reset all data</button>
     </div>
@@ -2712,6 +2730,75 @@ function removeLoggedFood(dateStr, foodId) {
   renderTodayInPlace(dateStr);
 }
 
+function resetDailyPlan() {
+  if (!confirm("Reset today's meal plan to empty slots?")) return;
+  const dateStr = today();
+  const loggedFoods = STATE.dailyPlans[dateStr]?.loggedFoods || [];
+  STATE.dailyPlans[dateStr] = { slots: defaultSlots(), approved: false, loggedFoods };
+  saveState();
+  render();
+  showToast("Today's meal plan reset");
+}
+
+function resetWeeklyPlan() {
+  if (!confirm('This will clear all meal plans for this week and remove your weekly template. Are you sure?')) return;
+  const dates = getWeekDates();
+  dates.forEach(d => {
+    const loggedFoods = STATE.dailyPlans[d]?.loggedFoods || [];
+    STATE.dailyPlans[d] = { slots: defaultSlots(), approved: false, loggedFoods };
+  });
+  STATE.weeklyTemplate = null;
+  saveState();
+  render();
+  showToast('Weekly plan reset');
+}
+
+function saveAsWeeklyTemplate() {
+  const dates = getWeekDates();
+  const template = {};
+  dates.forEach(d => {
+    const dayOfWeek = new Date(d + 'T12:00').getDay();
+    const plan = STATE.dailyPlans[d];
+    template[dayOfWeek] = plan
+      ? plan.slots.map(s => ({ ...s, id: uid(), seenNames: [] }))
+      : defaultSlots();
+  });
+  STATE.weeklyTemplate = template;
+  saveState();
+  showToast('Weekly template saved! Meals will auto-apply at midnight each day.');
+}
+
+function clearWeeklyTemplate() {
+  if (!confirm('Remove the weekly template? Midnight auto-update will reset to empty defaults instead.')) return;
+  STATE.weeklyTemplate = null;
+  saveState();
+  const content = document.querySelector('.page-content');
+  if (content) { content.innerHTML = renderSettings(); bindSettings(); }
+  showToast('Weekly template removed');
+}
+
+function applyTemplateForDate(dateStr) {
+  const dayOfWeek = new Date(dateStr + 'T12:00').getDay();
+  const loggedFoods = STATE.dailyPlans[dateStr]?.loggedFoods || [];
+  if (STATE.weeklyTemplate && STATE.weeklyTemplate[dayOfWeek]) {
+    const slots = STATE.weeklyTemplate[dayOfWeek].map(s => ({ ...s, id: uid() }));
+    STATE.dailyPlans[dateStr] = { slots, approved: false, loggedFoods };
+  } else {
+    STATE.dailyPlans[dateStr] = { slots: defaultSlots(), approved: false, loggedFoods };
+  }
+  saveState();
+}
+
+function checkMidnightReset() {
+  const currentDate = today();
+  if (currentDate !== lastKnownDate) {
+    lastKnownDate = currentDate;
+    applyTemplateForDate(currentDate);
+    if (STATE.currentView === 'today') render();
+    showToast(STATE.weeklyTemplate ? 'New day! Weekly plan applied.' : 'New day! Daily plan reset.');
+  }
+}
+
 function resetApp() {
   if (!confirm('This will delete all your data including meal history and saved meals. Are you sure?')) return;
   localStorage.removeItem(STORAGE_KEY);
@@ -2733,6 +2820,8 @@ function bindApp() {
 // INIT
 // ═══════════════════════════════════════════════════
 render();
+setInterval(checkMidnightReset, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkMidnightReset(); });
 </script>
 </body>
 </html>
