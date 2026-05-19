@@ -2808,12 +2808,149 @@ async function planDay(dateStr) {
 async function planWholeWeek() {
   const dates = getWeekDates();
   const btn = document.getElementById('plan-week-btn');
-  if (btn) { btn.disabled=true; btn.textContent='Planning...'; }
+  if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spinner spinner-dark"></span> Starting...`; }
+
+  // Seed variety tracker with any meals already on the plan this week
+  const usedNames = new Set();
+  dates.forEach(d => {
+    const plan = STATE.dailyPlans[d];
+    if (plan) plan.slots.forEach(s => { if (s.meal?.name) usedNames.add(s.meal.name); });
+  });
+
+  const dayResults = [];
+  let totalFilled = 0;
+  let totalErrors = 0;
+
   for (const d of dates) {
-    await planDay(d);
+    const dayLabel = new Date(d + 'T12:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    if (btn) btn.innerHTML = `<span class="spinner spinner-dark"></span> ${dayLabel}...`;
+
+    const plan = getOrCreatePlan(d);
+    const emptySlots = plan.slots.filter(s => !s.meal);
+
+    if (!emptySlots.length) {
+      dayResults.push({ date: d, dayLabel, skipped: true });
+      continue;
+    }
+
+    const { totals: fixedTotals } = getActiveFixedTotals(d);
+    let usedCal  = fixedTotals.calories;
+    let usedProt = fixedTotals.protein;
+    let usedCarbs = fixedTotals.carbs;
+    let usedFat  = fixedTotals.fat;
+    // Include already-filled slots in the macro budget
+    plan.slots.filter(s => s.meal).forEach(s => {
+      usedCal   += s.meal.calories || 0;
+      usedProt  += s.meal.protein  || 0;
+      usedCarbs += s.meal.carbs    || 0;
+      usedFat   += s.meal.fat      || 0;
+    });
+
+    let dayFilled = 0;
+    let dayErrors = 0;
+
+    for (const slot of emptySlots) {
+      const stillEmpty = plan.slots.filter(s => !s.meal);
+      const remaining = {
+        calories: Math.max(0, STATE.profile.calories - usedCal),
+        protein:  Math.max(0, STATE.profile.protein  - usedProt),
+        carbs:    Math.max(0, STATE.profile.carbs     - usedCarbs),
+        fat:      Math.max(0, STATE.profile.fat       - usedFat)
+      };
+      const wt = weightedSlotTarget(slot, remaining, stillEmpty);
+      try {
+        const recipe = await generateRecipe({
+          preference: slot.preference || '',
+          targetCal:   Math.round(Math.max(100, wt.cal)),
+          targetProt:  Math.round(wt.prot),
+          targetCarbs: Math.round(wt.carbs),
+          targetFat:   Math.round(wt.fat),
+          mealType:    slotMealType(slot),
+          excludeNames: [...usedNames]
+        });
+        slot.meal  = recipe;
+        usedNames.add(recipe.name);
+        usedCal   += recipe.calories || 0;
+        usedProt  += recipe.protein  || 0;
+        usedCarbs += recipe.carbs    || 0;
+        usedFat   += recipe.fat      || 0;
+        dayFilled++;
+      } catch(e) {
+        dayErrors++;
+        totalErrors++;
+      }
+    }
+
+    saveState();
+    totalFilled += dayFilled;
+    dayResults.push({ date: d, dayLabel, filled: dayFilled, errors: dayErrors, cal: Math.round(usedCal), prot: Math.round(usedProt), carbs: Math.round(usedCarbs), fat: Math.round(usedFat) });
   }
-  showToast('Week planned! Check the grocery list.');
+
   render();
+  showWeekPlanSummary(dayResults, totalFilled, totalErrors);
+}
+
+function showWeekPlanSummary(results, totalFilled, totalErrors) {
+  const target = STATE.profile;
+  const rows = results.map(r => {
+    if (r.skipped) return `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px">
+        <span style="font-weight:600;color:var(--text-2)">${r.dayLabel}</span>
+        <span style="color:var(--text-3);font-size:12px">Already fully planned</span>
+      </div>`;
+    const calPct = target.calories ? r.cal / target.calories : 0;
+    const calColor = calPct >= 0.9 && calPct <= 1.12 ? '#16a34a' : calPct >= 0.75 ? '#d97706' : '#ef4444';
+    const protPct = target.protein ? r.prot / target.protein : 0;
+    const protBar = Math.min(100, Math.round(protPct * 100));
+    const calBar  = Math.min(100, Math.round(calPct  * 100));
+    return `
+      <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
+          <span style="font-weight:700;font-size:13px">${r.dayLabel}</span>
+          <div style="text-align:right;font-size:12px">
+            <span style="font-weight:700;color:${calColor}">${r.cal} cal</span>
+            <span style="color:var(--text-3);margin-left:5px">${r.prot}g P · ${r.carbs}g C · ${r.fat}g F</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:3px">
+          <span style="font-size:11px;color:var(--text-3);width:28px">Cal</span>
+          <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${calBar}%;background:${calColor};border-radius:3px;transition:width .3s"></div>
+          </div>
+          <span style="font-size:11px;color:var(--text-3);width:32px;text-align:right">${calBar}%</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="font-size:11px;color:var(--text-3);width:28px">Pro</span>
+          <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${protBar}%;background:#6366f1;border-radius:3px;transition:width .3s"></div>
+          </div>
+          <span style="font-size:11px;color:var(--text-3);width:32px;text-align:right">${protBar}%</span>
+        </div>
+        <div style="margin-top:5px;font-size:11px;color:var(--text-3)">${r.filled} meal${r.filled !== 1 ? 's' : ''} added${r.errors ? ` · <span style="color:#ef4444">${r.errors} error${r.errors > 1 ? 's' : ''}</span>` : ''}</div>
+      </div>`;
+  }).join('');
+
+  const skippedCount = results.filter(r => r.skipped).length;
+  const plannedCount = results.filter(r => !r.skipped).length;
+
+  const html = `<div class="modal-overlay" id="week-plan-summary-modal" onclick="if(event.target.id==='week-plan-summary-modal')this.remove()">
+    <div class="modal-sheet" style="max-height:90vh;overflow-y:auto">
+      <div class="modal-title">${IC.sparkle} Week Planned</div>
+      <div class="modal-sub">${totalFilled} meal${totalFilled !== 1 ? 's' : ''} added across ${plannedCount} day${plannedCount !== 1 ? 's' : ''}${skippedCount ? ` · ${skippedCount} already full` : ''}${totalErrors ? ` · ${totalErrors} error${totalErrors > 1 ? 's' : ''}` : ''}</div>
+      <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text-2);margin:12px 0 4px;display:flex;gap:16px;flex-wrap:wrap">
+        <span>Target/day: <strong>${target.calories} cal</strong></span>
+        <span><strong>${target.protein}g</strong> protein</span>
+        <span><strong>${target.carbs}g</strong> carbs</span>
+        <span><strong>${target.fat}g</strong> fat</span>
+      </div>
+      <div style="margin-bottom:12px">${rows}</div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('week-plan-summary-modal').remove()">Close</button>
+        <button class="btn btn-primary" style="flex:1" onclick="weekState.groceryMode=true;render();document.getElementById('week-plan-summary-modal').remove()">${IC.cart} Grocery List</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
 }
 
 function renderGroceryList(dates) {
@@ -2887,7 +3024,7 @@ function renderSaved() {
   return `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
       <div style="font-size:20px;font-weight:800;letter-spacing:-.5px">Saved Meals</div>
-      <button class="btn btn-primary btn-sm" onclick="showBuildMealModal()" style="gap:5px">+ Build a Meal</button>
+      <button class="btn btn-primary btn-sm" onclick="showBuildMealModal()" style="gap:4px;font-size:11px;padding:4px 9px">+ Build a Meal</button>
     </div>
     <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">${STATE.savedMeals.length} saved · Filter by macros</div>
 
@@ -2987,13 +3124,13 @@ function renderBuildMealModal() {
   document.getElementById('build-meal-modal')?.remove();
   const { tab, loading, ingredients } = buildMealState;
 
-  const ingRows = ingredients.map((ing, i) => `
+  const ingRows = ingredients.map((ing) => `
     <div class="ing-row" id="ing-${ing.id}">
-      <input placeholder="Ingredient name" value="${ing.name}" oninput="buildMealState.ingredients[${i}].name=this.value">
-      <input type="number" placeholder="Cal" value="${ing.cal}" oninput="buildMealState.ingredients[${i}].cal=this.value;buildMealRecalc()">
-      <input type="number" placeholder="P" value="${ing.p}" oninput="buildMealState.ingredients[${i}].p=this.value;buildMealRecalc()">
-      <input type="number" placeholder="C" value="${ing.c}" oninput="buildMealState.ingredients[${i}].c=this.value;buildMealRecalc()">
-      <input type="number" placeholder="F" value="${ing.f}" oninput="buildMealState.ingredients[${i}].f=this.value;buildMealRecalc()">
+      <input placeholder="Ingredient name" value="${ing.name}" oninput="buildMealUpdateIngredient('${ing.id}','name',this.value)">
+      <input type="number" placeholder="Cal" value="${ing.cal}" oninput="buildMealUpdateIngredient('${ing.id}','cal',this.value);buildMealRecalc()">
+      <input type="number" placeholder="P" value="${ing.p}" oninput="buildMealUpdateIngredient('${ing.id}','p',this.value);buildMealRecalc()">
+      <input type="number" placeholder="C" value="${ing.c}" oninput="buildMealUpdateIngredient('${ing.id}','c',this.value);buildMealRecalc()">
+      <input type="number" placeholder="F" value="${ing.f}" oninput="buildMealUpdateIngredient('${ing.id}','f',this.value);buildMealRecalc()">
       <button class="ing-del" onclick="buildMealRemoveIngredient('${ing.id}')">✕</button>
     </div>`).join('');
 
@@ -3046,7 +3183,7 @@ function renderBuildMealModal() {
       </button>
     </div>
     <div style="text-align:center;margin:18px 0 10px;color:var(--text-3);font-size:12px">— or build manually instead —</div>
-    <button class="btn btn-secondary" style="width:100%" onclick="buildMealState.tab='manual';renderBuildMealModal()">Fill out manually</button>
+    <button class="btn btn-secondary" style="width:100%" onclick="buildMealSwitchPanel('manual')">Fill out manually</button>
     <div class="modal-actions" style="margin-top:18px">
       <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('build-meal-modal').remove()">Cancel</button>
     </div>`;
@@ -3055,11 +3192,8 @@ function renderBuildMealModal() {
     <div class="modal-sheet">
       <div class="modal-title">Build a Meal</div>
       <div class="modal-sub">Add a custom meal to your saved library.</div>
-      <div class="modal-tabs">
-        <button class="modal-tab ${tab==='url'?'active':''}" onclick="buildMealState.tab='url';renderBuildMealModal()">Import from URL</button>
-        <button class="modal-tab ${tab==='manual'?'active':''}" onclick="buildMealState.tab='manual';renderBuildMealModal()">Fill manually</button>
-      </div>
-      ${tab === 'url' ? urlTab : manualTab}
+      <div id="bm-url-panel"${tab === 'manual' ? ' style="display:none"' : ''}>${urlTab}</div>
+      <div id="bm-manual-panel"${tab === 'url' ? ' style="display:none"' : ''}>${manualTab}</div>
     </div>
   </div>`;
   document.body.insertAdjacentHTML('beforeend', html);
@@ -3141,16 +3275,41 @@ function parseRecipeFromHtml(html) {
 }
 
 function buildMealAddIngredient() {
-  buildMealState.ingredients.push({ id: uid(), name: '', cal: '', p: '', c: '', f: '' });
-  renderBuildMealModal();
+  const ing = { id: uid(), name: '', cal: '', p: '', c: '', f: '' };
+  buildMealState.ingredients.push(ing);
+  const row = `<div class="ing-row" id="ing-${ing.id}">
+    <input placeholder="Ingredient name" value="" oninput="buildMealUpdateIngredient('${ing.id}','name',this.value)">
+    <input type="number" placeholder="Cal" value="" oninput="buildMealUpdateIngredient('${ing.id}','cal',this.value);buildMealRecalc()">
+    <input type="number" placeholder="P" value="" oninput="buildMealUpdateIngredient('${ing.id}','p',this.value);buildMealRecalc()">
+    <input type="number" placeholder="C" value="" oninput="buildMealUpdateIngredient('${ing.id}','c',this.value);buildMealRecalc()">
+    <input type="number" placeholder="F" value="" oninput="buildMealUpdateIngredient('${ing.id}','f',this.value);buildMealRecalc()">
+    <button class="ing-del" onclick="buildMealRemoveIngredient('${ing.id}')">✕</button>
+  </div>`;
   const list = document.getElementById('bm-ing-list');
-  if (list) list.lastElementChild?.querySelector('input')?.focus();
+  if (list) {
+    list.insertAdjacentHTML('beforeend', row);
+    list.lastElementChild?.querySelector('input')?.focus();
+  }
 }
 
 function buildMealRemoveIngredient(ingId) {
   if (buildMealState.ingredients.length <= 1) { showToast('Need at least one ingredient row'); return; }
   buildMealState.ingredients = buildMealState.ingredients.filter(i => i.id !== ingId);
-  renderBuildMealModal();
+  document.getElementById('ing-' + ingId)?.remove();
+  buildMealRecalc();
+}
+
+function buildMealSwitchPanel(panel) {
+  buildMealState.tab = panel;
+  document.getElementById('bm-url-panel').style.display = panel === 'url' ? '' : 'none';
+  document.getElementById('bm-manual-panel').style.display = panel === 'manual' ? '' : 'none';
+  if (panel === 'url') setTimeout(() => document.getElementById('bm-url')?.focus(), 50);
+  else setTimeout(() => document.getElementById('bm-name')?.focus(), 50);
+}
+
+function buildMealUpdateIngredient(ingId, field, value) {
+  const ing = buildMealState.ingredients.find(i => i.id === ingId);
+  if (ing) ing[field] = value;
 }
 
 function buildMealRecalc() {
