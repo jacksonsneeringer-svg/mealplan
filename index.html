@@ -2319,7 +2319,7 @@ function renderToday() {
           { label:'Fat', val:consumed.fat, tgt:target.fat, unit:'g', color:'var(--fat)' }
         ].map(m => {
           const mPct = m.tgt > 0 ? m.val / m.tgt : 0;
-          const barColor = mPct >= 1 ? '#fca5a5' : m.color;
+          const barColor = mPct >= 1 ? '#ef4444' : mPct >= 0.75 ? '#fbbf24' : '#ffffff';
           return `<div class="macro-bar-item">
             <label>${m.label}</label>
             <div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.min(100,mPct*100).toFixed(1)}%;background:${barColor}"></div></div>
@@ -3525,7 +3525,7 @@ function renderSaved() {
   return `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
       <div style="font-size:20px;font-weight:800;letter-spacing:-.5px">Saved Meals</div>
-      <button class="btn btn-primary btn-sm" onclick="showBuildMealModal()" style="gap:4px;font-size:12px;padding:9px 11px;align-self:flex-end">+ Build a Meal</button>
+      <button class="btn btn-primary btn-sm" onclick="showBuildMealModal()" style="gap:4px;font-size:12px;padding:9px 11px;align-self:flex-end;width:50%">+ Build a Meal</button>
     </div>
     <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">${STATE.savedMeals.length} saved · Filter by macros</div>
 
