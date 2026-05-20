@@ -297,6 +297,12 @@ a{color:inherit;text-decoration:none}
 .meal-slot.dragging{opacity:.45;box-shadow:none}
 .meal-slot.drag-over{outline:2.5px dashed var(--primary);outline-offset:2px}
 
+/* ── Mobile Reorder Arrows ── */
+.slot-reorder-btns{display:none;flex-direction:column;gap:3px;flex-shrink:0;margin-right:4px}
+.btn-reorder{background:none;border:1.5px solid var(--border);border-radius:6px;color:var(--text-2);font-size:12px;font-weight:700;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;line-height:1}
+.btn-reorder:active{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+@media(max-width:499px){.slot-reorder-btns{display:flex}.drag-handle{display:none}}
+
 /* ── Add Meal Category Cards ── */
 .meal-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
 .meal-type-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 10px;border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s;background:var(--surface);text-align:center}
@@ -2394,9 +2400,16 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
 
   const targetCal = slot.meal ? slot.meal.calories : perSlotCal;
   const isSnack = slot.type === 'snack';
+  const slotIdx = allSlots.findIndex(s => s.id === slot.id);
+  const isFirst = slotIdx === 0;
+  const isLast = slotIdx === allSlots.length - 1;
 
   return `<div class="meal-slot" id="slot-${slot.id}" data-slot-id="${slot.id}" draggable="true">
     <div class="slot-header">
+      <div class="slot-reorder-btns">
+        ${!isFirst ? `<button class="btn-reorder" onclick="moveSlot('${dateStr}','${slot.id}','up')" title="Move up">^</button>` : ''}
+        ${!isLast ? `<button class="btn-reorder" onclick="moveSlot('${dateStr}','${slot.id}','down')" title="Move down">v</button>` : ''}
+      </div>
       <span class="drag-handle" title="Drag to reorder"><svg width="14" height="18" viewBox="0 0 14 18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="4" cy="3" r="1.5" fill="#9ca3af"/><circle cx="10" cy="3" r="1.5" fill="#9ca3af"/><circle cx="4" cy="9" r="1.5" fill="#9ca3af"/><circle cx="10" cy="9" r="1.5" fill="#9ca3af"/><circle cx="4" cy="15" r="1.5" fill="#9ca3af"/><circle cx="10" cy="15" r="1.5" fill="#9ca3af"/></svg></span>
       <div style="flex:1">
         <div class="slot-title">${slot.label}</div>
@@ -2731,6 +2744,19 @@ function reorderSlots(dateStr, srcId, targetId) {
   if (srcIdx === -1 || tgtIdx === -1) return;
   const [moved] = plan.slots.splice(srcIdx, 1);
   plan.slots.splice(tgtIdx, 0, moved);
+  saveState();
+  renderTodayInPlace(dateStr);
+}
+
+function moveSlot(dateStr, slotId, dir) {
+  const plan = STATE.dailyPlans[dateStr];
+  if (!plan) return;
+  const idx = plan.slots.findIndex(s => s.id === slotId);
+  if (idx === -1) return;
+  const newIdx = dir === 'up' ? idx - 1 : idx + 1;
+  if (newIdx < 0 || newIdx >= plan.slots.length) return;
+  const [moved] = plan.slots.splice(idx, 1);
+  plan.slots.splice(newIdx, 0, moved);
   saveState();
   renderTodayInPlace(dateStr);
 }
