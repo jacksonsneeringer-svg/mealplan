@@ -3213,6 +3213,7 @@ function renderWeek() {
         return `<div class="day-card ${isActive?'active':''} ${status==='planned'?'planned':''} ${isPast?'past':''}" onclick="selectWeekDay('${d}')">
           <div class="day-name">${dayName}${isToday ? ' <span style="display:inline-block;width:6px;height:6px;background:var(--primary);border-radius:50%;vertical-align:2px;margin-left:2px"></span>' : ''}</div>
           <div class="day-date">${parseInt(mm)}/${parseInt(dd)}</div>
+          ${plannedCals > 0 ? `<div style="font-size:22px;font-weight:800;color:var(--primary);line-height:1.1;margin:4px 0 2px">${plannedCals}</div><div style="font-size:10px;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">cal</div>` : ''}
           <div class="day-status ${status}">${statusText}</div>
         </div>`;
       }).join('')}
