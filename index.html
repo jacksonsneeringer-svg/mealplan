@@ -29,10 +29,17 @@ a{color:inherit;text-decoration:none}
 /* ── Layout ── */
 #app{min-height:100vh;display:flex;flex-direction:column}
 .nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
-.nav-bar.top{position:fixed;top:0;bottom:auto;border-top:none;border-bottom:1px solid var(--border);padding:0}
+.nav-bar.top{position:fixed;top:0;bottom:auto;border-top:none;border-bottom:1px solid var(--border);padding:0;overflow:visible}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;color:var(--text-3);font-size:11px;font-weight:500;transition:color .2s}
 .nav-item.active{color:var(--primary)}
 .nav-item svg{width:22px;height:22px}
+.hamburger-btn{display:none;margin-left:auto;padding:8px 14px;align-items:center;justify-content:center;background:none;color:var(--text);flex-shrink:0}
+.mobile-nav-dropdown{display:none;position:absolute;top:100%;right:0;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 0 var(--radius);z-index:200;min-width:160px;box-shadow:0 4px 16px rgba(0,0,0,.1);flex-direction:column}
+.mobile-nav-dropdown.open{display:flex}
+.mobile-nav-item{display:flex;align-items:center;gap:10px;padding:12px 20px;background:none;color:var(--text-2);font-size:14px;font-weight:500;width:100%;text-align:left;transition:color .2s}
+.mobile-nav-item:not(:last-child){border-bottom:1px solid var(--border)}
+.mobile-nav-item.active{color:var(--primary)}
+.mobile-nav-item svg{width:18px;height:18px;flex-shrink:0}
 .page-content{flex:1;padding:16px;padding-bottom:90px;max-width:680px;margin:0 auto;width:100%}
 .page-content.with-topnav{padding-top:72px}
 
@@ -302,6 +309,8 @@ a{color:inherit;text-decoration:none}
 .btn-reorder{background:none;border:1.5px solid var(--border);border-radius:6px;color:var(--text-2);font-size:12px;font-weight:700;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;line-height:1}
 .btn-reorder:active{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
 @media(max-width:499px){
+  .hamburger-btn{display:flex}
+  .nav-item{display:none}
   .slot-reorder-btns{display:flex}
   .drag-handle{display:none}
   /* Prevent iOS auto-zoom — all inputs must be ≥16px */
@@ -1935,6 +1944,17 @@ function navigate(view) {
   render();
 }
 
+function toggleMobileMenu(e) {
+  e.stopPropagation();
+  const dropdown = document.getElementById('mobile-nav-dropdown');
+  if (dropdown) dropdown.classList.toggle('open');
+}
+
+document.addEventListener('click', function() {
+  const dropdown = document.getElementById('mobile-nav-dropdown');
+  if (dropdown) dropdown.classList.remove('open');
+});
+
 function render() {
   const app = document.getElementById('app');
   if (!STATE.onboardingComplete) {
@@ -1960,6 +1980,17 @@ function renderApp() {
           <span>${tab.charAt(0).toUpperCase()+tab.slice(1)}</span>
         </button>
       `).join('')}
+      <button class="hamburger-btn" onclick="toggleMobileMenu(event)" aria-label="Open menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="mobile-nav-dropdown" id="mobile-nav-dropdown">
+        ${['today','week','saved','settings'].map(tab => `
+          <button class="mobile-nav-item ${v===tab?'active':''}" onclick="navigate('${tab}')">
+            ${NAV_ICONS[tab]}
+            <span>${tab.charAt(0).toUpperCase()+tab.slice(1)}</span>
+          </button>
+        `).join('')}
+      </div>
     </div>
     <div class="page-content with-topnav">
       ${v==='today' ? renderToday() : ''}
