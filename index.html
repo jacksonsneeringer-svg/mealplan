@@ -4032,14 +4032,32 @@ function renderGroceryList(dates) {
     return [ing];
   }
 
-  // Group and combine ingredients by normalized name, summing amounts by unit
+  function canonicalizeIngredient(name) {
+    const lower = name.toLowerCase().trim();
+    if (/\b(white|basmati|jasmine|brown|long.grain|short.grain|arborio|wild|sushi|calrose)\s+rice\b/.test(lower)) return 'Rice';
+    if (/\bromaine\b/.test(lower)) return 'Romaine lettuce';
+    if (/\bgarlic\b/.test(lower) && !/garlic\s+(powder|salt|flake|chip)/.test(lower)) return 'Garlic';
+    if (/\bcheddar\b/.test(lower)) return 'Cheddar cheese';
+    if (/\bmozzarella\b/.test(lower)) return 'Mozzarella';
+    if (/\bparmesan\b/.test(lower)) return 'Parmesan';
+    if (/\b(red|green|yellow|orange)\s+bell pepper\b/.test(lower) || lower === 'bell pepper') return 'Bell pepper';
+    if (/\bchicken breast\b/.test(lower)) return 'Chicken breast';
+    if (/\bgreek yogurt\b/.test(lower)) return 'Greek yogurt';
+    if (/\bground beef\b/.test(lower)) return 'Ground beef';
+    if (/\bground turkey\b/.test(lower)) return 'Ground turkey';
+    if (/\bonion\b/.test(lower) && !/onion\s+(powder|flake|salt)/.test(lower) && !/green onion|spring onion|red onion|shallot/.test(lower)) return 'Onion';
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  // Group and combine ingredients by canonical name, summing amounts by unit
   const grouped = {};
   allIngredients.forEach(rawIng => {
     const normalized = { ...rawIng, item: normalizeIngredientName(rawIng.item) };
     const split = splitCombinedIngredient(normalized);
     split.forEach(ing => {
-      const key = ing.item.toLowerCase();
-      if (!grouped[key]) grouped[key] = { item: ing.item, amounts: {}, meals: [] };
+      const canonical = canonicalizeIngredient(ing.item);
+      const key = canonical.toLowerCase();
+      if (!grouped[key]) grouped[key] = { item: canonical, amounts: {}, meals: [] };
       const unit = ing.unit || '';
       if (!grouped[key].amounts[unit]) grouped[key].amounts[unit] = 0;
       grouped[key].amounts[unit] += parseFloat(ing.amount) || 0;
@@ -4054,7 +4072,8 @@ function renderGroceryList(dates) {
     const g = amounts['g'] || 0;
     const ml = amounts['ml'] || 0;
 
-    if (category === 'Seasoning' || amounts['to taste'] > 0 || amounts['pinch'] > 0 || amounts['spray'] > 0) {
+    const isSpice = /\b(salt|pepper|paprika|cumin|oregano|thyme|rosemary|basil|seasoning|spice|garlic powder|onion powder|chili powder|curry powder|curry paste|cayenne|turmeric|cinnamon|nutmeg|cardamom|coriander|allspice|bouillon|tajin|smoked paprika|red pepper flake|italian herb|taco seasoning|black pepper|white pepper|dried herb)\b/.test(name);
+    if (isSpice || amounts['to taste'] > 0 || amounts['pinch'] > 0 || amounts['spray'] > 0) {
       return 'as needed';
     }
 
@@ -4085,10 +4104,10 @@ function renderGroceryList(dates) {
         [/broccoli/, 350, 'head of broccoli'],
         [/cauliflower/, 600, 'head of cauliflower'],
       ];
-      for (const [re, wt, noun] of byCount) {
+      for (const [re, wt] of byCount) {
         if (re.test(name)) {
           const n = Math.ceil(g / wt);
-          return `~${n} ${noun}${n > 1 && !noun.startsWith('head') ? 's' : ''}`;
+          return `~${n}`;
         }
       }
       if (/spinach|kale|arugula|romaine|lettuce|cabbage/.test(name)) return g <= 100 ? 'small bag (5 oz)' : 'large bag (10 oz)';
@@ -4143,12 +4162,10 @@ function renderGroceryList(dates) {
 
   const CATEGORIES = [
     { label: 'Produce', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', keywords: ['apple','apples','banana','bananas','orange','oranges','lemon','lemons','lime','limes','berry','berries','strawberry','blueberry','raspberry','grape','grapes','mango','pineapple','peach','pear','plum','watermelon','melon','avocado','tomato','tomatoes','cherry tomato','cucumber','zucchini','squash','bell pepper','jalapeño pepper','jalapeño','jalapeno','onion','onions','garlic','shallot','potato','potatoes','sweet potato','carrot','carrots','celery','broccoli','cauliflower','spinach','kale','lettuce','romaine','arugula','cabbage','brussels','mushroom','mushrooms','asparagus','corn','pea','peas','edamame','leek','ginger','beet','beets','radish','artichoke','eggplant','fennel','chard','cilantro','parsley','basil','mint','thyme','rosemary','sage','dill','chive','chives','scallion','scallions','herb','herbs','green onion','snap pea','water chestnut'] },
-    { label: 'Seasoning', color: '#854d0e', bg: '#fef9c3', border: '#fde68a', keywords: ['italian seasoning','italian herb','taco seasoning','everything bagel seasoning','pumpkin pie spice','tikka masala spice','garlic powder','onion powder','smoked paprika','garlic salt','chili powder','curry powder','curry paste','red pepper flake','cayenne','black pepper','ground ginger','dried oregano','dried thyme','dried rosemary','dried basil','allspice','cardamom','coriander','bouillon','tajin','tajín','paprika','cumin','turmeric','cinnamon','nutmeg','oregano','seasoning','spice blend','salt'] },
     { label: 'Meat & Seafood', color: '#dc2626', bg: '#fff1f2', border: '#fecdd3', keywords: ['chicken','beef','pork','turkey','lamb','veal','duck','steak','ground beef','bacon','sausage','ham','salami','pepperoni','brisket','ribs','loin','thigh','breast','wing','drumstick','fish','salmon','tuna','tilapia','cod','shrimp','prawn','prawns','crab','lobster','scallop','scallops','clam','clams','oyster','oysters','anchovy','anchovies','sardine','sardines','mahi','halibut','trout','catfish','sea bass','meatball','meatballs','chorizo','pancetta','prosciutto','deli meat','ground turkey','ground pork'] },
     { label: 'Dairy & Eggs', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', keywords: ['milk','cream','butter','cheese','cheddar','mozzarella','parmesan','feta','ricotta','brie','gouda','swiss','provolone','cream cheese','cottage cheese','sour cream','yogurt','greek yogurt','kefir','half and half','heavy cream','whipped cream','egg','eggs','ghee','buttermilk','ice cream','gelato'] },
     { label: 'Grains & Bread', color: '#b45309', bg: '#fffbeb', border: '#fde68a', keywords: ['bread','roll','rolls','bun','buns','bagel','bagels','tortilla','tortillas','pita','naan','rice','brown rice','white rice','basmati','pasta','spaghetti','penne','fettuccine','lasagna','noodle','noodles','quinoa','oat','oats','oatmeal','granola','cereal','flour','whole wheat','cornmeal','breadcrumb','breadcrumbs','cracker','crackers','pretzel','pretzels','wrap','wraps','couscous','bulgur','barley','farro','millet','rye','sourdough','baguette','croissant','muffin','muffins','waffle','waffles','pancake','pancakes'] },
-    { label: 'Canned & Pantry', color: '#ea580c', bg: '#fff7ed', border: '#fed7aa', keywords: ['canned','can of','tomato sauce','tomato paste','crushed tomatoes','diced tomatoes','chicken broth','beef broth','vegetable broth','stock','coconut milk','coconut cream','chickpea','chickpeas','lentil','lentils','black bean','kidney bean','white bean','navy bean','pinto bean','refried beans','olive','olives','pickle','pickles','soy sauce','fish sauce','worcestershire','vinegar','oil','olive oil','vegetable oil','coconut oil','sesame oil','honey','maple syrup','sugar','brown sugar','hot sauce','sriracha','ketchup','mustard','mayo','mayonnaise','relish','jam','jelly','peanut butter','almond butter','tahini','hummus','salsa','guacamole','nut','nuts','almond','almonds','walnut','walnuts','cashew','cashews','pecan','pecans','pine nut','pine nuts','seed','seeds','flaxseed','chia','sunflower seed','pumpkin seed','raisin','raisins','dried fruit','chocolate','cocoa','vanilla','baking powder','baking soda','yeast','cornstarch','gelatin','protein powder','miso','hoisin','oyster sauce','teriyaki','mirin','cooking spray','dijon','pumpkin puree'] },
-    { label: 'Beverages', color: '#0891b2', bg: '#ecfeff', border: '#a5f3fc', keywords: ['water','juice','coffee','tea','soda','almond milk','oat milk','soy milk','coconut water','sports drink','protein shake','smoothie','broth','wine','beer','kombucha'] },
+    { label: 'Canned & Pantry', color: '#ea580c', bg: '#fff7ed', border: '#fed7aa', keywords: ['canned','can of','tomato sauce','tomato paste','crushed tomatoes','diced tomatoes','chicken broth','beef broth','vegetable broth','stock','coconut milk','coconut cream','almond milk','oat milk','soy milk','coconut water','chickpea','chickpeas','lentil','lentils','black bean','kidney bean','white bean','navy bean','pinto bean','refried beans','olive','olives','pickle','pickles','soy sauce','fish sauce','worcestershire','vinegar','oil','olive oil','vegetable oil','coconut oil','sesame oil','honey','maple syrup','sugar','brown sugar','hot sauce','sriracha','ketchup','mustard','mayo','mayonnaise','relish','jam','jelly','peanut butter','almond butter','tahini','hummus','salsa','guacamole','nut','nuts','almond','almonds','walnut','walnuts','cashew','cashews','pecan','pecans','pine nut','pine nuts','seed','seeds','flaxseed','chia','sunflower seed','pumpkin seed','raisin','raisins','dried fruit','chocolate','cocoa','vanilla','baking powder','baking soda','yeast','cornstarch','gelatin','protein powder','miso','hoisin','oyster sauce','teriyaki','mirin','cooking spray','dijon','pumpkin puree','italian seasoning','italian herb','taco seasoning','everything bagel seasoning','pumpkin pie spice','tikka masala spice','garlic powder','onion powder','smoked paprika','garlic salt','chili powder','curry powder','curry paste','red pepper flake','cayenne','black pepper','ground ginger','dried oregano','dried thyme','dried rosemary','dried basil','allspice','cardamom','coriander','bouillon','tajin','tajín','paprika','cumin','turmeric','cinnamon','nutmeg','oregano','seasoning','spice blend','salt'] },
     { label: 'Frozen', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', keywords: ['frozen','ice cream','gelato','frozen vegetable','frozen fruit','frozen meal','frozen pizza','frozen waffle'] },
   ];
 
@@ -4168,7 +4185,7 @@ function renderGroceryList(dates) {
     return bestCat || 'Other';
   }
 
-  const CATEGORY_ORDER = ['Produce','Seasoning','Meat & Seafood','Dairy & Eggs','Grains & Bread','Canned & Pantry','Beverages','Frozen','Other'];
+  const CATEGORY_ORDER = ['Produce','Meat & Seafood','Dairy & Eggs','Grains & Bread','Canned & Pantry','Frozen','Other'];
   const CATEGORY_META = Object.fromEntries([
     ...CATEGORIES.map(c => [c.label, { color: c.color, bg: c.bg, border: c.border }]),
     ['Other', { color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb' }]
@@ -4198,12 +4215,15 @@ function renderGroceryList(dates) {
         const i = itemIndex++;
         const amtStr = toGroceryQuantity(item.item, item.amounts, item.category);
         const displayName = item.item.charAt(0).toUpperCase() + item.item.slice(1);
+        const isAsNeeded = amtStr === 'as needed';
+        const qtyPrefix = (!isAsNeeded && amtStr) ? `<span style="color:var(--text-2);font-weight:500;margin-right:6px">${amtStr}</span>` : '';
+        const sourceLine = (isAsNeeded ? 'as needed' + (item.meals.length ? ' · ' : '') : '') + item.meals.join(', ');
         return `
         <div class="grocery-item" id="gi-${i}">
           <input type="checkbox" class="grocery-check" onchange="this.closest('.grocery-item').classList.toggle('checked',this.checked)">
           <div class="grocery-text">
-            <span style="font-weight:600">${displayName}</span>
-            <span style="font-size:12px;color:var(--text-3);display:block">${amtStr}${item.meals.length ? ' · ' + item.meals.join(', ') : ''}</span>
+            <span style="font-weight:600">${qtyPrefix}${displayName}</span>
+            <span style="font-size:12px;color:var(--text-3);display:block">${sourceLine}</span>
           </div>
         </div>`;
       }).join('')}
