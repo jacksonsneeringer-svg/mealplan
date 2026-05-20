@@ -156,10 +156,10 @@ a{color:inherit;text-decoration:none}
 .ingredient-amount{color:var(--text-2);font-weight:500;font-size:12px;margin-right:4px}
 .ing-macros{display:flex;gap:4px;margin-top:2px;flex-wrap:wrap}
 .ing-mac-chip{font-size:10px;font-weight:600;padding:1px 5px;border-radius:10px;white-space:nowrap}
-.imc-cal{background:#fef9c3;color:#854d0e}
-.imc-p{background:#eef2ff;color:#4338ca}
-.imc-c{background:#fffbeb;color:#92400e}
-.imc-f{background:#fff1f2;color:#be123c}
+.imc-cal{background:#fef3eb;color:#9a3412}
+.imc-p{background:#ede9fe;color:#3730a3}
+.imc-c{background:#fef9c3;color:#7c4700}
+.imc-f{background:#fce7f3;color:#9d174d}
 
 /* ── Logged Foods ── */
 .logged-food-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:6px}
@@ -187,6 +187,7 @@ a{color:inherit;text-decoration:none}
 .day-card:hover{border-color:var(--primary);box-shadow:var(--shadow-md)}
 .day-card.active{border-color:var(--primary);background:var(--primary-light)}
 .day-card.planned{border-color:#86efac}
+.day-card.past{opacity:.55;filter:grayscale(.3)}
 .day-name{font-size:13px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px}
 .day-date{font-size:12px;color:var(--text-3);margin-bottom:8px}
 .day-cals{font-size:20px;font-weight:800;color:var(--primary)}
@@ -1941,6 +1942,7 @@ const IC = {
   pan:      `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M3 12h14a4 4 0 0 0 0-8H3v8z"/><path d="M19 6l2-2"/><line x1="3" y1="12" x2="3" y2="20"/><line x1="7" y1="20" x2="3" y2="20"/></svg>`,
   sparkle:  `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px"><path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2zM5 17l.8 2.7L8.5 20.5l-2.7.8L5 24l-.8-2.7L1.5 20.5l2.7-.8L5 17zM19 2l.5 1.8 1.8.5-1.8.5L19 6.5l-.5-1.7L16.7 4.3l1.8-.5L19 2z"/></svg>`,
   bookmark: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
+  bookmarkFilled: `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
   cart:     `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>`,
   printer:  `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>`,
   search:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
@@ -2086,17 +2088,17 @@ function renderOB3() {
         <div class="unit">kcal / day</div>
       </div>
       <div class="macro-field">
-        <label><span class="dot" style="background:#4f46e5"></span>Protein</label>
+        <label><span class="dot" style="background:var(--protein)"></span>Protein</label>
         <input type="number" id="me-protein" value="${m.protein}" data-field="protein">
         <div class="unit">grams — ${Math.round(m.protein*4/m.calories*100)}% of cals</div>
       </div>
       <div class="macro-field">
-        <label><span class="dot" style="background:#b45309"></span>Carbs</label>
+        <label><span class="dot" style="background:var(--carbs)"></span>Carbs</label>
         <input type="number" id="me-carbs" value="${m.carbs}" data-field="carbs">
         <div class="unit">grams — ${Math.round(m.carbs*4/m.calories*100)}% of cals</div>
       </div>
       <div class="macro-field">
-        <label><span class="dot" style="background:#be185d"></span>Fat</label>
+        <label><span class="dot" style="background:var(--fat)"></span>Fat</label>
         <input type="number" id="me-fat" value="${m.fat}" data-field="fat">
         <div class="unit">grams — ${Math.round(m.fat*9/m.calories*100)}% of cals</div>
       </div>
@@ -2312,12 +2314,12 @@ function renderToday() {
       </div>
       <div class="macro-bars">
         ${[
-          { label:'Protein', val:consumed.protein, tgt:target.protein, unit:'g', base:'#c4b5fd' },
-          { label:'Carbs', val:consumed.carbs, tgt:target.carbs, unit:'g', base:'#fde68a' },
-          { label:'Fat', val:consumed.fat, tgt:target.fat, unit:'g', base:'#fbcfe8' }
+          { label:'Protein', val:consumed.protein, tgt:target.protein, unit:'g', color:'var(--protein)' },
+          { label:'Carbs', val:consumed.carbs, tgt:target.carbs, unit:'g', color:'var(--carbs)' },
+          { label:'Fat', val:consumed.fat, tgt:target.fat, unit:'g', color:'var(--fat)' }
         ].map(m => {
           const mPct = m.tgt > 0 ? m.val / m.tgt : 0;
-          const barColor = mPct >= 1 ? '#fca5a5' : mPct >= 0.8 ? '#fef08a' : '#fff';
+          const barColor = mPct >= 1 ? '#fca5a5' : m.color;
           return `<div class="macro-bar-item">
             <label>${m.label}</label>
             <div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.min(100,mPct*100).toFixed(1)}%;background:${barColor}"></div></div>
@@ -2401,7 +2403,7 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
       <div class="slot-actions">
         ${slot.meal ? `
           <button class="btn btn-secondary btn-sm" onclick="regenerateSlot('${dateStr}','${slot.id}')">↺ New</button>
-          <button class="btn btn-secondary btn-sm" onclick="saveSlotMeal('${slot.id}')">${IC.bookmark} Save</button>
+          ${(() => { const isSaved = STATE.savedMeals.some(m => m.name === slot.meal.name); return `<button class="btn btn-secondary btn-sm" onclick="saveSlotMeal('${slot.id}')" style="${isSaved ? 'color:var(--primary);border-color:var(--primary)' : ''}" title="${isSaved ? 'Remove from saved' : 'Save meal'}">${isSaved ? IC.bookmarkFilled : IC.bookmark} ${isSaved ? 'Saved' : 'Save'}</button>`; })()}
         ` : !slot.open ? `
           <button class="pill" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Leave open</button>
           ${STATE.savedMeals.length ? `<button class="pill" style="background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark)" onclick="showUseSaved('${dateStr}','${slot.id}')">Add from saved</button>` : ''}
@@ -2758,11 +2760,17 @@ function saveSlotMeal(slotId) {
   const plan = STATE.dailyPlans[dateStr];
   const slot = plan?.slots.find(s => s.id === slotId);
   if (!slot?.meal) return;
-  const already = STATE.savedMeals.find(m => m.name === slot.meal.name);
-  if (already) { showToast('Already saved!'); return; }
-  STATE.savedMeals.push({ id: uid(), ...slot.meal, savedAt: Date.now() });
-  saveState();
-  showToast(`"${slot.meal.name}" saved to favorites!`);
+  const existingIdx = STATE.savedMeals.findIndex(m => m.name === slot.meal.name);
+  if (existingIdx >= 0) {
+    STATE.savedMeals.splice(existingIdx, 1);
+    saveState();
+    showToast(`"${slot.meal.name}" removed from saved`);
+  } else {
+    STATE.savedMeals.push({ id: uid(), ...slot.meal, savedAt: Date.now() });
+    saveState();
+    showToast(`"${slot.meal.name}" saved to favorites!`);
+  }
+  renderTodayInPlace(dateStr);
 }
 
 function showUseSaved(dateStr, slotId) {
@@ -2871,12 +2879,13 @@ function renderWeek() {
         const plannedCals = plan ? getPlanTotals(plan).calories : 0;
         const isActive = weekState.activeDay === d;
         const isToday = d === today();
+        const isPast = d < today();
         let status = 'none', statusText = 'Not planned';
         if (plan && plannedCount === totalCount && totalCount > 0) { status='planned'; statusText='✓ Fully planned'; }
         else if (plan && plannedCount > 0) { status='partial'; statusText=`${plannedCount}/${totalCount} meals`; }
         const [, mm, dd] = d.split('-');
         const dayName = new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'short'});
-        return `<div class="day-card ${isActive?'active':''} ${status==='planned'?'planned':''}" onclick="selectWeekDay('${d}')">
+        return `<div class="day-card ${isActive?'active':''} ${status==='planned'?'planned':''} ${isPast?'past':''}" onclick="selectWeekDay('${d}')">
           <div class="day-name">${dayName}${isToday ? ' <span style="display:inline-block;width:6px;height:6px;background:var(--primary);border-radius:50%;vertical-align:2px;margin-left:2px"></span>' : ''}</div>
           <div class="day-date">${parseInt(mm)}/${parseInt(dd)}</div>
           ${plannedCals > 0 ? `<div class="day-cals">${plannedCals}</div><div style="font-size:10px;opacity:.6">cal planned</div>` : '<div class="day-cals" style="color:var(--text-3)">—</div>'}
@@ -3413,7 +3422,7 @@ function showWeekPlanSummary(results, totalFilled, totalErrors, target) {
         <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
           <span style="font-size:11px;color:var(--text-3);width:28px">Pro</span>
           <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
-            <div style="height:100%;width:${protBar}%;background:#6366f1;border-radius:3px;transition:width .3s"></div>
+            <div style="height:100%;width:${protBar}%;background:var(--protein);border-radius:3px;transition:width .3s"></div>
           </div>
           <span style="font-size:11px;color:var(--text-3);width:32px;text-align:right">${protBar}%</span>
         </div>
