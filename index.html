@@ -261,6 +261,7 @@ a{color:inherit;text-decoration:none}
 .btn-generate:hover{background:var(--primary-hover)}
 .meal-slot{transition:box-shadow .15s}
 .meal-slot:hover{box-shadow:var(--shadow-md)}
+.week-meal-link:hover{text-decoration:underline;cursor:pointer}
 .saved-card:hover{border-color:var(--primary)}
 .radio-card.selected{border-color:var(--primary);background:var(--primary-light)}
 .radio-card:hover{border-color:var(--primary)}
@@ -1618,6 +1619,57 @@ const IMAC = {
   'fresh parsley':[0.36,0.030,0.064,0.008],
   'part-skim ricotta':[1.34,0.091,0.030,0.096], 'ricotta':[1.34,0.091,0.030,0.096],
   'lemon zest':[0, 0, 0, 0],
+  // Additional ingredients
+  'ripe avocado':[1.60,0.020,0.085,0.15],
+  'cream cheese':[3.42,0.060,0.041,0.34],
+  'sugar':[3.87,0,1.00,0], 'brown sugar or honey':[3.87,0,0.97,0],
+  'heavy cream':[3.45,0.023,0.027,0.36],
+  'ladyfinger biscuits':[3.65,0.065,0.74,0.048],
+  'light whipped cream':[2.59,0.019,0.015,0.27],
+  'whole wheat flour':[3.40,0.13,0.72,0.025], 'flour':[3.64,0.10,0.76,0.010],
+  'low-fat milk':[0.42,0.034,0.049,0.010],
+  'vanilla extract':[2.88,0,0.13,0],
+  'raw almonds':[5.79,0.21,0.22,0.49], 'almonds':[5.79,0.21,0.22,0.49],
+  'strawberries':[0.32,0.007,0.077,0.003],
+  'banana':[0.89,0.011,0.23,0.003],
+  'fresh mozzarella pearls':[2.54,0.19,0.029,0.16],
+  'balsamic glaze':[2.22,0.003,0.55,0],
+  'green onions':[0.32,0.018,0.073,0.002],
+  'cinnamon':[2.47,0.040,0.81,0.034], 'cinnamon stick':[2.47,0.040,0.81,0.034],
+  'bell peppers':[0.31,0.010,0.071,0.003], 'bell peppers, sliced':[0.31,0.010,0.071,0.003],
+  'cooked white rice (day-old preferred)':[1.30,0.027,0.28,0.003], 'cooked white rice':[1.30,0.027,0.28,0.003],
+  'cumin and garlic powder':[3.12,0.15,0.53,0.17], 'cumin and smoked paprika':[3.12,0.15,0.53,0.17],
+  'garlic powder and paprika':[2.93,0.12,0.56,0.14], 'garlic powder and smoked paprika':[2.93,0.12,0.56,0.14],
+  'garlic powder':[3.31,0.15,0.73,0.005], 'smoked paprika':[2.82,0.14,0.54,0.13],
+  'fresh chives':[0.30,0.033,0.043,0.005], 'fresh chives (optional)':[0.30,0.033,0.043,0.005],
+  'fresh chives or cilantro':[0.25,0.027,0.040,0.003],
+  'dried cranberries':[3.08,0.003,0.82,0.008],
+  'edamame':[1.22,0.11,0.090,0.052], 'edamame, shelled':[1.22,0.11,0.090,0.052],
+  'cauliflower florets':[0.25,0.019,0.050,0.003],
+  'cauliflower rice (fresh or frozen)':[0.25,0.019,0.050,0.003], 'cauliflower rice':[0.25,0.019,0.050,0.003],
+  'celery stalks':[0.16,0.007,0.030,0.002], 'celery':[0.16,0.007,0.030,0.002], 'celery, sliced':[0.16,0.007,0.030,0.002],
+  'butter lettuce leaves':[0.13,0.013,0.022,0.002],
+  'lime juice':[0.25,0.002,0.083,0], 'fresh lime juice':[0.25,0.002,0.083,0],
+  'cannellini beans':[1.02,0.070,0.19,0.003], 'chickpeas':[1.10,0.075,0.17,0.022],
+  'pinto beans':[1.40,0.087,0.26,0.005],
+  'ginger, minced':[0.80,0.018,0.18,0.008],
+  'fresh cilantro':[0.23,0.021,0.037,0.005],
+  'jalapeño, minced':[0.29,0.013,0.067,0.001], 'jalapeño, diced':[0.29,0.013,0.067,0.001],
+  'cod fillet':[0.82,0.18,0,0.007],
+  'mirin or rice vinegar':[0.50,0,0.10,0], 'white miso paste':[1.99,0.12,0.28,0.060],
+  'low-sodium broth':[0.05,0.003,0.009,0.001], 'low-sodium chicken broth':[0.05,0.003,0.009,0.001],
+  'fish sauce or soy sauce':[0.35,0.051,0.035,0.003], 'fish sauce':[0.35,0.051,0.035,0.003],
+  'chili flakes':[2.82,0.12,0.49,0.15],
+  'zucchini, spiralized':[0.17,0.012,0.032,0.003],
+  'parmesan cheese, grated':[4.31,0.38,0.04,0.29],
+  'reduced-fat cheddar cheese, shredded':[2.90,0.26,0.013,0.19],
+  'cheddar cheese, shredded':[2.90,0.26,0.013,0.19], 'cheddar cheese':[4.03,0.25,0.013,0.33],
+  'white wine vinegar':[0.19,0,0.003,0],
+  'sweet potato (medium)':[0.86,0.016,0.20,0.001],
+  'arugula or spinach':[0.25,0.026,0.037,0.004], 'arugula':[0.25,0.026,0.037,0.004],
+  'maple syrup':[2.60,0.000,0.67,0.001],
+  'mixed nuts':[5.50,0.18,0.22,0.47],
+  'egg noodles':[3.54,0.13,0.68,0.038], 'rice noodles':[3.64,0.066,0.84,0.004],
   // Per-unit lookups [cal, p, c, f] — applied when unit is the key
 };
 // Per-unit macros [cal, p, c, f] per 1 unit
@@ -1639,6 +1691,8 @@ const IMAC_UNIT = {
   'to taste':    [0, 0, 0, 0],
   'piece':       [60, 6, 0.5, 3.5],   // low-fat string cheese stick ~28g
   'cucumber':    [22, 1, 5, 0.1],     // whole medium cucumber ~140g
+  'egg whites':  [17, 3.6, 0.2, 0],   // per egg white (plural unit variant)
+  'leaves':      [3, 0.2, 0.5, 0.02], // per lettuce leaf ~15g
 };
 
 function ingMacros(ing, scale) {
@@ -2300,6 +2354,21 @@ function renderRecipeCard(meal, slotId) {
           </li>`;
         }).join('')}
       </ul>
+      ${(() => {
+        const knownIngs = meal.ingredients.filter(i => i.cal !== undefined);
+        if (knownIngs.length < 2) return '';
+        const totCal = knownIngs.reduce((s,i)=>s+(i.cal||0),0);
+        const totP   = knownIngs.reduce((s,i)=>s+(i.p||0),0);
+        const totC   = knownIngs.reduce((s,i)=>s+(i.c||0),0);
+        const totF   = knownIngs.reduce((s,i)=>s+(i.f||0),0);
+        return `<div style="display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--border);margin-top:4px">
+          <span style="font-size:11px;font-weight:700;color:var(--text-3);flex:1">Ingredient total</span>
+          <span class="ing-mac-chip imc-cal">${IC.flame} ${totCal} cal</span>
+          <span class="ing-mac-chip imc-p">P ${totP}g</span>
+          <span class="ing-mac-chip imc-c">C ${totC}g</span>
+          <span class="ing-mac-chip imc-f">F ${totF}g</span>
+        </div>`;
+      })()}
     </div>
     ` : ''}
     ${meal.instructions?.length ? `
@@ -2716,7 +2785,7 @@ function renderWeekDayDetail(dateStr) {
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:600">${slot.label}</div>
           ${slot.meal
-            ? `<div style="font-size:12px;color:var(--text-2);cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" onclick="showWeekMealDetail('${dateStr}','${slot.id}')" title="View recipe">${slot.meal.name} — ${slot.meal.calories} cal · ${slot.meal.protein}g P · ${slot.meal.carbs}g C · ${slot.meal.fat}g F</div>`
+            ? `<div class="week-meal-link" style="font-size:12px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" onclick="showWeekMealDetail('${dateStr}','${slot.id}')" title="View recipe">${slot.meal.name} — ${slot.meal.calories} cal · ${slot.meal.protein}g P · ${slot.meal.carbs}g C · ${slot.meal.fat}g F</div>`
             : `<div style="font-size:12px;color:var(--text-3)">Not planned</div>`}
         </div>
         <div style="display:flex;gap:4px;flex-shrink:0">
@@ -2782,6 +2851,17 @@ async function weekGenerateSlot(dateStr, slotId) {
     fat:      Math.max(0, STATE.profile.fat      - usedFat)
   };
   const wt = weightedSlotTarget(slot, remaining, stillEmpty);
+  // Collect meal names already used for this slot's category across the whole week
+  const cat = slotMealType(slot);
+  const weekExclude = [];
+  getWeekDates().forEach(d => {
+    const p = STATE.dailyPlans[d];
+    if (!p) return;
+    p.slots.forEach(s => {
+      if (s.meal && s.id !== slotId && slotMealType(s) === cat) weekExclude.push(s.meal.name);
+    });
+  });
+  if (prevMeal) weekExclude.push(prevMeal.name); // also exclude what was just there
   try {
     const recipe = await generateRecipe({
       preference: slot.preference || '',
@@ -2789,7 +2869,8 @@ async function weekGenerateSlot(dateStr, slotId) {
       targetProt:  Math.round(wt.prot),
       targetCarbs: Math.round(wt.carbs),
       targetFat:   Math.round(wt.fat),
-      mealType:    slotMealType(slot)
+      mealType:    cat,
+      excludeNames: weekExclude
     });
     slot.meal = recipe;
     saveState();
@@ -2889,6 +2970,20 @@ async function planDay(dateStr) {
   let usedCarbs = fixedTotals.carbs;
   let usedFat = fixedTotals.fat;
 
+  // Pre-collect meal names used for each category across the rest of the week
+  const weekUsedByCat = {};
+  getWeekDates().forEach(d => {
+    if (d === dateStr) return;
+    const p = STATE.dailyPlans[d];
+    if (!p) return;
+    p.slots.forEach(s => {
+      if (!s.meal) return;
+      const cat = slotMealType(s);
+      if (!weekUsedByCat[cat]) weekUsedByCat[cat] = [];
+      weekUsedByCat[cat].push(s.meal.name);
+    });
+  });
+
   for (const slot of emptySlots) {
     const stillEmpty = plan.slots.filter(s => !s.meal && !s.open);
     const remainingMacros = {
@@ -2902,13 +2997,18 @@ async function planDay(dateStr) {
     const tProt  = wt.prot;
     const tCarbs = wt.carbs;
     const tFat   = wt.fat;
+    const cat = slotMealType(slot);
+    const todayUsed = emptySlots.filter(s => s.meal).map(s => s.meal.name);
+    const excludeNames = [...(weekUsedByCat[cat] || []), ...todayUsed];
     try {
-      const recipe = await generateRecipe({ preference:slot.preference||'', targetCal:Math.round(tCal), targetProt:Math.round(tProt), targetCarbs:Math.round(tCarbs), targetFat:Math.round(tFat), mealType:slotMealType(slot) });
+      const recipe = await generateRecipe({ preference:slot.preference||'', targetCal:Math.round(tCal), targetProt:Math.round(tProt), targetCarbs:Math.round(tCarbs), targetFat:Math.round(tFat), mealType:cat, excludeNames });
       slot.meal = recipe;
       usedCal += recipe.calories||0;
       usedProt += recipe.protein||0;
       usedCarbs += recipe.carbs||0;
       usedFat += recipe.fat||0;
+      if (!weekUsedByCat[cat]) weekUsedByCat[cat] = [];
+      weekUsedByCat[cat].push(recipe.name);
       saveState();
     } catch(e) { showToast(`Error for ${slot.label}: ${e.message}`, 3000); }
   }
@@ -3042,6 +3142,8 @@ async function planWholeWeek(opts = {}) {
 
   // Track pool index per category for cycling
   const catPoolIdx = {};
+  // Track meal names used per category across days (for non-pool categories)
+  const weekUsedNames = {};
 
   const dayResults = [];
   let totalFilled = 0;
@@ -3112,7 +3214,8 @@ async function planWholeWeek(opts = {}) {
             targetProt:  Math.round(wt.prot),
             targetCarbs: Math.round(wt.carbs),
             targetFat:   Math.round(wt.fat),
-            mealType: cat
+            mealType: cat,
+            excludeNames: weekUsedNames[cat] || []
           });
           // Hard cap: don't exceed remaining daily budget
           let finalRecipe = recipe;
@@ -3125,6 +3228,8 @@ async function planWholeWeek(opts = {}) {
           usedProt  += finalRecipe.protein  || 0;
           usedCarbs += finalRecipe.carbs    || 0;
           usedFat   += finalRecipe.fat      || 0;
+          if (!weekUsedNames[cat]) weekUsedNames[cat] = [];
+          weekUsedNames[cat].push(finalRecipe.name);
           dayFilled++;
         } catch(e) {
           dayErrors++;
