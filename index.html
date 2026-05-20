@@ -3130,7 +3130,7 @@ function showWeekPlanSummary(results, totalFilled, totalErrors, target) {
         <span style="color:var(--text-3);font-size:12px">Already fully planned</span>
       </div>`;
     const calPct = target.calories ? r.cal / target.calories : 0;
-    const calColor = calPct >= 0.9 && calPct <= 1.12 ? '#16a34a' : calPct >= 0.75 ? '#d97706' : '#ef4444';
+    const calColor = calPct > 1.0 ? '#ef4444' : calPct >= 0.85 ? '#16a34a' : calPct >= 0.7 ? '#d97706' : '#ef4444';
     const protPct = target.protein ? r.prot / target.protein : 0;
     const protBar = Math.min(100, Math.round(protPct * 100));
     const calBar  = Math.min(100, Math.round(calPct  * 100));
