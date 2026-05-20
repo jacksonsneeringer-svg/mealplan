@@ -124,7 +124,7 @@ a{color:inherit;text-decoration:none}
 .fixed-item-inactive{opacity:.4}
 
 /* ── Meal Slots ── */
-.meal-slot{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
+.meal-slot{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow);-webkit-touch-callout:none}
 .slot-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px}
 .slot-title{font-size:15px;font-weight:700}
 .slot-target{font-size:12px;color:var(--text-3)}
@@ -2628,52 +2628,93 @@ function initDragDrop(dateStr) {
     });
 
     // Mobile touch drag-and-drop
-    const handle = el.querySelector('.drag-handle');
-    if (!handle) return;
-    handle.addEventListener('touchstart', e => {
-      e.preventDefault();
-      const touch = e.touches[0];
+    const startTouchDrag = (rect, offsetX, offsetY) => {
       touchDragId = el.dataset.slotId;
       touchActiveDateStr = dateStr;
-      const rect = el.getBoundingClientRect();
-      touchOffsetX = touch.clientX - rect.left;
-      touchOffsetY = touch.clientY - rect.top;
+      touchOffsetX = offsetX;
+      touchOffsetY = offsetY;
       touchClone = el.cloneNode(true);
       touchClone.style.cssText = `position:fixed;z-index:9999;width:${rect.width}px;left:${rect.left}px;top:${rect.top}px;opacity:0.85;pointer-events:none;box-shadow:0 8px 25px rgba(0,0,0,0.2);border-radius:12px;`;
       document.body.appendChild(touchClone);
       el.classList.add('dragging');
-    }, { passive: false });
+      if (navigator.vibrate) navigator.vibrate(40);
+    };
 
-    handle.addEventListener('touchmove', e => {
-      e.preventDefault();
+    const onDragMove = e => {
       if (!touchClone) return;
+      e.preventDefault();
       const touch = e.touches[0];
       touchClone.style.left = `${touch.clientX - touchOffsetX}px`;
       touchClone.style.top = `${touch.clientY - touchOffsetY}px`;
       touchClone.style.display = 'none';
-      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      const tgt = document.elementFromPoint(touch.clientX, touch.clientY);
       touchClone.style.display = '';
-      const targetSlot = target?.closest('.meal-slot[data-slot-id]');
+      const targetSlot = tgt?.closest('.meal-slot[data-slot-id]');
       document.querySelectorAll('.meal-slot').forEach(s => s.classList.remove('drag-over'));
-      if (targetSlot && targetSlot.dataset.slotId !== touchDragId) {
-        targetSlot.classList.add('drag-over');
-      }
-    }, { passive: false });
+      if (targetSlot && targetSlot.dataset.slotId !== touchDragId) targetSlot.classList.add('drag-over');
+    };
 
-    handle.addEventListener('touchend', e => {
+    const onDragEnd = e => {
       if (!touchDragId) return;
       const touch = e.changedTouches[0];
       if (touchClone) { touchClone.remove(); touchClone = null; }
       el.classList.remove('dragging');
-      const target = document.elementFromPoint(touch.clientX, touch.clientY);
-      const targetSlot = target?.closest('.meal-slot[data-slot-id]');
+      const tgt = document.elementFromPoint(touch.clientX, touch.clientY);
+      const targetSlot = tgt?.closest('.meal-slot[data-slot-id]');
       document.querySelectorAll('.meal-slot').forEach(s => s.classList.remove('drag-over'));
       if (targetSlot && targetSlot.dataset.slotId !== touchDragId) {
         reorderSlots(touchActiveDateStr, touchDragId, targetSlot.dataset.slotId);
       }
       touchDragId = null;
       touchActiveDateStr = null;
+      document.removeEventListener('touchmove', onDragMove);
+      document.removeEventListener('touchend', onDragEnd);
+    };
+
+    // Drag handle: immediate drag on touch (no long-press delay needed)
+    const handle = el.querySelector('.drag-handle');
+    if (handle) {
+      handle.addEventListener('touchstart', e => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = el.getBoundingClientRect();
+        startTouchDrag(rect, touch.clientX - rect.left, touch.clientY - rect.top);
+        document.addEventListener('touchmove', onDragMove, { passive: false });
+        document.addEventListener('touchend', onDragEnd);
+      }, { passive: false });
+    }
+
+    // Long-press on slot white space / left area to initiate drag
+    let lpTimer = null;
+    let lpStartX = 0, lpStartY = 0;
+    el.addEventListener('touchstart', e => {
+      const tgt = e.target;
+      if (tgt.closest('button') || tgt.closest('input') || tgt.closest('.drag-handle')) return;
+      const touch = e.touches[0];
+      lpStartX = touch.clientX;
+      lpStartY = touch.clientY;
+      const capturedX = touch.clientX;
+      const capturedY = touch.clientY;
+      lpTimer = setTimeout(() => {
+        lpTimer = null;
+        const rect = el.getBoundingClientRect();
+        startTouchDrag(rect, capturedX - rect.left, capturedY - rect.top);
+        document.addEventListener('touchmove', onDragMove, { passive: false });
+        document.addEventListener('touchend', onDragEnd);
+      }, 430);
+    }, { passive: true });
+
+    el.addEventListener('touchmove', e => {
+      if (!lpTimer) return;
+      const t = e.touches[0];
+      if (Math.abs(t.clientX - lpStartX) > 8 || Math.abs(t.clientY - lpStartY) > 8) {
+        clearTimeout(lpTimer); lpTimer = null;
+      }
     });
+
+    const cancelLp = () => { if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } };
+    el.addEventListener('touchend', cancelLp);
+    el.addEventListener('touchcancel', cancelLp);
   });
 }
 
