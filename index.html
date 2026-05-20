@@ -3077,6 +3077,9 @@ function useSavedMeal(dateStr, slotId, mealId) {
 // WEEK VIEW
 // ═══════════════════════════════════════════════════
 let weekState = { activeDay: null, groceryMode: false };
+let pwIngredientsList = [];
+let pwSelectedCuisines = [];
+let _planWeekSnapshot = null;
 
 function renderWeek() {
   const dates = getWeekDates();
@@ -3372,11 +3375,96 @@ async function planDay(dateStr) {
   render();
 }
 
+function pwToggleSection(id) {
+  const body = document.getElementById(id + '-body');
+  const arrow = document.getElementById(id + '-arrow');
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+function pwAddIngredient() {
+  const input = document.getElementById('pw-ing-input');
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) return;
+  val.split(',').map(v => v.trim()).filter(Boolean).forEach(v => {
+    if (v && !pwIngredientsList.includes(v)) pwIngredientsList.push(v);
+  });
+  input.value = '';
+  pwRenderIngredients();
+}
+
+function pwIngInputKeydown(e) {
+  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); pwAddIngredient(); }
+}
+
+function pwRemoveIngredient(idx) {
+  pwIngredientsList.splice(idx, 1);
+  pwRenderIngredients();
+}
+
+function pwRenderIngredients() {
+  const container = document.getElementById('pw-ing-chips');
+  if (!container) return;
+  if (pwIngredientsList.length === 0) {
+    container.innerHTML = '<span style="font-size:12px;color:var(--text-3);font-style:italic">No ingredients added yet.</span>';
+    return;
+  }
+  container.innerHTML = pwIngredientsList.map((ing, i) => `
+    <span style="display:inline-flex;align-items:center;gap:4px;background:var(--primary-light);color:var(--primary-dark);border-radius:20px;padding:3px 10px 3px 12px;font-size:12px;font-weight:500;margin:2px">
+      ${ing}
+      <button onclick="pwRemoveIngredient(${i})" style="background:none;border:none;cursor:pointer;color:var(--primary);font-size:15px;padding:0;line-height:1;margin-left:2px">&times;</button>
+    </span>
+  `).join('');
+}
+
+function pwToggleCuisine(cuisine) {
+  const idx = pwSelectedCuisines.indexOf(cuisine);
+  if (idx === -1) pwSelectedCuisines.push(cuisine);
+  else pwSelectedCuisines.splice(idx, 1);
+  const btn = document.querySelector(`[data-cuisine="${CSS.escape(cuisine)}"]`);
+  if (btn) {
+    const isNow = pwSelectedCuisines.includes(cuisine);
+    btn.style.background = isNow ? 'var(--primary)' : 'var(--surface-2)';
+    btn.style.color = isNow ? '#fff' : 'var(--text-2)';
+    btn.style.borderColor = isNow ? 'var(--primary)' : 'var(--border)';
+  }
+}
+
 function showPlanWeekModal() {
   const p = STATE.profile;
+  pwIngredientsList = [];
+  pwSelectedCuisines = [];
+
+  // Determine which categories exist in the current week
+  const dates = getWeekDates();
+  const existingCategories = new Set();
+  dates.forEach(d => {
+    const plan = getOrCreatePlan(d);
+    plan.slots.forEach(s => existingCategories.add(s.category || slotMealType(s)));
+  });
+
+  const CUISINES = ['American','Chinese','Ethiopian','French','German','Greek','Indian','Italian','Japanese','Korean','Mediterranean','Mexican','Thai','Vietnamese','Spanish','Caribbean','Middle Eastern','Brazilian'];
+
+  const varietyRows = [['breakfast','Breakfasts'],['lunch','Lunches'],['dinner','Dinners'],['snack','Snacks'],['dessert','Desserts']].map(([id, label]) => {
+    const disabled = !existingCategories.has(id);
+    return `
+      <div class="macro-field" style="${disabled ? 'opacity:0.35;pointer-events:none' : ''}">
+        <label style="font-size:10px">${label}${disabled ? ' <span style="font-size:9px;font-style:italic">(none in week)</span>' : ''}</label>
+        <input type="number" id="pw-${id}" value="7" min="1" max="7" style="font-size:18px" ${disabled ? 'disabled' : ''}>
+        <div class="unit">/ week</div>
+      </div>`;
+  }).join('');
+
+  const sectionStyle = 'border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;overflow:hidden';
+  const headerStyle = 'display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;user-select:none;background:var(--surface-2)';
+  const arrowStyle = 'font-size:12px;transition:transform .2s;display:inline-block';
+
   document.getElementById('plan-week-modal')?.remove();
   const html = `<div class="modal-overlay" id="plan-week-modal" onclick="if(event.target.id==='plan-week-modal')this.remove()">
-    <div class="modal-sheet">
+    <div class="modal-sheet" style="max-height:90vh;overflow-y:auto">
       <div class="modal-title">${IC.sparkle} Plan Your Week</div>
       <div class="modal-sub">Customize targets and variety before generating.</div>
 
@@ -3404,19 +3492,46 @@ function showPlanWeekModal() {
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Ingredients to use <span style="font-size:11px;font-weight:400;color:var(--text-3)">(optional)</span></label>
-        <textarea class="form-input" id="pw-ingredients" rows="2" placeholder="e.g. chicken breast, broccoli, brown rice..." style="resize:none"></textarea>
+      <div style="${sectionStyle}">
+        <div style="${headerStyle}" onclick="pwToggleSection('pw-ingredients')">
+          <span style="font-size:13px;font-weight:600">Ingredients to use <span style="font-size:11px;font-weight:400;color:var(--text-3)">(optional)</span></span>
+          <span id="pw-ingredients-arrow" style="${arrowStyle}">▼</span>
+        </div>
+        <div id="pw-ingredients-body" style="display:none;padding:12px 14px">
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input class="form-input" id="pw-ing-input" placeholder="e.g. chicken breast" style="flex:1;font-size:13px" onkeydown="pwIngInputKeydown(event)">
+            <button class="btn btn-secondary" style="padding:6px 12px;font-size:13px;white-space:nowrap" onclick="pwAddIngredient()">+ Add</button>
+          </div>
+          <div id="pw-ing-chips" style="display:flex;flex-wrap:wrap;gap:2px;min-height:24px">
+            <span style="font-size:12px;color:var(--text-3);font-style:italic">No ingredients added yet.</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:8px">Press Enter or comma to add. These ingredients will be incorporated into meal suggestions.</div>
+        </div>
       </div>
 
-      <div class="form-label" style="margin-bottom:8px">Variety per category <span style="font-size:11px;font-weight:400;color:var(--text-3)">(unique meals per week, 1–7)</span></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
-        ${[['breakfast','Breakfasts'],['lunch','Lunches'],['dinner','Dinners'],['snack','Snacks'],['dessert','Desserts']].map(([id,label]) => `
-        <div class="macro-field">
-          <label style="font-size:10px">${label}</label>
-          <input type="number" id="pw-${id}" value="7" min="1" max="7" style="font-size:18px">
-          <div class="unit">/ week</div>
-        </div>`).join('')}
+      <div style="${sectionStyle}">
+        <div style="${headerStyle}" onclick="pwToggleSection('pw-cuisine')">
+          <span style="font-size:13px;font-weight:600">Cuisine preferences <span style="font-size:11px;font-weight:400;color:var(--text-3)">(optional, multi-select)</span></span>
+          <span id="pw-cuisine-arrow" style="${arrowStyle}">▼</span>
+        </div>
+        <div id="pw-cuisine-body" style="display:none;padding:12px 14px">
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${CUISINES.map(c => `<button data-cuisine="${c}" onclick="pwToggleCuisine('${c}')" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s">${c}</button>`).join('')}
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:8px">Select any cuisines you'd like for this week. Meals will lean toward your selections.</div>
+        </div>
+      </div>
+
+      <div style="${sectionStyle}">
+        <div style="${headerStyle}" onclick="pwToggleSection('pw-variety')">
+          <span style="font-size:13px;font-weight:600">Variety per category <span style="font-size:11px;font-weight:400;color:var(--text-3)">(unique meals per week)</span></span>
+          <span id="pw-variety-arrow" style="${arrowStyle}">▼</span>
+        </div>
+        <div id="pw-variety-body" style="display:none;padding:12px 14px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            ${varietyRows}
+          </div>
+        </div>
       </div>
 
       <div class="modal-actions">
@@ -3435,19 +3550,27 @@ function submitPlanWeek() {
     carbs:    parseFloat(document.getElementById('pw-carbs').value)    || STATE.profile.carbs,
     fat:      parseFloat(document.getElementById('pw-fat').value)      || STATE.profile.fat
   };
-  const ingredientsToUse = document.getElementById('pw-ingredients').value.trim();
+  const ingredientsToUse = pwIngredientsList.join(', ');
+  const cuisinePrefs = pwSelectedCuisines.slice();
   const mealCounts = {};
   ['breakfast','lunch','dinner','snack','dessert'].forEach(cat => {
-    const v = parseInt(document.getElementById(`pw-${cat}`)?.value);
-    if (!isNaN(v)) mealCounts[cat] = Math.max(1, Math.min(7, v));
+    const el = document.getElementById(`pw-${cat}`);
+    if (el && !el.disabled) {
+      const v = parseInt(el.value);
+      if (!isNaN(v)) mealCounts[cat] = Math.max(1, Math.min(7, v));
+    }
   });
   document.getElementById('plan-week-modal').remove();
-  planWholeWeek({ targets, ingredientsToUse, mealCounts });
+  planWholeWeek({ targets, ingredientsToUse, cuisinePrefs, mealCounts });
 }
 
 async function planWholeWeek(opts = {}) {
-  const { targets: customTargets, ingredientsToUse = '', mealCounts = {} } = opts;
+  const { targets: customTargets, ingredientsToUse = '', cuisinePrefs = [], mealCounts = {} } = opts;
+  // Save snapshot before making any changes so the X button can revert
+  _planWeekSnapshot = JSON.parse(JSON.stringify(STATE.dailyPlans));
   const targets = customTargets || STATE.profile;
+  const cuisineSuffix = cuisinePrefs.length ? ` Cuisine style: ${cuisinePrefs.join(', ')}.` : '';
+  const ingSuffix = ingredientsToUse ? ` Use these ingredients: ${ingredientsToUse}` : '';
   const dates = getWeekDates();
   const btn = document.getElementById('plan-week-btn');
   if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spinner spinner-dark"></span> Planning...`; }
@@ -3482,7 +3605,7 @@ async function planWholeWeek(opts = {}) {
       for (let i = 0; i < desired; i++) {
         try {
           const recipe = await generateRecipe({
-            preference: (slots[0].slot.preference || '') + (ingredientsToUse ? ` Use these ingredients: ${ingredientsToUse}` : ''),
+            preference: (slots[0].slot.preference || '') + ingSuffix + cuisineSuffix,
             targetCal:   Math.round(Math.max(100, roughWt.cal)),
             targetProt:  Math.round(roughWt.prot),
             targetCarbs: Math.round(roughWt.carbs),
@@ -3566,7 +3689,7 @@ async function planWholeWeek(opts = {}) {
         const cappedTargetCal = Math.min(Math.round(Math.max(100, wt.cal)), Math.max(100, budgetLeft));
         try {
           const recipe = await generateRecipe({
-            preference: (slot.preference || '') + (ingredientsToUse ? ` Use these ingredients: ${ingredientsToUse}` : ''),
+            preference: (slot.preference || '') + ingSuffix + cuisineSuffix,
             targetCal:   cappedTargetCal,
             targetProt:  Math.round(wt.prot),
             targetCarbs: Math.round(wt.carbs),
@@ -3592,7 +3715,7 @@ async function planWholeWeek(opts = {}) {
           // Retry without name exclusions as fallback
           try {
             const recipe = await generateRecipe({
-              preference: (slot.preference || '') + (ingredientsToUse ? ` Use these ingredients: ${ingredientsToUse}` : ''),
+              preference: (slot.preference || '') + ingSuffix + cuisineSuffix,
               targetCal:   cappedTargetCal,
               targetProt:  Math.round(wt.prot),
               targetCarbs: Math.round(wt.carbs),
@@ -3628,10 +3751,20 @@ async function planWholeWeek(opts = {}) {
 
   if (btn) { btn.disabled = false; btn.innerHTML = `${IC.sparkle} Plan Week`; }
   render();
-  showWeekPlanSummary(dayResults, totalFilled, totalErrors, targets);
+  showWeekPlanSummary(dayResults, totalFilled, totalErrors, targets, _planWeekSnapshot);
 }
 
-function showWeekPlanSummary(results, totalFilled, totalErrors, target) {
+function discardWeekPlan() {
+  if (_planWeekSnapshot) {
+    STATE.dailyPlans = _planWeekSnapshot;
+    _planWeekSnapshot = null;
+    saveState();
+    render();
+  }
+  document.getElementById('week-plan-summary-modal')?.remove();
+}
+
+function showWeekPlanSummary(results, totalFilled, totalErrors, target, snapshot) {
   target = target || STATE.profile;
   const rows = results.map(r => {
     if (r.skipped) return `
@@ -3703,9 +3836,10 @@ function showWeekPlanSummary(results, totalFilled, totalErrors, target) {
   const skippedCount = results.filter(r => r.skipped).length;
   const plannedCount = results.filter(r => !r.skipped).length;
 
-  const html = `<div class="modal-overlay" id="week-plan-summary-modal" onclick="if(event.target.id==='week-plan-summary-modal')this.remove()">
-    <div class="modal-sheet" style="max-height:90vh;overflow-y:auto">
-      <div class="modal-title">${IC.sparkle} Week Planned</div>
+  const html = `<div class="modal-overlay" id="week-plan-summary-modal">
+    <div class="modal-sheet" style="max-height:90vh;overflow-y:auto;position:relative">
+      <button onclick="discardWeekPlan()" style="position:absolute;top:12px;right:14px;background:none;border:none;cursor:pointer;font-size:22px;color:var(--text-3);line-height:1;padding:0" title="Discard and go back">&times;</button>
+      <div class="modal-title" style="padding-right:28px">${IC.sparkle} Week Planned</div>
       <div class="modal-sub">${totalFilled} meal${totalFilled !== 1 ? 's' : ''} added across ${plannedCount} day${plannedCount !== 1 ? 's' : ''}${skippedCount ? ` · ${skippedCount} already full` : ''}${totalErrors ? ` · ${totalErrors} error${totalErrors > 1 ? 's' : ''}` : ''}</div>
       <div style="background:var(--surface-2);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text-2);margin:12px 0 4px;display:flex;gap:16px;flex-wrap:wrap">
         <span>Target/day: <strong>${target.calories} cal</strong></span>
@@ -3715,8 +3849,8 @@ function showWeekPlanSummary(results, totalFilled, totalErrors, target) {
       </div>
       <div style="margin-bottom:12px">${rows}</div>
       <div class="modal-actions">
-        <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('week-plan-summary-modal').remove()">Close</button>
-        <button class="btn btn-primary" style="flex:1" onclick="weekState.groceryMode=true;render();document.getElementById('week-plan-summary-modal').remove()">${IC.cart} Grocery List</button>
+        <button class="btn btn-secondary" style="flex:1" onclick="weekState.groceryMode=true;render();document.getElementById('week-plan-summary-modal').remove()">${IC.cart} Grocery List</button>
+        <button class="btn btn-primary" style="flex:1" onclick="saveAsWeeklyTemplate();document.getElementById('week-plan-summary-modal').remove()">Apply &amp; Save Template</button>
       </div>
     </div>
   </div>`;
