@@ -124,7 +124,7 @@ a{color:inherit;text-decoration:none}
 .fixed-item-inactive{opacity:.4}
 
 /* ── Meal Slots ── */
-.meal-slot{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow);-webkit-touch-callout:none}
+.meal-slot{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow);-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
 .slot-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px}
 .slot-title{font-size:15px;font-weight:700}
 .slot-target{font-size:12px;color:var(--text-3)}
@@ -2627,94 +2627,99 @@ function initDragDrop(dateStr) {
       }
     });
 
-    // Mobile touch drag-and-drop
-    const startTouchDrag = (rect, offsetX, offsetY) => {
+    // Unified pointer-event drag (works for mouse and touch, no passive/preventDefault issues)
+    let ptrDragActive = false;
+
+    const startPointerDrag = (e, captureEl) => {
+      ptrDragActive = true;
       touchDragId = el.dataset.slotId;
       touchActiveDateStr = dateStr;
-      touchOffsetX = offsetX;
-      touchOffsetY = offsetY;
+      const rect = el.getBoundingClientRect();
+      touchOffsetX = e.clientX - rect.left;
+      touchOffsetY = e.clientY - rect.top;
       touchClone = el.cloneNode(true);
       touchClone.style.cssText = `position:fixed;z-index:9999;width:${rect.width}px;left:${rect.left}px;top:${rect.top}px;opacity:0.85;pointer-events:none;box-shadow:0 8px 25px rgba(0,0,0,0.2);border-radius:12px;`;
       document.body.appendChild(touchClone);
       el.classList.add('dragging');
       if (navigator.vibrate) navigator.vibrate(40);
+      try { captureEl.setPointerCapture(e.pointerId); } catch (_) {}
     };
 
-    const onDragMove = e => {
-      if (!touchClone) return;
+    const onPointerMove = e => {
+      if (!ptrDragActive || !touchClone) return;
       e.preventDefault();
-      const touch = e.touches[0];
-      touchClone.style.left = `${touch.clientX - touchOffsetX}px`;
-      touchClone.style.top = `${touch.clientY - touchOffsetY}px`;
+      touchClone.style.left = `${e.clientX - touchOffsetX}px`;
+      touchClone.style.top = `${e.clientY - touchOffsetY}px`;
       touchClone.style.display = 'none';
-      const tgt = document.elementFromPoint(touch.clientX, touch.clientY);
+      const tgt = document.elementFromPoint(e.clientX, e.clientY);
       touchClone.style.display = '';
       const targetSlot = tgt?.closest('.meal-slot[data-slot-id]');
       document.querySelectorAll('.meal-slot').forEach(s => s.classList.remove('drag-over'));
       if (targetSlot && targetSlot.dataset.slotId !== touchDragId) targetSlot.classList.add('drag-over');
     };
 
-    const onDragEnd = e => {
-      if (!touchDragId) return;
-      const touch = e.changedTouches[0];
+    const onPointerEnd = e => {
+      if (!ptrDragActive) return;
+      ptrDragActive = false;
       if (touchClone) { touchClone.remove(); touchClone = null; }
       el.classList.remove('dragging');
-      const tgt = document.elementFromPoint(touch.clientX, touch.clientY);
-      const targetSlot = tgt?.closest('.meal-slot[data-slot-id]');
       document.querySelectorAll('.meal-slot').forEach(s => s.classList.remove('drag-over'));
-      if (targetSlot && targetSlot.dataset.slotId !== touchDragId) {
-        reorderSlots(touchActiveDateStr, touchDragId, targetSlot.dataset.slotId);
+      if (e.type !== 'pointercancel') {
+        const tgt = document.elementFromPoint(e.clientX, e.clientY);
+        const targetSlot = tgt?.closest('.meal-slot[data-slot-id]');
+        if (targetSlot && targetSlot.dataset.slotId !== touchDragId) {
+          reorderSlots(touchActiveDateStr, touchDragId, targetSlot.dataset.slotId);
+        }
       }
       touchDragId = null;
       touchActiveDateStr = null;
-      document.removeEventListener('touchmove', onDragMove);
-      document.removeEventListener('touchend', onDragEnd);
     };
 
-    // Drag handle: immediate drag on touch (no long-press delay needed)
+    // Drag handle: immediate drag on pointer down (no long-press needed)
     const handle = el.querySelector('.drag-handle');
     if (handle) {
-      handle.addEventListener('touchstart', e => {
+      handle.addEventListener('pointerdown', e => {
+        if (e.button !== 0 || ptrDragActive) return;
         e.preventDefault();
-        const touch = e.touches[0];
-        const rect = el.getBoundingClientRect();
-        startTouchDrag(rect, touch.clientX - rect.left, touch.clientY - rect.top);
-        document.addEventListener('touchmove', onDragMove, { passive: false });
-        document.addEventListener('touchend', onDragEnd);
-      }, { passive: false });
+        startPointerDrag(e, handle);
+      });
+      handle.addEventListener('pointermove', onPointerMove);
+      handle.addEventListener('pointerup', onPointerEnd);
+      handle.addEventListener('pointercancel', onPointerEnd);
     }
 
-    // Long-press on slot white space / left area to initiate drag
+    // Long-press on slot body to initiate drag
     let lpTimer = null;
     let lpStartX = 0, lpStartY = 0;
-    el.addEventListener('touchstart', e => {
+
+    el.addEventListener('pointerdown', e => {
       const tgt = e.target;
       if (tgt.closest('button') || tgt.closest('input') || tgt.closest('.drag-handle')) return;
-      const touch = e.touches[0];
-      lpStartX = touch.clientX;
-      lpStartY = touch.clientY;
-      const capturedX = touch.clientX;
-      const capturedY = touch.clientY;
+      if (e.button !== 0 || ptrDragActive) return;
+      lpStartX = e.clientX;
+      lpStartY = e.clientY;
+      const snap = { clientX: e.clientX, clientY: e.clientY, pointerId: e.pointerId };
       lpTimer = setTimeout(() => {
         lpTimer = null;
-        const rect = el.getBoundingClientRect();
-        startTouchDrag(rect, capturedX - rect.left, capturedY - rect.top);
-        document.addEventListener('touchmove', onDragMove, { passive: false });
-        document.addEventListener('touchend', onDragEnd);
-      }, 430);
-    }, { passive: true });
-
-    el.addEventListener('touchmove', e => {
-      if (!lpTimer) return;
-      const t = e.touches[0];
-      if (Math.abs(t.clientX - lpStartX) > 8 || Math.abs(t.clientY - lpStartY) > 8) {
-        clearTimeout(lpTimer); lpTimer = null;
-      }
+        startPointerDrag(snap, el);
+      }, 450);
     });
 
-    const cancelLp = () => { if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } };
-    el.addEventListener('touchend', cancelLp);
-    el.addEventListener('touchcancel', cancelLp);
+    el.addEventListener('pointermove', e => {
+      if (lpTimer && (Math.abs(e.clientX - lpStartX) > 8 || Math.abs(e.clientY - lpStartY) > 8)) {
+        clearTimeout(lpTimer); lpTimer = null;
+      }
+      if (ptrDragActive) onPointerMove(e);
+    });
+
+    el.addEventListener('pointerup', e => {
+      if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+      if (ptrDragActive) onPointerEnd(e);
+    });
+    el.addEventListener('pointercancel', e => {
+      if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+      if (ptrDragActive) onPointerEnd(e);
+    });
   });
 }
 
