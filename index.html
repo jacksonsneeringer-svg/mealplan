@@ -4007,54 +4007,168 @@ function renderGroceryList(dates) {
   // Normalize ingredient name by stripping preparation descriptors
   function normalizeIngredientName(name) {
     return name
-      .replace(/\s*[-–]\s*(halved|sliced|diced|chopped|minced|crushed|grated|shredded|peeled|cored|seeded|trimmed|washed|torn|roughly|finely|thinly|coarsely|freshly|ground|whole|quartered|julienned|cubed|mashed|pureed|roasted|toasted|blanched|caramelized|softened|melted).*$/i, '')
-      .replace(/,\s*(halved|sliced|diced|chopped|minced|crushed|grated|shredded|peeled|cored|seeded|trimmed|washed|torn|roughly|finely|thinly|coarsely|freshly|ground|quartered|julienned|cubed|mashed|pureed|roasted|toasted|blanched).*$/i, '')
-      .replace(/\s+(halved|sliced|diced|chopped|minced|crushed|grated|shredded|peeled|cored|seeded|trimmed|washed|torn|quartered|julienned|cubed|mashed|pureed)$/i, '')
+      .replace(/\s*\([^)]*\)/g, '')
+      .replace(/\s+or\s+.+$/i, '')
+      .replace(/,\s*(halved|sliced|diced|chopped|minced|crushed|grated|shredded|peeled|cored|seeded|trimmed|washed|torn|roughly|finely|thinly|coarsely|freshly|ground|quartered|julienned|cubed|mashed|pureed|roasted|toasted|blanched|caramelized|softened|melted|cooked|grilled|baked|steamed|boiled).*$/i, '')
+      .replace(/\s*[-–]\s*(halved|sliced|diced|chopped|minced|crushed|grated|shredded|peeled|cored|seeded|trimmed|washed|torn|roughly|finely|thinly|coarsely|freshly|ground|whole|quartered|julienned|cubed|mashed|pureed|roasted|toasted|blanched|caramelized|softened|melted|cooked|grilled).*$/i, '')
+      .replace(/\s+(halved|sliced|diced|chopped|minced|crushed|grated|shredded|peeled|cored|seeded|trimmed|washed|torn|quartered|julienned|cubed|mashed|pureed|cooked|grilled)$/i, '')
+      .replace(/^(fresh|ripe|raw|cooked)\s+/i, '')
       .trim();
+  }
+
+  // Split "X and Y" or "A, B, C" combined ingredients into separate entries
+  function splitCombinedIngredient(ing) {
+    const name = ing.item;
+    const amt = parseFloat(ing.amount) || 0;
+    const andMatch = name.match(/^(.+?)\s+and\s+(.+)$/i);
+    if (andMatch) {
+      return [andMatch[1].trim(), andMatch[2].trim()]
+        .map(p => ({ ...ing, item: p, amount: amt / 2 }));
+    }
+    const commaParts = name.split(/,\s+/);
+    if (commaParts.length >= 3 && commaParts.every(p => p.trim().split(/\s+/).length <= 3)) {
+      return commaParts.map(p => ({ ...ing, item: p.trim(), amount: amt / commaParts.length }));
+    }
+    return [ing];
   }
 
   // Group and combine ingredients by normalized name, summing amounts by unit
   const grouped = {};
-  allIngredients.forEach(ing => {
-    const normalized = normalizeIngredientName(ing.item);
-    const key = normalized.toLowerCase();
-    if (!grouped[key]) grouped[key] = { item: normalized, amounts: {}, meals: [] };
-    const unit = ing.unit || '';
-    if (!grouped[key].amounts[unit]) grouped[key].amounts[unit] = 0;
-    grouped[key].amounts[unit] += parseFloat(ing.amount) || 0;
-    const useLabel = `${ing.day} – ${ing.meal}`;
-    if (!grouped[key].meals.includes(useLabel)) grouped[key].meals.push(useLabel);
+  allIngredients.forEach(rawIng => {
+    const normalized = { ...rawIng, item: normalizeIngredientName(rawIng.item) };
+    const split = splitCombinedIngredient(normalized);
+    split.forEach(ing => {
+      const key = ing.item.toLowerCase();
+      if (!grouped[key]) grouped[key] = { item: ing.item, amounts: {}, meals: [] };
+      const unit = ing.unit || '';
+      if (!grouped[key].amounts[unit]) grouped[key].amounts[unit] = 0;
+      grouped[key].amounts[unit] += parseFloat(ing.amount) || 0;
+      const useLabel = `${ing.day} – ${ing.meal}`;
+      if (!grouped[key].meals.includes(useLabel)) grouped[key].meals.push(useLabel);
+    });
   });
 
-  function formatAmounts(amounts) {
+  // Convert amounts to grocery-store-friendly quantities
+  function toGroceryQuantity(itemName, amounts, category) {
+    const name = itemName.toLowerCase();
+    const g = amounts['g'] || 0;
+    const ml = amounts['ml'] || 0;
+
+    if (category === 'Seasoning' || amounts['to taste'] > 0 || amounts['pinch'] > 0 || amounts['spray'] > 0) {
+      return 'as needed';
+    }
+
+    for (const u of ['egg','eggs','egg white','egg whites','slice','slices','clove','cloves','medium','large','small','tortilla','corn tortilla','lemon','cucumber','wedge']) {
+      if (amounts[u] > 0) {
+        const n = Math.ceil(amounts[u]);
+        return `${n} ${u}${n > 1 && !u.endsWith('s') ? 's' : ''}`;
+      }
+    }
+
+    if (g > 0) {
+      const byCount = [
+        [/\bavocado\b/, 150, 'avocado'],
+        [/\bbanana\b/, 120, 'banana'],
+        [/\bapple\b/, 180, 'apple'],
+        [/\borange\b/, 180, 'orange'],
+        [/\blemon\b/, 80, 'lemon'],
+        [/\blime\b/, 60, 'lime'],
+        [/\bmango\b/, 200, 'mango'],
+        [/bell pepper|red pepper(?! flake)|green pepper|yellow pepper/, 150, 'bell pepper'],
+        [/\bonion\b/, 150, 'onion'],
+        [/sweet potato/, 200, 'sweet potato'],
+        [/\bpotato\b/, 150, 'potato'],
+        [/(?<!cherry )\btomato\b/, 120, 'tomato'],
+        [/\bcucumber\b/, 200, 'cucumber'],
+        [/\bzucchini\b/, 200, 'zucchini'],
+        [/\bcarrot\b/, 80, 'carrot'],
+        [/broccoli/, 350, 'head of broccoli'],
+        [/cauliflower/, 600, 'head of cauliflower'],
+      ];
+      for (const [re, wt, noun] of byCount) {
+        if (re.test(name)) {
+          const n = Math.ceil(g / wt);
+          return `~${n} ${noun}${n > 1 && !noun.startsWith('head') ? 's' : ''}`;
+        }
+      }
+      if (/spinach|kale|arugula|romaine|lettuce|cabbage/.test(name)) return g <= 100 ? 'small bag (5 oz)' : 'large bag (10 oz)';
+      if (/cherry tomato/.test(name)) return g <= 200 ? '1 pint' : '2 pints';
+      if (/mushroom/.test(name)) return g <= 150 ? '8 oz container' : '16 oz container';
+      if (/asparagus/.test(name)) return '1 bunch';
+      if (/green bean/.test(name)) return g <= 150 ? '½ lb bag' : '1 lb bag';
+      if (/snap pea|snow pea/.test(name)) return '1 bag (8 oz)';
+      if (/chicken|ground turkey|ground beef|ground pork|ground chicken|pork(?! rinds)|turkey(?! sausage)|salmon|shrimp|cod|tilapia|halibut|sea bass|mahi/.test(name) || /\bsteak\b|\bsirloin\b|\bflank\b|\btenderloin\b|\bfilet\b/.test(name)) {
+        const lbs = g / 453.6;
+        if (lbs <= 0.33) return '~¼ lb';
+        if (lbs <= 0.6) return '~½ lb';
+        if (lbs <= 0.85) return '~¾ lb';
+        if (lbs <= 1.15) return '~1 lb';
+        if (lbs <= 1.6) return '~1½ lb';
+        return `~${Math.round(lbs)} lb`;
+      }
+      if (/cheese|mozzarella|parmesan|feta|cheddar|ricotta|gouda|provolone/.test(name)) {
+        const oz = Math.round(g / 28.35);
+        return oz <= 2 ? '~2 oz' : `~${Math.ceil(oz / 4) * 4} oz`;
+      }
+      if (/greek yogurt|cottage cheese/.test(name)) return g <= 200 ? 'small container (7 oz)' : '1 container (16 oz)';
+      if (/\brice\b|pasta|penne|spaghetti|fettuccine|\boats\b|oatmeal|quinoa|couscous|barley/.test(name)) return g <= 200 ? 'small bag (1 lb)' : 'large bag (2 lb)';
+      if (/canned|diced tomato|crushed tomato|tomato paste|tomato sauce|black bean|kidney bean|chickpea|lentil(?! soup)|\bcorn\b/.test(name)) {
+        const cans = Math.ceil(g / 400);
+        return `${cans} can${cans > 1 ? 's' : ''} (15 oz each)`;
+      }
+      const oz = g / 28.35;
+      return oz < 1 ? 'small amount' : `~${Math.round(oz)} oz`;
+    }
+
+    if (ml > 0) {
+      if (/broth|stock/.test(name)) return ml <= 500 ? '1 carton (32 oz)' : '2 cartons (32 oz)';
+      if (/coconut milk|coconut cream/.test(name)) return '1 can (13.5 oz)';
+      if (/soy sauce|worcestershire|fish sauce|hot sauce|sriracha|teriyaki|hoisin|oyster sauce|mirin/.test(name)) return 'small bottle';
+      if (/olive oil|sesame oil|vegetable oil|coconut oil/.test(name)) return ml <= 50 ? 'small bottle' : '1 bottle';
+      if (/almond milk|oat milk|soy milk/.test(name)) return '½ gallon';
+      if (/\bmilk\b/.test(name)) return ml <= 100 ? 'small carton' : '½ gallon';
+      if (/heavy cream|whipping cream/.test(name)) return 'small carton (1 pt)';
+      if (/lemon juice|lime juice/.test(name)) return 'small bottle';
+      if (/vinegar/.test(name)) return 'small bottle';
+      if (/honey|maple syrup/.test(name)) return 'small bottle';
+      const floz = Math.ceil(ml / 29.57);
+      return `~${floz} fl oz`;
+    }
+
     return Object.entries(amounts)
-      .filter(([_, amt]) => amt > 0)
-      .map(([unit, amt]) => {
-        const rounded = Math.round(amt * 10) / 10;
-        return unit ? `${rounded} ${unit}` : `${rounded}`;
-      })
+      .filter(([_, v]) => v > 0)
+      .map(([u, v]) => `${Math.round(v * 10) / 10}${u ? ' ' + u : ''}`)
       .join(' + ');
   }
 
   const CATEGORIES = [
-    { label: 'Produce', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', keywords: ['apple','apples','banana','bananas','orange','oranges','lemon','lemons','lime','limes','berry','berries','strawberry','blueberry','raspberry','grape','grapes','mango','pineapple','peach','pear','plum','watermelon','melon','avocado','tomato','tomatoes','cucumber','zucchini','squash','pepper','peppers','onion','onions','garlic','shallot','potato','potatoes','sweet potato','carrot','carrots','celery','broccoli','cauliflower','spinach','kale','lettuce','arugula','cabbage','brussels','mushroom','mushrooms','asparagus','corn','pea','peas','bean','beans','edamame','leek','ginger','beet','beets','radish','artichoke','eggplant','fennel','chard','cilantro','parsley','basil','mint','thyme','rosemary','sage','dill','chive','chives','scallion','scallions','herb','herbs','jalapeño','jalapeno'] },
+    { label: 'Produce', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', keywords: ['apple','apples','banana','bananas','orange','oranges','lemon','lemons','lime','limes','berry','berries','strawberry','blueberry','raspberry','grape','grapes','mango','pineapple','peach','pear','plum','watermelon','melon','avocado','tomato','tomatoes','cherry tomato','cucumber','zucchini','squash','bell pepper','jalapeño pepper','jalapeño','jalapeno','onion','onions','garlic','shallot','potato','potatoes','sweet potato','carrot','carrots','celery','broccoli','cauliflower','spinach','kale','lettuce','romaine','arugula','cabbage','brussels','mushroom','mushrooms','asparagus','corn','pea','peas','edamame','leek','ginger','beet','beets','radish','artichoke','eggplant','fennel','chard','cilantro','parsley','basil','mint','thyme','rosemary','sage','dill','chive','chives','scallion','scallions','herb','herbs','green onion','snap pea','water chestnut'] },
+    { label: 'Seasoning', color: '#854d0e', bg: '#fef9c3', border: '#fde68a', keywords: ['italian seasoning','italian herb','taco seasoning','everything bagel seasoning','pumpkin pie spice','tikka masala spice','garlic powder','onion powder','smoked paprika','garlic salt','chili powder','curry powder','curry paste','red pepper flake','cayenne','black pepper','ground ginger','dried oregano','dried thyme','dried rosemary','dried basil','allspice','cardamom','coriander','bouillon','tajin','tajín','paprika','cumin','turmeric','cinnamon','nutmeg','oregano','seasoning','spice blend','salt'] },
     { label: 'Meat & Seafood', color: '#dc2626', bg: '#fff1f2', border: '#fecdd3', keywords: ['chicken','beef','pork','turkey','lamb','veal','duck','steak','ground beef','bacon','sausage','ham','salami','pepperoni','brisket','ribs','loin','thigh','breast','wing','drumstick','fish','salmon','tuna','tilapia','cod','shrimp','prawn','prawns','crab','lobster','scallop','scallops','clam','clams','oyster','oysters','anchovy','anchovies','sardine','sardines','mahi','halibut','trout','catfish','sea bass','meatball','meatballs','chorizo','pancetta','prosciutto','deli meat','ground turkey','ground pork'] },
     { label: 'Dairy & Eggs', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', keywords: ['milk','cream','butter','cheese','cheddar','mozzarella','parmesan','feta','ricotta','brie','gouda','swiss','provolone','cream cheese','cottage cheese','sour cream','yogurt','greek yogurt','kefir','half and half','heavy cream','whipped cream','egg','eggs','ghee','buttermilk','ice cream','gelato'] },
-    { label: 'Grains & Bread', color: '#b45309', bg: '#fffbeb', border: '#fde68a', keywords: ['bread','roll','rolls','bun','buns','bagel','bagels','tortilla','tortillas','pita','naan','rice','brown rice','white rice','pasta','spaghetti','penne','fettuccine','lasagna','noodle','noodles','quinoa','oat','oats','oatmeal','granola','cereal','flour','whole wheat','cornmeal','breadcrumb','breadcrumbs','cracker','crackers','pretzel','pretzels','wrap','wraps','couscous','bulgur','barley','farro','millet','rye','sourdough','baguette','croissant','muffin','muffins','waffle','waffles','pancake','pancakes'] },
-    { label: 'Canned & Pantry', color: '#ea580c', bg: '#fff7ed', border: '#fed7aa', keywords: ['canned','can of','tomato sauce','tomato paste','crushed tomatoes','diced tomatoes','chicken broth','beef broth','vegetable broth','stock','coconut milk','coconut cream','chickpea','chickpeas','lentil','lentils','black bean','kidney bean','white bean','navy bean','pinto bean','refried beans','olive','olives','pickle','pickles','soy sauce','fish sauce','worcestershire','vinegar','oil','olive oil','vegetable oil','coconut oil','sesame oil','honey','maple syrup','sugar','brown sugar','salt','pepper','spice','spices','cumin','paprika','chili powder','curry','turmeric','cinnamon','nutmeg','oregano','dried','bouillon','hot sauce','sriracha','ketchup','mustard','mayo','mayonnaise','relish','jam','jelly','peanut butter','almond butter','tahini','hummus','salsa','guacamole','nut','nuts','almond','almonds','walnut','walnuts','cashew','cashews','pecan','pecans','pine nut','pine nuts','seed','seeds','flaxseed','chia','sunflower seed','pumpkin seed','raisin','raisins','dried fruit','chocolate','cocoa','vanilla','baking powder','baking soda','yeast','cornstarch','gelatin','protein powder'] },
+    { label: 'Grains & Bread', color: '#b45309', bg: '#fffbeb', border: '#fde68a', keywords: ['bread','roll','rolls','bun','buns','bagel','bagels','tortilla','tortillas','pita','naan','rice','brown rice','white rice','basmati','pasta','spaghetti','penne','fettuccine','lasagna','noodle','noodles','quinoa','oat','oats','oatmeal','granola','cereal','flour','whole wheat','cornmeal','breadcrumb','breadcrumbs','cracker','crackers','pretzel','pretzels','wrap','wraps','couscous','bulgur','barley','farro','millet','rye','sourdough','baguette','croissant','muffin','muffins','waffle','waffles','pancake','pancakes'] },
+    { label: 'Canned & Pantry', color: '#ea580c', bg: '#fff7ed', border: '#fed7aa', keywords: ['canned','can of','tomato sauce','tomato paste','crushed tomatoes','diced tomatoes','chicken broth','beef broth','vegetable broth','stock','coconut milk','coconut cream','chickpea','chickpeas','lentil','lentils','black bean','kidney bean','white bean','navy bean','pinto bean','refried beans','olive','olives','pickle','pickles','soy sauce','fish sauce','worcestershire','vinegar','oil','olive oil','vegetable oil','coconut oil','sesame oil','honey','maple syrup','sugar','brown sugar','hot sauce','sriracha','ketchup','mustard','mayo','mayonnaise','relish','jam','jelly','peanut butter','almond butter','tahini','hummus','salsa','guacamole','nut','nuts','almond','almonds','walnut','walnuts','cashew','cashews','pecan','pecans','pine nut','pine nuts','seed','seeds','flaxseed','chia','sunflower seed','pumpkin seed','raisin','raisins','dried fruit','chocolate','cocoa','vanilla','baking powder','baking soda','yeast','cornstarch','gelatin','protein powder','miso','hoisin','oyster sauce','teriyaki','mirin','cooking spray','dijon','pumpkin puree'] },
     { label: 'Beverages', color: '#0891b2', bg: '#ecfeff', border: '#a5f3fc', keywords: ['water','juice','coffee','tea','soda','almond milk','oat milk','soy milk','coconut water','sports drink','protein shake','smoothie','broth','wine','beer','kombucha'] },
     { label: 'Frozen', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', keywords: ['frozen','ice cream','gelato','frozen vegetable','frozen fruit','frozen meal','frozen pizza','frozen waffle'] },
   ];
 
+  // Use longest keyword match to correctly distinguish e.g. "garlic powder" (Seasoning) from "garlic" (Produce)
   function getCategory(itemName) {
     const name = itemName.toLowerCase();
+    let bestCat = null;
+    let bestLen = -1;
     for (const cat of CATEGORIES) {
-      if (cat.keywords.some(kw => name.includes(kw))) return cat.label;
+      for (const kw of cat.keywords) {
+        if (name.includes(kw) && kw.length > bestLen) {
+          bestLen = kw.length;
+          bestCat = cat.label;
+        }
+      }
     }
-    return 'Other';
+    return bestCat || 'Other';
   }
 
-  const CATEGORY_ORDER = ['Produce','Meat & Seafood','Dairy & Eggs','Grains & Bread','Canned & Pantry','Beverages','Frozen','Other'];
+  const CATEGORY_ORDER = ['Produce','Seasoning','Meat & Seafood','Dairy & Eggs','Grains & Bread','Canned & Pantry','Beverages','Frozen','Other'];
   const CATEGORY_META = Object.fromEntries([
     ...CATEGORIES.map(c => [c.label, { color: c.color, bg: c.bg, border: c.border }]),
     ['Other', { color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb' }]
@@ -4065,6 +4179,7 @@ function renderGroceryList(dates) {
   CATEGORY_ORDER.forEach(c => byCategory[c] = []);
   items.forEach(item => {
     const cat = getCategory(item.item);
+    item.category = cat;
     byCategory[cat].push(item);
   });
   CATEGORY_ORDER.forEach(c => byCategory[c].sort((a,b) => a.item.localeCompare(b.item)));
@@ -4081,7 +4196,7 @@ function renderGroceryList(dates) {
       </div>
       ${byCategory[cat].map(item => {
         const i = itemIndex++;
-        const amtStr = formatAmounts(item.amounts);
+        const amtStr = toGroceryQuantity(item.item, item.amounts, item.category);
         const displayName = item.item.charAt(0).toUpperCase() + item.item.slice(1);
         return `
         <div class="grocery-item" id="gi-${i}">
