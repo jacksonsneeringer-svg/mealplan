@@ -661,8 +661,12 @@ function getActiveFixedTotals(dateStr) {
   if (!active) {
     active = STATE.fixedItems.reduce((o, it) => { o[it.id] = true; return o; }, {});
     localStorage.setItem(key, JSON.stringify(active));
+  } else {
+    let changed = false;
+    STATE.fixedItems.forEach(it => { if (!(it.id in active)) { active[it.id] = true; changed = true; } });
+    if (changed) localStorage.setItem(key, JSON.stringify(active));
   }
-  return { active, totals: STATE.fixedItems.filter(it => active[it.id]).reduce((acc, it) => ({
+  return { active, totals: STATE.fixedItems.filter(it => active[it.id] !== false).reduce((acc, it) => ({
     calories: acc.calories+(it.calories||0), protein: acc.protein+(it.protein||0),
     carbs: acc.carbs+(it.carbs||0), fat: acc.fat+(it.fat||0)
   }), { calories:0, protein:0, carbs:0, fat:0 }) };
