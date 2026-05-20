@@ -660,12 +660,12 @@ function setFixedItemActive(dateStr, itemId, val) {
 const RECIPE_DB = [
   // ─── BREAKFAST ───
   { id:'overnight-oats', name:'Overnight Oats with Berries', keywords:['oats','overnight oats','oatmeal'], mealTypes:['breakfast'],
-    description:'Creamy overnight oats loaded with protein and topped with fresh berries. Prep the night before for a zero-effort morning.',
+    description:'Silky oats soaked overnight in creamy vanilla almond milk, topped with jewel-bright berries and a dusting of cinnamon. Prep the night before for a zero-effort morning.',
     prepTime:'5 min', cookTime:'0 min', baseCal:598, baseP:50, baseC:80, baseF:9,
     ingredients:[{item:'Rolled oats',amount:80,unit:'g'},{item:'Non-fat Greek yogurt',amount:150,unit:'g'},{item:'Unsweetened almond milk',amount:120,unit:'ml'},{item:'Protein powder (vanilla)',amount:25,unit:'g'},{item:'Mixed berries',amount:100,unit:'g'},{item:'Honey',amount:10,unit:'g'}],
     instructions:['Combine oats, Greek yogurt, almond milk, and protein powder in a jar.','Stir well until fully mixed.','Cover and refrigerate overnight (at least 6 hours).','In the morning, top with mixed berries and a drizzle of honey.','Add extra almond milk if you prefer a thinner consistency.']},
   { id:'scrambled-eggs-toast', name:'Fluffy Scrambled Eggs on Toast', keywords:['eggs','scrambled eggs','toast','egg'], mealTypes:['breakfast'],
-    description:'Buttery, fluffy scrambled eggs piled high on whole wheat toast. A protein-packed classic that never gets old.',
+    description:'Buttery, fluffy scrambled eggs piled high on whole wheat toast. Soft golden curds with a rich, creamy bite — a timeless morning staple.',
     prepTime:'5 min', cookTime:'8 min', baseCal:459, baseP:26, baseC:27, baseF:24,
     ingredients:[{item:'Large eggs',amount:3,unit:'egg'},{item:'Whole wheat bread',amount:2,unit:'slice'},{item:'Butter',amount:8,unit:'g'},{item:'Milk',amount:30,unit:'ml'},{item:'Salt and pepper',amount:1,unit:'pinch'},{item:'Fresh chives (optional)',amount:5,unit:'g'}],
     instructions:['Crack eggs into a bowl, add milk, salt, and pepper. Whisk until combined.','Melt butter in a non-stick pan over medium-low heat.','Pour in egg mixture. Let it sit 30 seconds, then gently fold with a spatula.','Remove from heat just before eggs are fully set — residual heat finishes them.','Toast bread and top with scrambled eggs.']},
@@ -675,7 +675,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Non-fat Greek yogurt',amount:250,unit:'g'},{item:'Low-sugar granola',amount:40,unit:'g'},{item:'Strawberries, sliced',amount:80,unit:'g'},{item:'Blueberries',amount:50,unit:'g'},{item:'Honey',amount:10,unit:'g'}],
     instructions:['Spoon half the Greek yogurt into a glass or bowl.','Add half the granola, then half the fruit.','Repeat with remaining yogurt, granola, and fruit.','Drizzle with honey and serve immediately.']},
   { id:'protein-pancakes', name:'High-Protein Banana Pancakes', keywords:['pancakes','protein pancakes','pancake'], mealTypes:['breakfast'],
-    description:'Fluffy, satisfying pancakes packed with protein. These taste indulgent but are genuinely good for you.',
+    description:'Fluffy, golden pancakes with pillowy middles and lightly crisp edges. Drizzle with maple syrup and fresh berries for the full stack experience.',
     prepTime:'8 min', cookTime:'12 min', baseCal:663, baseP:56, baseC:74, baseF:17,
     ingredients:[{item:'Rolled oats (blended to flour)',amount:60,unit:'g'},{item:'Protein powder (vanilla)',amount:30,unit:'g'},{item:'Ripe banana',amount:1,unit:'medium'},{item:'Eggs',amount:2,unit:'egg'},{item:'Non-fat Greek yogurt',amount:80,unit:'g'},{item:'Baking powder',amount:3,unit:'g'},{item:'Cooking spray',amount:1,unit:'spray'}],
     instructions:['Blend oats into fine flour. Mash banana in a bowl.','Mix all ingredients together until smooth batter forms.','Heat a non-stick pan over medium and coat with cooking spray.','Pour ¼ cup batter per pancake. Cook 2-3 min until bubbles form, then flip.','Cook 1-2 min more until golden. Serve with fresh fruit.']},
@@ -685,17 +685,17 @@ const RECIPE_DB = [
     ingredients:[{item:'Whole grain bread',amount:2,unit:'slice'},{item:'Ripe avocado',amount:100,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Lemon juice',amount:5,unit:'ml'},{item:'Red pepper flakes',amount:1,unit:'pinch'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
     instructions:['Toast bread until golden and crisp.','Mash avocado with lemon juice, salt, pepper, and red pepper flakes.','Fry eggs to your liking in a lightly oiled pan.','Spread avocado on toast and top with fried eggs.','Season with extra salt and red pepper flakes. Serve immediately.']},
   { id:'breakfast-burrito', name:'High-Protein Breakfast Burrito', keywords:['burrito','breakfast burrito','wrap'], mealTypes:['breakfast'],
-    description:'A hearty, protein-packed burrito loaded with eggs, turkey sausage, and veggies. Filling enough to power you through the morning.',
+    description:'A hearty burrito stuffed with fluffy scrambled eggs, savory turkey sausage, and colorful vegetables, wrapped tight in a warm flour tortilla.',
     prepTime:'8 min', cookTime:'10 min', baseCal:757, baseP:50, baseC:58, baseF:35,
     ingredients:[{item:'Large flour tortilla (10")',amount:1,unit:'tortilla'},{item:'Eggs',amount:3,unit:'egg'},{item:'Turkey breakfast sausage',amount:60,unit:'g'},{item:'Black beans (canned, drained)',amount:80,unit:'g'},{item:'Shredded cheese',amount:30,unit:'g'},{item:'Salsa',amount:40,unit:'g'}],
     instructions:['Cook turkey sausage in a pan, breaking it up. Set aside.','Scramble eggs in the same pan until just set. Season well.','Warm tortilla in microwave for 20 seconds.','Layer eggs, sausage, black beans, and cheese in the center of tortilla.','Top with salsa, fold sides in, then roll up tightly.']},
   { id:'cottage-cheese-bowl', name:'Cottage Cheese Power Bowl', keywords:['cottage cheese','cottage'], mealTypes:['breakfast','snack'],
-    description:'A high-protein cottage cheese bowl with fruit and a hint of sweetness. Incredibly filling for the calorie count.',
+    description:'Creamy cottage cheese topped with vibrant seasonal fruit and a golden drizzle of honey. Cool, refreshing, and naturally sweet.',
     prepTime:'3 min', cookTime:'0 min', baseCal:296, baseP:27, baseC:33, baseF:5,
     ingredients:[{item:'Low-fat cottage cheese',amount:225,unit:'g'},{item:'Pineapple chunks',amount:80,unit:'g'},{item:'Blueberries',amount:50,unit:'g'},{item:'Honey',amount:8,unit:'g'},{item:'Chia seeds',amount:8,unit:'g'}],
     instructions:['Scoop cottage cheese into a bowl.','Top with pineapple and blueberries.','Drizzle with honey and sprinkle chia seeds.','Mix gently and enjoy.']},
   { id:'egg-white-omelette', name:'Veggie Egg White Omelette', keywords:['omelette','omelet','egg white','egg whites'], mealTypes:['breakfast'],
-    description:'A light, fluffy omelette loaded with colorful vegetables. High protein, low fat, and packed with nutrients.',
+    description:'A light, golden omelette folded over a colorful medley of sautéed vegetables. Delicate, airy, and beautiful on the plate.',
     prepTime:'8 min', cookTime:'8 min', baseCal:337, baseP:35, baseC:12, baseF:16,
     ingredients:[{item:'Egg whites',amount:6,unit:'egg white'},{item:'Whole egg',amount:1,unit:'egg'},{item:'Bell pepper, diced',amount:80,unit:'g'},{item:'Mushrooms, sliced',amount:60,unit:'g'},{item:'Baby spinach',amount:40,unit:'g'},{item:'Feta cheese',amount:25,unit:'g'},{item:'Olive oil',amount:5,unit:'ml'}],
     instructions:['Whisk egg whites and whole egg with a pinch of salt.','Sauté bell pepper and mushrooms in olive oil over medium heat for 3-4 min.','Add spinach and cook until wilted. Remove veggies and set aside.','Pour egg mixture into pan. Let set on bottom then lift edges.','Add veggies and feta to one half. Fold and slide onto plate.']},
@@ -705,12 +705,12 @@ const RECIPE_DB = [
     ingredients:[{item:'Rolled oats',amount:80,unit:'g'},{item:'Water or milk',amount:200,unit:'ml'},{item:'Almond butter',amount:25,unit:'g'},{item:'Banana, sliced',amount:1,unit:'medium'},{item:'Cinnamon',amount:2,unit:'g'},{item:'Honey',amount:10,unit:'g'}],
     instructions:['Bring water or milk to a boil in a small saucepan.','Add oats and reduce to medium-low. Cook 3-5 min, stirring occasionally.','Remove from heat. Stir in cinnamon and honey.','Transfer to bowl. Swirl in almond butter.','Top with banana slices and enjoy hot.']},
   { id:'smoothie-bowl', name:'Tropical Protein Smoothie Bowl', keywords:['smoothie','smoothie bowl','acai'], mealTypes:['breakfast'],
-    description:'A thick, vibrant smoothie bowl topped with crunchy granola and tropical fruit. Nutritious and delicious.',
+    description:'A thick, vibrantly colored smoothie bowl with tropical fruit and crunchy granola. Bold flavor, gorgeous color, and endlessly customizable toppings.',
     prepTime:'8 min', cookTime:'0 min', baseCal:545, baseP:36, baseC:71, baseF:14,
     ingredients:[{item:'Frozen mango chunks',amount:120,unit:'g'},{item:'Frozen banana',amount:80,unit:'g'},{item:'Protein powder (vanilla)',amount:25,unit:'g'},{item:'Non-fat Greek yogurt',amount:100,unit:'g'},{item:'Granola',amount:30,unit:'g'},{item:'Kiwi, sliced',amount:60,unit:'g'},{item:'Coconut flakes',amount:10,unit:'g'}],
     instructions:['Blend frozen mango, banana, protein powder, and yogurt until thick and smooth.','If too thick, add 1-2 tbsp water or milk.','Pour into a bowl.','Arrange granola, kiwi, and coconut flakes on top.','Eat immediately with a spoon.']},
   { id:'french-toast', name:'Protein French Toast', keywords:['french toast','french'], mealTypes:['breakfast'],
-    description:'Golden, custardy French toast with a secret protein boost. Tastes like a treat, fuels like a champion.',
+    description:'Golden, custardy French toast soaked in a cinnamon-vanilla egg batter and pan-fried to caramelized perfection. Tastes like a proper weekend indulgence.',
     prepTime:'5 min', cookTime:'8 min', baseCal:507, baseP:29, baseC:50, baseF:18,
     ingredients:[{item:'Whole wheat bread',amount:3,unit:'slice'},{item:'Eggs',amount:2,unit:'egg'},{item:'Non-fat Greek yogurt',amount:60,unit:'g'},{item:'Cinnamon',amount:2,unit:'g'},{item:'Vanilla extract',amount:2,unit:'ml'},{item:'Butter',amount:6,unit:'g'},{item:'Fresh berries',amount:80,unit:'g'}],
     instructions:['Whisk eggs, yogurt, cinnamon, and vanilla together.','Dip each bread slice in egg mixture, coating both sides.','Melt butter in a non-stick pan over medium heat.','Cook each slice 2-3 min per side until golden brown.','Serve topped with fresh berries.']},
@@ -727,7 +727,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Large whole wheat tortilla',amount:1,unit:'tortilla'},{item:'Deli turkey breast',amount:120,unit:'g'},{item:'Avocado, sliced',amount:70,unit:'g'},{item:'Romaine lettuce',amount:40,unit:'g'},{item:'Tomato, sliced',amount:60,unit:'g'},{item:'Swiss cheese',amount:20,unit:'g'},{item:'Dijon mustard',amount:10,unit:'g'}],
     instructions:['Lay tortilla flat. Spread mustard evenly.','Layer turkey, cheese, lettuce, tomato, and avocado in the center.','Season avocado with salt and pepper.','Fold sides in, then roll from the bottom into a tight wrap.','Slice diagonally and serve immediately.']},
   { id:'tuna-salad-sandwich', name:'High-Protein Tuna Melt Sandwich', keywords:['tuna','tuna salad','tuna sandwich','tuna melt'], mealTypes:['lunch'],
-    description:'A creamy, flavor-packed tuna salad on toasted whole wheat with melted cheese. High protein and ready in minutes.',
+    description:'A creamy, tangy tuna salad piled on toasted whole wheat bread with melted cheese. Bold, savory, and ready in minutes.',
     prepTime:'8 min', cookTime:'5 min', baseCal:446, baseP:58, baseC:29, baseF:9,
     ingredients:[{item:'Canned tuna in water',amount:150,unit:'g'},{item:'Whole wheat bread',amount:2,unit:'slice'},{item:'Non-fat Greek yogurt (instead of mayo)',amount:40,unit:'g'},{item:'Celery, diced',amount:30,unit:'g'},{item:'Red onion, diced',amount:20,unit:'g'},{item:'Reduced-fat cheddar cheese',amount:30,unit:'g'},{item:'Lemon juice, salt, pepper',amount:1,unit:'to taste'}],
     instructions:['Drain tuna thoroughly. Mix with Greek yogurt, celery, onion, lemon juice, salt, and pepper.','Toast bread. Spread tuna mixture on one slice.','Top with cheese. Broil or microwave until cheese is melted.','Top with remaining bread, slice, and serve.']},
@@ -764,7 +764,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Salmon fillet',amount:200,unit:'g'},{item:'White rice (cooked)',amount:180,unit:'g'},{item:'Asparagus',amount:100,unit:'g'},{item:'Lemon',amount:1,unit:'lemon'},{item:'Garlic, minced',amount:3,unit:'clove'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Fresh dill or parsley',amount:10,unit:'g'}],
     instructions:['Preheat oven to 400°F (200°C).','Place salmon and asparagus on a baking sheet. Drizzle with olive oil.','Top salmon with garlic, herbs, lemon zest, and lemon slices.','Season everything with salt and pepper.','Bake 15-18 min until salmon flakes easily. Serve over rice with fresh lemon.']},
   { id:'chicken-stir-fry', name:'Chicken and Veggie Stir Fry', keywords:['stir fry','chicken stir fry','stir-fry'], mealTypes:['dinner'],
-    description:'A vibrant, high-protein stir fry with tender chicken and crisp vegetables in a savory garlic-ginger sauce.',
+    description:'A vibrant wok stir fry with tender chicken and crisp vegetables lacquered in a bold garlic-ginger sauce. Smoky, aromatic, and full of umami depth.',
     prepTime:'12 min', cookTime:'12 min', baseCal:718, baseP:74, baseC:72, baseF:14,
     ingredients:[{item:'Chicken breast, sliced thin',amount:200,unit:'g'},{item:'White rice (cooked)',amount:180,unit:'g'},{item:'Broccoli florets',amount:100,unit:'g'},{item:'Bell pepper, sliced',amount:80,unit:'g'},{item:'Snap peas',amount:60,unit:'g'},{item:'Low-sodium soy sauce',amount:20,unit:'ml'},{item:'Sesame oil',amount:5,unit:'ml'},{item:'Garlic and ginger, minced',amount:10,unit:'g'}],
     instructions:['Mix soy sauce, sesame oil, garlic, and ginger for the sauce.','Cook chicken in a wok over high heat until golden. Set aside.','Add broccoli, pepper, and snap peas. Stir fry 3-4 min until tender-crisp.','Return chicken to pan, pour sauce over, toss well for 1-2 min.','Serve immediately over rice, garnished with sesame seeds if desired.']},
@@ -779,12 +779,12 @@ const RECIPE_DB = [
     ingredients:[{item:'Sirloin or flank steak',amount:200,unit:'g'},{item:'Sweet potato',amount:250,unit:'g'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Garlic powder and paprika',amount:3,unit:'g'},{item:'Rosemary or thyme',amount:2,unit:'g'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
     instructions:['Preheat oven to 425°F. Cut sweet potato into wedges, toss with olive oil and spices.','Roast sweet potato 20-25 min, flipping halfway, until golden and tender.','Season steak generously with salt, pepper, garlic powder, and rosemary.','Grill or sear in a cast iron pan over high heat, 3-4 min per side for medium-rare.','Rest steak 5 min before slicing. Serve with sweet potato wedges.']},
   { id:'chicken-parmesan', name:'Lightened Chicken Parmesan', keywords:['chicken parmesan','chicken parm','parmesan'], mealTypes:['dinner'],
-    description:'Juicy, crispy chicken in marinara sauce with melted mozzarella over pasta. All the flavor with less of the guilt.',
+    description:'Juicy, crispy chicken smothered in rich marinara sauce under a blanket of bubbling mozzarella over pasta. Italian-American comfort at its finest.',
     prepTime:'15 min', cookTime:'25 min', baseCal:1093, baseP:99, baseC:103, baseF:28,
     ingredients:[{item:'Chicken breast',amount:200,unit:'g'},{item:'Whole wheat pasta (dry)',amount:90,unit:'g'},{item:'Marinara sauce',amount:120,unit:'g'},{item:'Part-skim mozzarella',amount:40,unit:'g'},{item:'Whole wheat breadcrumbs',amount:30,unit:'g'},{item:'Parmesan cheese, grated',amount:15,unit:'g'},{item:'Egg',amount:1,unit:'egg'},{item:'Italian seasoning',amount:3,unit:'g'}],
     instructions:['Pound chicken to even thickness. Dip in beaten egg, then breadcrumbs mixed with Parmesan and Italian seasoning.','Bake at 425°F for 20 min until crispy and cooked through.','Spoon marinara on top of chicken, add mozzarella. Broil 2-3 min until bubbly.','Cook pasta per package directions.','Serve chicken over pasta. Sprinkle extra Parmesan.']},
   { id:'turkey-meatballs-pasta', name:'Turkey Meatball Pasta', keywords:['meatballs','turkey meatballs','pasta'], mealTypes:['dinner'],
-    description:'Juicy, herbed turkey meatballs simmered in tomato sauce over al dente pasta. Comfort food that is genuinely high-protein.',
+    description:'Juicy, herb-rolled turkey meatballs slow-simmered in rustic tomato sauce over al dente pasta. Italian Sunday dinner energy any night of the week.',
     prepTime:'15 min', cookTime:'25 min', baseCal:978, baseP:74, baseC:106, baseF:28,
     ingredients:[{item:'Ground turkey (93% lean)',amount:200,unit:'g'},{item:'Whole wheat pasta (dry)',amount:100,unit:'g'},{item:'Marinara sauce',amount:150,unit:'g'},{item:'Breadcrumbs',amount:20,unit:'g'},{item:'Egg',amount:1,unit:'egg'},{item:'Parmesan cheese',amount:15,unit:'g'},{item:'Garlic and Italian herbs',amount:5,unit:'g'}],
     instructions:['Mix turkey, breadcrumbs, egg, Parmesan, garlic, and herbs. Form into golf ball-sized meatballs.','Brown meatballs in a pan, about 3-4 min per side.','Add marinara sauce and simmer 10-15 min until meatballs are cooked through.','Cook pasta per package directions.','Serve meatballs and sauce over pasta. Garnish with Parmesan.']},
@@ -799,7 +799,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Bone-in chicken thighs',amount:250,unit:'g'},{item:'Broccoli florets',amount:120,unit:'g'},{item:'Zucchini, sliced',amount:100,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Olive oil',amount:12,unit:'ml'},{item:'Garlic powder, paprika, Italian seasoning',amount:5,unit:'g'}],
     instructions:['Preheat oven to 425°F.','Pat chicken dry. Season with salt, pepper, garlic powder, paprika, and Italian seasoning.','Toss vegetables with olive oil, salt, and pepper.','Arrange chicken skin-side up on a sheet pan. Spread vegetables around it.','Roast 25-30 min until chicken skin is crispy and internal temp reaches 165°F.']},
   { id:'shrimp-fried-rice', name:'Shrimp Fried Rice', keywords:['shrimp','fried rice','shrimp fried rice'], mealTypes:['dinner'],
-    description:'Better-than-takeout shrimp fried rice that is actually high in protein. Packed with flavor and ready in 15 minutes.',
+    description:'Better-than-takeout shrimp fried rice with wok-charred edges and savory umami depth. Golden, smoky, and ready in 15 minutes.',
     prepTime:'10 min', cookTime:'12 min', baseCal:774, baseP:67, baseC:85, baseF:17,
     ingredients:[{item:'Large shrimp, peeled',amount:180,unit:'g'},{item:'Cooked white rice (day-old preferred)',amount:240,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Frozen peas and carrots',amount:80,unit:'g'},{item:'Low-sodium soy sauce',amount:25,unit:'ml'},{item:'Sesame oil',amount:5,unit:'ml'},{item:'Garlic, minced',amount:3,unit:'clove'},{item:'Green onions',amount:20,unit:'g'}],
     instructions:['Cook shrimp in a large wok over high heat until pink, 2 min per side. Set aside.','Scramble eggs in the same pan. Remove and set aside.','Add rice to pan, spread out, and cook without stirring 2 min for a little crunch.','Add garlic, peas, and carrots. Stir fry 2 min.','Return shrimp and eggs. Add soy sauce and sesame oil. Toss well. Garnish with green onions.']},
@@ -809,7 +809,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Flank steak or sirloin, thinly sliced',amount:200,unit:'g'},{item:'Broccoli florets',amount:180,unit:'g'},{item:'White rice (cooked)',amount:180,unit:'g'},{item:'Soy sauce',amount:25,unit:'ml'},{item:'Oyster sauce',amount:15,unit:'ml'},{item:'Garlic and ginger',amount:8,unit:'g'},{item:'Sesame oil',amount:5,unit:'ml'},{item:'Cornstarch',amount:8,unit:'g'}],
     instructions:['Toss beef slices with cornstarch and a pinch of salt.','Mix soy sauce, oyster sauce, and sesame oil for the sauce.','Sear beef in very hot pan until browned, about 2 min. Set aside.','Stir fry broccoli 3-4 min. Add garlic and ginger, cook 1 min.','Return beef, pour sauce, toss over heat 1-2 min. Serve over rice.']},
   { id:'ground-turkey-bowl', name:'Seasoned Ground Turkey Bowl', keywords:['ground turkey','turkey bowl'], mealTypes:['dinner','lunch'],
-    description:'Savory seasoned ground turkey over rice with roasted veggies. A fast, flexible meal that hits all your macros.',
+    description:'Savory seasoned ground turkey over fluffy rice with caramelized roasted vegetables. A fast, flexible meal-prep staple with bold seasoning.',
     prepTime:'8 min', cookTime:'15 min', baseCal:634, baseP:52, baseC:56, baseF:23,
     ingredients:[{item:'Ground turkey (93% lean)',amount:200,unit:'g'},{item:'White or brown rice (cooked)',amount:180,unit:'g'},{item:'Zucchini, diced',amount:100,unit:'g'},{item:'Garlic cloves, minced',amount:3,unit:'clove'},{item:'Olive oil',amount:8,unit:'ml'},{item:'Paprika, cumin, onion powder',amount:4,unit:'g'},{item:'Low-sodium soy sauce or Worcestershire',amount:10,unit:'ml'}],
     instructions:['Cook turkey in olive oil over medium-high heat, breaking into crumbles.','Season with paprika, cumin, onion powder, salt, and pepper.','Add garlic and zucchini. Cook 4-5 min until veggies are tender.','Splash in soy sauce or Worcestershire and stir.','Serve over rice.']},
@@ -821,12 +821,12 @@ const RECIPE_DB = [
     ingredients:[{item:'Apple (medium)',amount:1,unit:'apple'},{item:'Natural peanut butter',amount:30,unit:'g'}],
     instructions:['Slice apple into wedges.','Serve with peanut butter for dipping.','Optional: sprinkle with cinnamon.']},
   { id:'yogurt-berries', name:'Greek Yogurt with Mixed Berries', keywords:['yogurt','greek yogurt','berries'], mealTypes:['snack'],
-    description:'Thick, protein-rich Greek yogurt topped with antioxidant-packed berries and a drizzle of honey.',
+    description:'Thick, tangy Greek yogurt crowned with jewel-bright berries and a warm golden drizzle of honey.',
     prepTime:'2 min', cookTime:'0 min', baseCal:165, baseP:18, baseC:22, baseF:0,
     ingredients:[{item:'Non-fat Greek yogurt',amount:175,unit:'g'},{item:'Mixed berries',amount:80,unit:'g'},{item:'Honey',amount:7,unit:'g'}],
     instructions:['Spoon yogurt into a bowl.','Top with berries and a drizzle of honey.','Enjoy immediately.']},
   { id:'cottage-cheese-fruit', name:'Cottage Cheese with Fruit', keywords:['cottage cheese','cottage'], mealTypes:['snack'],
-    description:'Light, protein-dense cottage cheese paired with sweet pineapple. A classic high-protein snack.',
+    description:'Cool, creamy cottage cheese paired with juicy, sun-sweet pineapple chunks. A classic tropical combination with a satisfying contrast of textures.',
     prepTime:'2 min', cookTime:'0 min', baseCal:166, baseP:20, baseC:14, baseF:2,
     ingredients:[{item:'Low-fat cottage cheese',amount:180,unit:'g'},{item:'Pineapple or peach chunks',amount:80,unit:'g'}],
     instructions:['Scoop cottage cheese into a bowl.','Top with fruit.','Season with a pinch of cinnamon if desired.']},
@@ -836,17 +836,17 @@ const RECIPE_DB = [
     ingredients:[{item:'Plain rice cakes',amount:2,unit:'cake'},{item:'Natural peanut butter',amount:25,unit:'g'}],
     instructions:['Spread peanut butter evenly over rice cakes.','Optional: add banana slices on top.','Serve immediately.']},
   { id:'hard-boiled-eggs', name:'Hard Boiled Eggs', keywords:['hard boiled eggs','boiled eggs','hard-boiled','eggs'], mealTypes:['snack'],
-    description:'A simple, portable, high-protein snack. Add everything bagel seasoning for extra flavor.',
+    description:'Crisp hard-boiled eggs with a savory everything-bagel seasoning finish. A pantry-ready snack with satisfying crunch and bold flavor.',
     prepTime:'2 min', cookTime:'12 min', baseCal:156, baseP:12, baseC:1, baseF:10,
     ingredients:[{item:'Eggs',amount:2,unit:'egg'},{item:'Everything bagel seasoning (optional)',amount:1,unit:'pinch'}],
     instructions:['Place eggs in a saucepan and cover with cold water by 1 inch.','Bring to a boil over medium-high heat.','Turn off heat, cover, and let sit 10-12 min.','Transfer to ice water for 5 min to stop cooking.','Peel and serve with seasoning.']},
   { id:'almonds-dried-fruit', name:'Almonds and Dried Fruit Trail Mix', keywords:['almonds','trail mix','nuts','dried fruit'], mealTypes:['snack'],
-    description:'A handful of almonds and dried fruit for a satisfying snack with healthy fats and natural sugar.',
+    description:'A crunchy handful of toasted almonds with chewy sweet dried fruit. A classic trail-mix-style snack with warm, nutty flavor.',
     prepTime:'1 min', cookTime:'0 min', baseCal:257, baseP:6, baseC:28, baseF:15,
     ingredients:[{item:'Raw almonds',amount:30,unit:'g'},{item:'Raisins or dried cranberries',amount:25,unit:'g'}],
     instructions:['Combine almonds and dried fruit in a small bowl.','Enjoy as a portable snack anytime.']},
   { id:'hummus-veggies', name:'Hummus with Veggie Sticks', keywords:['hummus','vegetables','veggies','carrots'], mealTypes:['snack'],
-    description:'Creamy hummus with crisp, colorful vegetable sticks. High fiber, satisfying, and endlessly dippable.',
+    description:'Silky, garlicky hummus surrounded by crisp, colorful vegetable spears. A Middle Eastern staple that is endlessly dippable and deeply satisfying.',
     prepTime:'5 min', cookTime:'0 min', baseCal:197, baseP:6, baseC:28, baseF:8,
     ingredients:[{item:'Hummus',amount:80,unit:'g'},{item:'Carrot sticks',amount:80,unit:'g'},{item:'Celery sticks',amount:60,unit:'g'},{item:'Cucumber slices',amount:80,unit:'g'}],
     instructions:['Cut vegetables into sticks or rounds.','Serve alongside hummus for dipping.','Season hummus with paprika or olive oil if desired.']},
@@ -856,24 +856,24 @@ const RECIPE_DB = [
     ingredients:[{item:'Whole wheat crackers',amount:30,unit:'g'},{item:'Reduced-fat cheddar cheese, sliced',amount:40,unit:'g'}],
     instructions:['Slice cheese into thin pieces.','Arrange crackers on a plate and top with cheese.','Optional: add a thin slice of apple on top of each.']},
   { id:'edamame', name:'Salted Edamame', keywords:['edamame','soy beans'], mealTypes:['snack'],
-    description:'Steamed edamame sprinkled with sea salt. One of the best high-protein plant-based snacks in existence.',
+    description:'Bright green edamame pods steamed until tender and finished with a pinch of flaky sea salt. A satisfying Japanese izakaya staple.',
     prepTime:'1 min', cookTime:'5 min', baseCal:244, baseP:22, baseC:18, baseF:10,
     ingredients:[{item:'Frozen edamame in shell',amount:200,unit:'g'},{item:'Sea salt',amount:1,unit:'pinch'}],
     instructions:['Microwave frozen edamame 3-4 min, or boil in salted water for 5 min.','Drain and sprinkle generously with sea salt.','Eat by squeezing beans out of pods directly into your mouth.']},
   { id:'banana-almond-butter', name:'Banana with Almond Butter', keywords:['banana','almond butter','banana and almond butter'], mealTypes:['snack'],
-    description:'Creamy almond butter spread on fresh banana slices. A filling snack with natural sweetness and healthy fats.',
+    description:'Creamy almond butter spread on ripe banana slices. Naturally sweet and nutty with a satisfying, smooth bite.',
     prepTime:'2 min', cookTime:'0 min', baseCal:255, baseP:7, baseC:33, baseF:14,
     ingredients:[{item:'Banana (medium)',amount:1,unit:'banana'},{item:'Almond butter',amount:25,unit:'g'}],
     instructions:['Peel and slice banana.','Serve with almond butter for dipping or spread on each slice.','Optional: sprinkle with hemp seeds.']},
   { id:'tuna-crackers', name:'Tuna and Crackers', keywords:['tuna','crackers','tuna crackers'], mealTypes:['snack'],
-    description:'High-protein canned tuna served with whole wheat crackers. Satisfying and portable.',
+    description:'Savory canned tuna seasoned with lemon and herbs, served on crunchy whole wheat crackers. Satisfying and portable.',
     prepTime:'3 min', cookTime:'0 min', baseCal:204, baseP:26, baseC:17, baseF:3,
     ingredients:[{item:'Canned tuna in water',amount:90,unit:'g'},{item:'Whole wheat crackers',amount:25,unit:'g'},{item:'Lemon juice, salt, pepper',amount:1,unit:'to taste'}],
     instructions:['Drain tuna and season with lemon juice, salt, and pepper.','Serve on top of crackers.','Optional: add a dab of hot sauce or mustard.']},
 
   // ─── BREAKFAST (new) ───
   { id:'protein-waffles', name:'Crispy Protein Waffles', keywords:['waffles','waffle','protein waffles'], mealTypes:['breakfast'],
-    description:'Light and crispy waffles made with protein powder and oats. Top with fresh berries and a touch of maple syrup.',
+    description:'Light and crispy waffles with a golden, nutty crunch from rolled oats. Top with fresh berries and a touch of maple syrup.',
     prepTime:'8 min', cookTime:'10 min', baseCal:608, baseP:55, baseC:57, baseF:17,
     ingredients:[{item:'Rolled oats (blended to flour)',amount:60,unit:'g'},{item:'Protein powder (vanilla)',amount:30,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Non-fat Greek yogurt',amount:80,unit:'g'},{item:'Almond milk',amount:60,unit:'ml'},{item:'Baking powder',amount:4,unit:'g'},{item:'Mixed berries',amount:80,unit:'g'}],
     instructions:['Blend oats into flour. Mix with protein powder and baking powder.','Whisk eggs, yogurt, and almond milk together.','Combine wet and dry ingredients into a smooth batter.','Pour into a preheated waffle iron coated with cooking spray.','Cook 4-5 min until golden and crispy. Top with berries.']},
@@ -888,7 +888,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Chia seeds',amount:40,unit:'g'},{item:'Almond milk',amount:250,unit:'ml'},{item:'Protein powder (vanilla)',amount:25,unit:'g'},{item:'Cocoa powder',amount:10,unit:'g'},{item:'Honey',amount:12,unit:'g'},{item:'Blueberries',amount:60,unit:'g'}],
     instructions:['Mix chia seeds, almond milk, protein powder, cocoa, and honey in a jar.','Whisk vigorously to prevent clumping.','Refrigerate at least 4 hours or overnight.','Stir well before serving.','Top with blueberries.']},
   { id:'smoked-salmon-bagel', name:'Smoked Salmon Bagel', keywords:['smoked salmon','bagel','lox'], mealTypes:['breakfast'],
-    description:'Creamy whipped cottage cheese and smoked salmon on a toasted bagel. Elegant, protein-packed, and ready in 5 minutes.',
+    description:'Silky whipped cottage cheese layered with smoky cured salmon on a golden toasted bagel. Elegant New York brunch energy in 5 minutes.',
     prepTime:'5 min', cookTime:'2 min', baseCal:221, baseP:24, baseC:18, baseF:5,
     ingredients:[{item:'Whole wheat bagel thin',amount:1,unit:'slice'},{item:'Smoked salmon',amount:60,unit:'g'},{item:'Low-fat cottage cheese',amount:80,unit:'g'},{item:'Cherry tomatoes',amount:50,unit:'g'},{item:'Red onion, thinly sliced',amount:15,unit:'g'},{item:'Capers',amount:10,unit:'g'},{item:'Lemon juice',amount:5,unit:'ml'}],
     instructions:['Toast bagel thin until golden.','Blend or whip cottage cheese until smooth.','Spread cottage cheese on both halves.','Top with smoked salmon, tomatoes, red onion, and capers.','Squeeze fresh lemon juice over top.']},
@@ -927,7 +927,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Large shrimp, peeled',amount:200,unit:'g'},{item:'Small corn tortillas',amount:3,unit:'corn tortilla'},{item:'Shredded lettuce',amount:60,unit:'g'},{item:'Cherry tomatoes',amount:60,unit:'g'},{item:'Avocado',amount:50,unit:'g'},{item:'Lemon juice',amount:15,unit:'ml'},{item:'Non-fat Greek yogurt',amount:40,unit:'g'},{item:'Taco seasoning',amount:8,unit:'g'}],
     instructions:['Season shrimp with taco seasoning, salt, and pepper.','Cook in a hot pan 2-3 min per side until pink.','Mix Greek yogurt with lemon juice and a pinch of salt for crema.','Warm tortillas in a dry pan.','Fill each tortilla with shrimp, lettuce, tomatoes, and avocado. Drizzle with crema.']},
   { id:'turkey-chili', name:'Smoky Turkey Chili', keywords:['chili','turkey chili','chili bowl'], mealTypes:['dinner'],
-    description:'A rich, deeply flavored turkey chili that gets better the longer it simmers. High protein and loaded with fiber.',
+    description:'A rich, deeply spiced turkey chili with earthy cumin, smoky chipotle, and chunky tomatoes. Low and slow is the secret — it gets better the longer it simmers.',
     prepTime:'12 min', cookTime:'30 min', baseCal:726, baseP:65, baseC:66, baseF:25,
     ingredients:[{item:'Ground turkey (93% lean)',amount:220,unit:'g'},{item:'Black beans (canned, drained)',amount:130,unit:'g'},{item:'Diced tomatoes (canned)',amount:200,unit:'g'},{item:'Corn',amount:80,unit:'g'},{item:'Onion, diced',amount:80,unit:'g'},{item:'Bell pepper, diced',amount:80,unit:'g'},{item:'Taco seasoning',amount:15,unit:'g'},{item:'Olive oil',amount:8,unit:'ml'}],
     instructions:['Cook onion and bell pepper in olive oil over medium heat 4-5 min.','Add turkey and break up well. Cook until no longer pink.','Add taco seasoning and stir 1 min.','Add diced tomatoes, beans, and corn. Stir to combine.','Simmer 20-25 min, stirring occasionally, until thickened. Season to taste.']},
@@ -942,7 +942,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Cod fillet',amount:220,unit:'g'},{item:'White rice (cooked)',amount:160,unit:'g'},{item:'Asparagus',amount:120,unit:'g'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Garlic, minced',amount:3,unit:'clove'},{item:'Lemon juice',amount:15,unit:'ml'},{item:'Italian seasoning',amount:3,unit:'g'},{item:'Whole wheat breadcrumbs',amount:20,unit:'g'}],
     instructions:['Preheat oven to 400°F.','Pat cod dry. Mix breadcrumbs with Italian seasoning, garlic, salt, and pepper.','Brush cod with olive oil, then press breadcrumb mixture onto the top.','Arrange on a baking sheet with asparagus drizzled in olive oil.','Roast 15-18 min until cod flakes easily. Drizzle with lemon juice. Serve over rice.']},
   { id:'shrimp-fried-rice-2', name:'High-Protein Shrimp Fried Rice', keywords:['fried rice','shrimp fried rice','rice'], mealTypes:['dinner'],
-    description:'Better-than-takeout shrimp fried rice packed with vegetables and protein. Ready in 15 minutes.',
+    description:'Better-than-takeout shrimp fried rice with wok-charred vegetables and savory soy glaze. Ready in 15 minutes with bold, smoky flavor.',
     prepTime:'8 min', cookTime:'12 min', baseCal:720, baseP:65, baseC:71, baseF:17,
     ingredients:[{item:'Large shrimp, peeled',amount:180,unit:'g'},{item:'White rice (cooked)',amount:200,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Snap peas',amount:60,unit:'g'},{item:'Carrot sticks',amount:60,unit:'g'},{item:'Low-sodium soy sauce',amount:20,unit:'ml'},{item:'Sesame oil',amount:6,unit:'ml'},{item:'Garlic and ginger, minced',amount:8,unit:'g'}],
     instructions:['Cook shrimp in sesame oil over high heat 2 min per side. Set aside.','Scramble eggs in the same wok. Set aside.','Add garlic and ginger, then carrots and snap peas. Stir fry 3 min.','Add cold rice and soy sauce. Stir fry 3-4 min until hot and slightly crispy.','Return shrimp and eggs, toss everything together. Serve hot.']},
@@ -954,7 +954,7 @@ const RECIPE_DB = [
 
   // ─── SNACKS (new) ───
   { id:'protein-shake', name:'Protein Shake', keywords:['protein shake','shake','protein drink'], mealTypes:['snack'],
-    description:'A quick, filling protein shake blended with banana and almond milk. The fastest snack there is.',
+    description:'A creamy, naturally sweet shake blended with ripe banana and almond milk. Smooth, cold, and ready in under 2 minutes.',
     prepTime:'3 min', cookTime:'0 min', baseCal:236, baseP:26, baseC:22, baseF:6,
     ingredients:[{item:'Protein powder (vanilla)',amount:30,unit:'g'},{item:'Almond milk',amount:300,unit:'ml'},{item:'Frozen banana',amount:80,unit:'g'}],
     instructions:['Combine all ingredients in a blender.','Blend on high until smooth and creamy.','Pour into a glass and enjoy immediately.']},
@@ -964,12 +964,12 @@ const RECIPE_DB = [
     ingredients:[{item:'Whole wheat bread',amount:1,unit:'slice'},{item:'Natural peanut butter',amount:25,unit:'g'},{item:'Banana (medium)',amount:1,unit:'banana'}],
     instructions:['Toast bread until golden.','Spread peanut butter generously over toast.','Slice banana and arrange on top.','Optional: drizzle with a little honey and sprinkle with cinnamon.']},
   { id:'string-cheese-apple', name:'String Cheese & Apple Slices', keywords:['string cheese','cheese and apple','cheese'], mealTypes:['snack'],
-    description:'A classic pairing of protein-rich string cheese and crisp apple slices. Portable, satisfying, and no prep needed.',
+    description:'Salty, stretchy string cheese paired with crisp, sweet-tart apple slices. An effortless snack with perfect sweet-savory contrast.',
     prepTime:'2 min', cookTime:'0 min', baseCal:215, baseP:13, baseC:26, baseF:7,
     ingredients:[{item:'Low-fat string cheese',amount:2,unit:'piece'},{item:'Apple (medium)',amount:1,unit:'apple'}],
     instructions:['Slice the apple into wedges.','Peel string cheese into strips.','Pair together and enjoy — no other steps required.']},
   { id:'mixed-nuts', name:'Spiced Mixed Nuts', keywords:['nuts','mixed nuts','almonds'], mealTypes:['snack'],
-    description:'A handful of lightly spiced mixed nuts for a satisfying, healthy-fat-rich snack that keeps hunger at bay.',
+    description:'A crunchy handful of warm-spiced mixed nuts with flaky sea salt. Toasty, rich, and deeply satisfying.',
     prepTime:'1 min', cookTime:'0 min', baseCal:255, baseP:10, baseC:10, baseF:21,
     ingredients:[{item:'Raw almonds',amount:20,unit:'g'},{item:'Cashews',amount:15,unit:'g'},{item:'Pumpkin seeds',amount:10,unit:'g'}],
     instructions:['Combine nuts and seeds in a small bowl.','Optional: toast in a dry pan 2-3 min with a pinch of salt and smoked paprika.','Portion into 45g serving. Enjoy as a portable snack.']},
@@ -984,7 +984,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Cucumber (large)',amount:1,unit:'cucumber'},{item:'Avocado (ripe)',amount:80,unit:'g'},{item:'Lemon juice',amount:8,unit:'ml'},{item:'Red pepper flakes',amount:1,unit:'pinch'}],
     instructions:['Slice cucumber into thick rounds (about 1cm each).','Mash avocado with lemon juice, salt, and pepper until creamy.','Spoon a small dollop of avocado onto each cucumber round.','Top with red pepper flakes and a pinch of flaky salt.']},
   { id:'turkey-roll-ups', name:'Turkey & Cheese Roll-Ups', keywords:['turkey','roll-ups','turkey roll','deli turkey'], mealTypes:['snack'],
-    description:'Thin slices of deli turkey rolled around crunchy veggies and a swipe of hummus. Protein-packed with zero cooking.',
+    description:'Thin slices of deli turkey rolled tight around crunchy cucumber spears and a smear of creamy hummus. A handheld snack with great texture and flavor.',
     prepTime:'5 min', cookTime:'0 min', baseCal:184, baseP:22, baseC:11, baseF:6,
     ingredients:[{item:'Deli turkey breast',amount:100,unit:'g'},{item:'Hummus',amount:30,unit:'g'},{item:'Carrot sticks',amount:40,unit:'g'},{item:'Baby spinach',amount:20,unit:'g'}],
     instructions:['Lay out turkey slices flat.','Spread a thin layer of hummus on each slice.','Place a few spinach leaves and a carrot stick at one end.','Roll up tightly. Secure with a toothpick if needed.']},
@@ -1011,7 +1011,7 @@ const RECIPE_DB = [
 
   // ─── DESSERTS ───
   { id:'protein-mug-cake', name:'Chocolate Protein Mug Cake', keywords:['mug cake','chocolate cake','cake','chocolate','protein cake'], mealTypes:['dessert'],
-    description:'A rich, fudgy chocolate cake made in 90 seconds flat. High-protein and secretly guilt-free.',
+    description:'A rich, fudgy chocolate mug cake with a molten-soft center and deep cocoa flavor. Warm, indulgent, and ready in 90 seconds flat.',
     prepTime:'3 min', cookTime:'2 min', baseCal:309, baseP:36, baseC:23, baseF:11,
     ingredients:[{item:'Protein powder (vanilla)',amount:30,unit:'g'},{item:'Cocoa powder',amount:10,unit:'g'},{item:'Oat flour',amount:20,unit:'g'},{item:'Egg',amount:1,unit:'egg'},{item:'Almond milk',amount:60,unit:'ml'},{item:'Baking powder',amount:2,unit:'g'}],
     instructions:['Whisk all dry ingredients together in a large mug.','Add egg and almond milk, stir until smooth with no lumps.','Microwave on high for 60-90 seconds until just set in the center (a little glossy on top is fine).','Let stand 1 min before eating — it firms up as it cools. Top with a few chocolate chips if you like.']},
@@ -1021,17 +1021,17 @@ const RECIPE_DB = [
     ingredients:[{item:'Non-fat Greek yogurt',amount:200,unit:'g'},{item:'Mixed berries',amount:80,unit:'g'},{item:'Honey',amount:15,unit:'ml'},{item:'Granola',amount:20,unit:'g'}],
     instructions:['Line a baking sheet with parchment paper.','Mix Greek yogurt and honey until smooth. Spread into a thin, even layer on the parchment.','Scatter mixed berries and granola over the top, pressing lightly.','Freeze at least 2 hours until solid. Break into irregular pieces and serve straight from the freezer.']},
   { id:'banana-nice-cream', name:'Two-Ingredient Banana Nice Cream', keywords:['nice cream','banana ice cream','banana','ice cream','frozen banana'], mealTypes:['dessert'],
-    description:'Frozen bananas blended into a creamy, scoopable ice cream with no dairy, no added sugar, and no guilt.',
+    description:'Frozen bananas blended into a velvety, scoopable soft-serve with natural caramel sweetness and a silky dairy-free texture.',
     prepTime:'5 min', cookTime:'0 min', baseCal:218, baseP:3, baseC:55, baseF:1,
     ingredients:[{item:'Frozen banana',amount:240,unit:'g'},{item:'Almond milk',amount:30,unit:'ml'}],
     instructions:['Slice ripe bananas and freeze in a single layer at least 4 hours (overnight is best).','Add frozen banana and almond milk to a blender or food processor.','Blend, scraping down the sides often, until perfectly smooth and creamy — about 2-3 minutes.','Serve immediately for soft-serve consistency, or freeze 30 more min for a firmer scoop.']},
   { id:'protein-brownies', name:'Fudgy Protein Brownies', keywords:['brownies','brownie','chocolate brownies','protein brownies'], mealTypes:['dessert'],
-    description:'Dense, fudgy chocolate brownies packed with protein. They taste like the real thing and keep you on track.',
+    description:'Dense, fudgy chocolate brownies with a shiny crinkled crust and chewy bite. Rich dark chocolate flavor in every square.',
     prepTime:'10 min', cookTime:'20 min', baseCal:748, baseP:74, baseC:43, baseF:38,
     ingredients:[{item:'Protein powder (vanilla)',amount:60,unit:'g'},{item:'Cocoa powder',amount:20,unit:'g'},{item:'Natural peanut butter',amount:40,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Almond milk',amount:60,unit:'ml'},{item:'Honey',amount:20,unit:'ml'},{item:'Baking powder',amount:3,unit:'g'}],
     instructions:['Preheat oven to 350°F (175°C). Line a small baking pan with parchment.','Whisk together protein powder, cocoa, and baking powder.','Mix in peanut butter, eggs, almond milk, and honey until a thick batter forms.','Spread evenly in the pan. Bake 18-22 min until the edges are set but the center is still slightly soft.','Let cool completely before slicing — they firm up significantly as they cool.']},
   { id:'cottage-cheese-mousse', name:'Chocolate Cottage Cheese Mousse', keywords:['cottage cheese mousse','mousse','chocolate mousse','cottage cheese dessert'], mealTypes:['dessert'],
-    description:'Blended cottage cheese transforms into a silky, protein-rich chocolate mousse. Skeptics become believers after the first spoonful.',
+    description:'Blended cottage cheese transforms into a silky, airy chocolate mousse with deep cocoa richness. Skeptics become believers after the first spoonful.',
     prepTime:'5 min', cookTime:'0 min', baseCal:228, baseP:23, baseC:30, baseF:4,
     ingredients:[{item:'Low-fat cottage cheese',amount:180,unit:'g'},{item:'Cocoa powder',amount:12,unit:'g'},{item:'Honey',amount:15,unit:'ml'},{item:'Mixed berries',amount:50,unit:'g'}],
     instructions:['Blend cottage cheese until completely smooth (about 60 seconds in a blender).','Add cocoa powder and honey. Blend again until fully combined and silky.','Taste and adjust sweetness as needed.','Transfer to a bowl, top with berries, and refrigerate 15 min if you prefer a thicker, chilled texture.']},
@@ -1048,7 +1048,7 @@ const RECIPE_DB = [
 
   // ─── SPECIAL RECIPES ───
   { id:'chicken-crust-pizza', name:'Chicken Crust Pizza', keywords:['chicken crust pizza','pizza','keto pizza','chicken pizza','low carb pizza'], mealTypes:['lunch','dinner'],
-    description:'A genius low-carb pizza where the crust is made from seasoned ground chicken. Topped with marinara and bubbling mozzarella for all the pizza vibes.',
+    description:'A bold, savory pizza with a golden ground chicken crust, tangy marinara sauce, and bubbling mozzarella. All the pizza vibes in an unexpected form.',
     prepTime:'15 min', cookTime:'25 min', baseCal:744, baseP:70, baseC:17, baseF:42,
     ingredients:[{item:'Ground chicken',amount:250,unit:'g'},{item:'Egg',amount:1,unit:'egg'},{item:'Parmesan cheese, grated',amount:20,unit:'g'},{item:'Garlic powder',amount:2,unit:'g'},{item:'Italian seasoning',amount:2,unit:'g'},{item:'Marinara sauce',amount:60,unit:'g'},{item:'Part-skim mozzarella',amount:60,unit:'g'},{item:'Bell pepper, sliced',amount:50,unit:'g'},{item:'Cherry tomatoes, halved',amount:40,unit:'g'}],
     instructions:['Preheat oven to 400°F (200°C). Line a baking sheet with parchment paper.','Mix ground chicken, egg, Parmesan, garlic powder, Italian seasoning, salt, and pepper until combined.','Press the mixture into a thin, even circle about 10 inches wide on the parchment.','Bake the crust 15 min until golden and set.','Top with marinara, mozzarella, peppers, and tomatoes. Return to oven 8-10 min until cheese is bubbly and lightly browned.']},
@@ -1070,7 +1070,7 @@ const RECIPE_DB = [
 
   // ─── BREAKFAST (additional) ───
   { id:'ricotta-berry-toast', name:'Ricotta Berry Toast', keywords:['ricotta toast','ricotta','berry toast'], mealTypes:['breakfast'],
-    description:'Creamy ricotta spread thick on golden toast, piled with fresh berries and a drizzle of honey. Light, protein-rich, and effortlessly good.',
+    description:'Creamy ricotta spread thick on golden toast, piled with jewel-bright fresh berries and a golden honey drizzle. Effortlessly elegant and delicious.',
     prepTime:'5 min', cookTime:'2 min', baseCal:336, baseP:15, baseC:46, baseF:10,
     ingredients:[{item:'Whole wheat bread',amount:2,unit:'slice'},{item:'Part-skim ricotta',amount:80,unit:'g'},{item:'Mixed berries',amount:100,unit:'g'},{item:'Honey',amount:10,unit:'g'},{item:'Lemon zest',amount:1,unit:'pinch'}],
     instructions:['Toast bread until golden and crisp.','Spread ricotta generously over each slice.','Top with fresh berries.','Drizzle with honey and finish with lemon zest.','Serve immediately.']},
@@ -1082,7 +1082,7 @@ const RECIPE_DB = [
     instructions:['Preheat oven to 350°F. Grease a 6-cup muffin tin well.','Chop turkey into small pieces. Distribute turkey, spinach, and bell pepper among the cups.','Crack or pour egg mixture evenly into each cup.','Top with shredded cheese.','Bake 15-18 min until eggs are just set. Cool 2 min before removing.']},
 
   { id:'banana-pb-protein-oats', name:'Peanut Butter Banana Protein Oats', keywords:['protein oats','peanut butter oats','banana oats'], mealTypes:['breakfast'],
-    description:'Warm oatmeal stirred with protein powder and swirled with peanut butter. Thick, rich, and built to keep you full until dinner.',
+    description:'Warm, thick oatmeal swirled with creamy peanut butter and a pinch of cinnamon. Deeply comforting with a rich, nutty warmth.',
     prepTime:'3 min', cookTime:'5 min', baseCal:666, baseP:41, baseC:87, baseF:20,
     ingredients:[{item:'Rolled oats',amount:80,unit:'g'},{item:'Protein powder (vanilla)',amount:25,unit:'g'},{item:'Natural peanut butter',amount:20,unit:'g'},{item:'Banana',amount:1,unit:'banana'},{item:'Almond milk',amount:200,unit:'ml'},{item:'Cinnamon',amount:1,unit:'g'}],
     instructions:['Bring almond milk to a gentle boil in a small saucepan.','Add oats and cook over medium-low heat 4-5 min, stirring frequently.','Remove from heat. Stir in protein powder until no lumps remain.','Transfer to bowl. Swirl in peanut butter.','Top with banana slices and a dusting of cinnamon.']},
@@ -1107,13 +1107,13 @@ const RECIPE_DB = [
     instructions:['Cook ground chicken in sesame oil over medium-high heat, breaking into fine crumbles.','Add garlic and ginger. Cook 1 min until fragrant.','Stir in water chestnuts, soy sauce, and hoisin. Cook 2-3 min until glossy.','Taste and adjust seasoning.','Spoon mixture into lettuce cups. Garnish with sliced green onions.']},
 
   { id:'turkey-mediterranean-salad', name:'Mediterranean Turkey Protein Salad', keywords:['turkey salad','mediterranean salad','protein salad'], mealTypes:['lunch'],
-    description:'Diced turkey, chickpeas, cucumber, and tomatoes tossed in a bright lemon-herb dressing. A complete, satisfying lunch with no cooking required.',
+    description:'Diced turkey, chickpeas, cucumber, and tomatoes tossed in a bright lemon-herb dressing. Fresh, colorful, and ready with no cooking required.',
     prepTime:'10 min', cookTime:'0 min', baseCal:395, baseP:38, baseC:26, baseF:16,
     ingredients:[{item:'Deli turkey breast',amount:150,unit:'g'},{item:'Cucumber, diced',amount:120,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Chickpeas (canned, drained)',amount:80,unit:'g'},{item:'Red onion, diced',amount:30,unit:'g'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Lemon juice',amount:15,unit:'ml'},{item:'Fresh parsley',amount:10,unit:'g'}],
     instructions:['Chop turkey into bite-sized pieces.','Combine turkey, cucumber, tomatoes, chickpeas, and red onion in a large bowl.','Whisk olive oil, lemon juice, salt, and pepper together for the dressing.','Pour dressing over the salad and toss well.','Garnish with fresh parsley. Serve immediately or refrigerate up to 2 hours.']},
 
   { id:'black-bean-burrito-bowl', name:'Black Bean Burrito Bowl', keywords:['burrito bowl','black bean bowl','vegetarian bowl'], mealTypes:['lunch','dinner'],
-    description:'A hearty vegetarian burrito bowl with spiced black beans, rice, corn, and all the fixings. Faster than Chipotle and a lot healthier.',
+    description:'A hearty vegetarian burrito bowl with smoky spiced black beans, fluffy rice, sweet corn, and creamy avocado. Faster than Chipotle with bold, layered flavor.',
     prepTime:'8 min', cookTime:'10 min', baseCal:607, baseP:26, baseC:106, baseF:12,
     ingredients:[{item:'Black beans (canned, drained)',amount:180,unit:'g'},{item:'White rice (cooked)',amount:160,unit:'g'},{item:'Corn',amount:60,unit:'g'},{item:'Avocado',amount:60,unit:'g'},{item:'Salsa',amount:60,unit:'g'},{item:'Non-fat Greek yogurt',amount:40,unit:'g'},{item:'Taco seasoning',amount:8,unit:'g'},{item:'Lime juice',amount:10,unit:'ml'}],
     instructions:['Heat beans in a small pan with taco seasoning and 2 tbsp water until hot.','Warm rice if needed.','Build the bowl: rice base, then seasoned beans, corn, and avocado.','Top with salsa and Greek yogurt as sour cream.','Squeeze lime juice over everything before eating.']},
@@ -1144,7 +1144,7 @@ const RECIPE_DB = [
     instructions:['Cook pasta per package directions. Reserve ¼ cup pasta water before draining.','Cook shrimp in olive oil over medium-high heat 2 min per side until pink. Remove.','Add butter and garlic to the same pan. Cook 1-2 min.','Add tomatoes and cook 3 min until blistered. Add spinach and wilt.','Return shrimp and pasta. Toss with lemon juice and pasta water. Top with Parmesan.']},
 
   { id:'herb-pork-tenderloin', name:'Herb-Roasted Pork Tenderloin', keywords:['pork','pork tenderloin','roasted pork'], mealTypes:['dinner'],
-    description:'A lean pork tenderloin coated in garlic and herbs, roasted until perfectly juicy alongside golden potatoes and asparagus.',
+    description:'A garlic-and-herb-crusted pork tenderloin roasted until perfectly juicy and golden alongside crispy potatoes and bright asparagus spears.',
     prepTime:'10 min', cookTime:'28 min', baseCal:574, baseP:55, baseC:33, baseF:22,
     ingredients:[{item:'Pork tenderloin',amount:220,unit:'g'},{item:'Baby potatoes, halved',amount:160,unit:'g'},{item:'Asparagus',amount:100,unit:'g'},{item:'Olive oil',amount:12,unit:'ml'},{item:'Garlic cloves',amount:3,unit:'clove'},{item:'Italian seasoning',amount:3,unit:'g'},{item:'Dijon mustard',amount:12,unit:'g'}],
     instructions:['Preheat oven to 425°F.','Rub pork all over with Dijon mustard, minced garlic, Italian seasoning, salt, and pepper.','Toss potatoes with olive oil, salt, and pepper. Arrange on a sheet pan.','Place pork on top of the potatoes. Roast 15 min.','Add asparagus drizzled with olive oil. Roast 8-10 min more until pork reaches 145°F. Rest 5 min before slicing.']},
@@ -1163,13 +1163,13 @@ const RECIPE_DB = [
     instructions:['Preheat oven to 400°F. Drain chickpeas and pat completely dry with paper towels — this is key for crispiness.','Toss with olive oil, smoked paprika, garlic powder, and salt.','Spread in a single layer on a baking sheet.','Roast 20-25 min, shaking the pan halfway, until golden and crunchy.','Let cool 5 min before eating — they crisp up further as they cool.']},
 
   { id:'protein-energy-bites', name:'No-Bake Protein Energy Bites', keywords:['energy bites','protein bites','energy balls','no bake'], mealTypes:['snack'],
-    description:'Chewy, chocolatey bites packed with oats, peanut butter, and protein. Batch prep on Sunday for grab-and-go snacks all week.',
+    description:'Chewy, chocolatey no-bake bites rolled with oats, peanut butter, and dark chocolate chips. Batch prep on Sunday for grab-and-go snacks all week.',
     prepTime:'10 min', cookTime:'0 min', baseCal:434, baseP:25, baseC:45, baseF:19,
     ingredients:[{item:'Rolled oats',amount:35,unit:'g'},{item:'Natural peanut butter',amount:25,unit:'g'},{item:'Honey',amount:12,unit:'g'},{item:'Protein powder (vanilla)',amount:15,unit:'g'},{item:'Dark chocolate chips (70%+)',amount:10,unit:'g'}],
     instructions:['Combine oats, peanut butter, honey, and protein powder in a bowl.','Stir until a thick, cohesive dough forms. If too dry, add ½ tsp more honey.','Fold in chocolate chips.','Refrigerate 20 min until firm enough to roll.','Roll into 4-5 balls. Store in the fridge up to a week.']},
 
   { id:'cucumber-tuna-bites', name:'Tuna & Cottage Cheese Cucumber Bites', keywords:['cucumber bites','tuna bites','salmon snack'], mealTypes:['snack'],
-    description:'Cool cucumber rounds topped with a creamy tuna and cottage cheese mixture. An elegant, protein-rich snack with zero cooking.',
+    description:'Cool cucumber rounds topped with a creamy, herb-flecked tuna mixture and briny capers. Elegant little bites with satisfying crunch and zero cooking.',
     prepTime:'5 min', cookTime:'0 min', baseCal:154, baseP:27, baseC:7, baseF:1,
     ingredients:[{item:'Cucumber',amount:1,unit:'cucumber'},{item:'Canned tuna in water',amount:80,unit:'g'},{item:'Low-fat cottage cheese',amount:50,unit:'g'},{item:'Lemon juice',amount:5,unit:'ml'},{item:'Capers',amount:8,unit:'g'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
     instructions:['Slice cucumber into thick rounds (about 1 cm each).','Drain tuna and mix with cottage cheese, lemon juice, and a pinch of salt.','Spoon a small amount of the tuna mixture onto each cucumber round.','Top with a caper or two.','Serve immediately or refrigerate up to 1 hour.']},
@@ -1187,14 +1187,14 @@ const RECIPE_DB = [
     instructions:['Slice pear into thin wedges, removing the core.','Arrange on a plate alongside almond butter for dipping.','Optional: sprinkle with a pinch of cinnamon.']},
 
   { id:'cottage-cheese-cucumber', name:'Cottage Cheese & Cucumber Bowl', keywords:['cottage cheese cucumber','cottage cheese snack','cucumber snack'], mealTypes:['snack'],
-    description:'Chilled cottage cheese with crisp cucumber, a drizzle of olive oil, and everything bagel seasoning. Savory, high-protein, and refreshing.',
+    description:'Chilled cottage cheese with crisp cucumber slices, a glug of fruity olive oil, and savory everything-bagel seasoning. Cool, refreshing, and deeply satisfying.',
     prepTime:'3 min', cookTime:'0 min', baseCal:165, baseP:17, baseC:7, baseF:7,
     ingredients:[{item:'Low-fat cottage cheese',amount:150,unit:'g'},{item:'Cucumber, diced',amount:80,unit:'g'},{item:'Olive oil',amount:5,unit:'ml'},{item:'Salt and pepper',amount:1,unit:'to taste'},{item:'Red pepper flakes',amount:1,unit:'pinch'}],
     instructions:['Spoon cottage cheese into a bowl.','Top with diced cucumber.','Drizzle with olive oil.','Season with salt, pepper, and a pinch of red pepper flakes.','Stir gently and enjoy cold.']},
 
   // ─── LOW-CALORIE MEALS ───
   { id:'zucchini-noodles-turkey', name:'Zucchini Noodles with Turkey Marinara', keywords:['zucchini noodles','zoodles','turkey marinara','low calorie pasta'], mealTypes:['dinner','lunch'],
-    description:'Spiralized zucchini as pasta with a lean turkey marinara sauce. All the satisfaction of a pasta dish at under 290 calories.',
+    description:'Spiralized zucchini ribbons tossed with a rich, herb-packed turkey marinara sauce. All the satisfaction of a pasta dish with a fresh, summery twist.',
     prepTime:'10 min', cookTime:'15 min', baseCal:336, baseP:32, baseC:21, baseF:16,
     ingredients:[{item:'Zucchini, spiralized',amount:300,unit:'g'},{item:'Ground turkey (93% lean)',amount:120,unit:'g'},{item:'Marinara sauce',amount:80,unit:'ml'},{item:'Garlic, minced',amount:5,unit:'g'},{item:'Olive oil',amount:5,unit:'ml'},{item:'Fresh basil',amount:5,unit:'g'}],
     instructions:['Cook ground turkey in a skillet over medium-high heat until browned. Add garlic.','Add marinara sauce and simmer 5 minutes.','Sauté spiralized zucchini in a separate pan with a tiny bit of olive oil for 2-3 minutes — do not overcook.','Plate zucchini and top with turkey marinara.','Garnish with fresh basil.']},
@@ -1229,7 +1229,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Cod fillet',amount:200,unit:'g'},{item:'White miso paste',amount:30,unit:'g'},{item:'Honey',amount:10,unit:'g'},{item:'Mirin or rice vinegar',amount:10,unit:'ml'},{item:'Low-sodium soy sauce',amount:5,unit:'ml'}],
     instructions:['Mix miso, honey, mirin, and soy sauce into a smooth glaze.','Coat cod fillets and marinate at least 30 minutes (or overnight).','Broil on high for 8-10 minutes until glazed and just cooked through.','Serve with steamed greens.']},
   { id:'cauliflower-soup', name:'Creamy Cauliflower Soup', keywords:['cauliflower soup','cream of cauliflower','cauliflower bisque'], mealTypes:['lunch','dinner'],
-    description:'A velvety cauliflower soup with garlic and a hint of nutmeg. Incredibly satisfying for only 180 calories a bowl.',
+    description:'A velvety cauliflower soup with roasted garlic and a whisper of nutmeg. Silky, warming, and deeply satisfying in every spoonful.',
     prepTime:'10 min', cookTime:'20 min', baseCal:253, baseP:11, baseC:34, baseF:11,
     ingredients:[{item:'Cauliflower florets',amount:400,unit:'g'},{item:'Onion, diced',amount:80,unit:'g'},{item:'Garlic, minced',amount:5,unit:'g'},{item:'Low-sodium broth',amount:500,unit:'ml'},{item:'Almond milk',amount:100,unit:'ml'},{item:'Olive oil',amount:8,unit:'ml'},{item:'Nutmeg',amount:1,unit:'pinch'}],
     instructions:['Sauté onion and garlic in olive oil until soft.','Add cauliflower and broth. Bring to a boil.','Simmer 15 minutes until cauliflower is very soft.','Blend until silky smooth.','Stir in almond milk and a pinch of nutmeg. Season well.']},
@@ -1239,96 +1239,96 @@ const RECIPE_DB = [
     ingredients:[{item:'Chicken breast, cooked and shredded',amount:150,unit:'g'},{item:'Cucumber, diced',amount:120,unit:'g'},{item:'Cherry tomatoes',amount:60,unit:'g'},{item:'Red onion, thinly sliced',amount:30,unit:'g'},{item:'Fresh cilantro',amount:10,unit:'g'},{item:'Lime juice',amount:20,unit:'ml'},{item:'Fish sauce or soy sauce',amount:10,unit:'ml'},{item:'Chili flakes',amount:1,unit:'pinch'}],
     instructions:['Combine shredded chicken, cucumber, tomatoes, and red onion in a bowl.','Whisk together lime juice, fish sauce, and chili flakes for the dressing.','Toss salad with dressing.','Garnish with fresh cilantro.']},
   { id:'egg-drop-soup', name:'Egg Drop Soup', keywords:['egg drop soup','chinese egg drop','egg soup'], mealTypes:['lunch','dinner','snack'],
-    description:'Silky wisps of egg in a savory ginger broth. Classic Chinese comfort food at just 120 calories.',
+    description:'Silky wisps of egg draped through a fragrant ginger-scallion broth. Classic Chinese comfort food in minutes, warming from the first sip.',
     prepTime:'5 min', cookTime:'8 min', baseCal:223, baseP:14, baseC:15, baseF:11,
     ingredients:[{item:'Low-sodium chicken broth',amount:480,unit:'ml'},{item:'Eggs',amount:2,unit:'egg'},{item:'Cornstarch',amount:8,unit:'g'},{item:'Ginger, minced',amount:3,unit:'g'},{item:'Low-sodium soy sauce',amount:10,unit:'ml'},{item:'Green onions',amount:15,unit:'g'}],
     instructions:['Bring broth to a boil with ginger and soy sauce.','Mix cornstarch with 2 tbsp cold water; stir into broth to thicken slightly.','Beat eggs in a bowl.','Slowly drizzle eggs into the gently simmering broth while stirring in a circular motion.','Top with sliced green onions.']},
 
   // ─── ADDITIONAL BREAKFAST (200-1100 cal range) ───
   { id:'light-fruit-yogurt', name:'Light Fruit & Yogurt Bowl', keywords:['light breakfast','fruit yogurt','yogurt bowl'], mealTypes:['breakfast'],
-    description:'A light bowl of non-fat Greek yogurt with seasonal fruit. Perfect for low-calorie mornings.',
+    description:'A cool bowl of tangy Greek yogurt crowned with bright seasonal fruit. Simple, clean, and effortlessly fresh.',
     prepTime:'3 min', cookTime:'0 min', baseCal:152, baseP:18, baseC:19, baseF:0,
     ingredients:[{item:'Non-fat Greek yogurt',amount:175,unit:'g'},{item:'Strawberries, sliced',amount:80,unit:'g'},{item:'Blueberries',amount:40,unit:'g'}],
     instructions:['Spoon yogurt into a bowl.','Top with fresh fruit.','Enjoy immediately.']},
   { id:'egg-white-toast', name:'Egg White Toast', keywords:['egg white toast','light eggs','egg whites'], mealTypes:['breakfast'],
-    description:'Fluffy egg whites on whole grain toast. Simple, protein-packed, and under 250 calories.',
+    description:'Delicate, fluffy egg whites on golden whole grain toast with a pinch of fresh herbs. Light, airy, and ready in minutes.',
     prepTime:'5 min', cookTime:'5 min', baseCal:159, baseP:22, baseC:13, baseF:1,
     ingredients:[{item:'Egg whites',amount:5,unit:'egg white'},{item:'Whole grain bread',amount:1,unit:'slice'},{item:'Salt and pepper',amount:1,unit:'to taste'},{item:'Cooking spray',amount:1,unit:'spray'}],
     instructions:['Whisk egg whites with salt and pepper.','Cook in a non-stick pan with cooking spray over medium heat.','Toast bread.','Serve egg whites on toast.']},
   { id:'berry-protein-smoothie', name:'Berry Protein Smoothie', keywords:['berry smoothie','protein smoothie','smoothie'], mealTypes:['breakfast','snack'],
-    description:'A quick berry protein smoothie that tastes like a milkshake. Ready in 3 minutes.',
+    description:'A quick berry smoothie with a creamy, milkshake-like texture and a vibrant deep purple color. Fruity, sweet, and ready in 3 minutes.',
     prepTime:'3 min', cookTime:'0 min', baseCal:269, baseP:27, baseC:30, baseF:5,
     ingredients:[{item:'Frozen mixed berries',amount:120,unit:'g'},{item:'Protein powder (vanilla)',amount:30,unit:'g'},{item:'Almond milk',amount:240,unit:'ml'},{item:'Banana (small)',amount:60,unit:'g'}],
     instructions:['Add all ingredients to a blender.','Blend until smooth.','Pour and drink immediately.']},
   { id:'veggie-breakfast-sandwich', name:'Veggie Breakfast Sandwich', keywords:['breakfast sandwich','veggie sandwich','egg sandwich'], mealTypes:['breakfast'],
-    description:'A satisfying egg and veggie sandwich on a whole wheat English muffin.',
+    description:'A savory egg and colorful veggie sandwich stacked on a toasted whole wheat English muffin. Golden, cheesy, and ready fast.',
     prepTime:'8 min', cookTime:'8 min', baseCal:364, baseP:24, baseC:30, baseF:16,
     ingredients:[{item:'Whole wheat English muffin',amount:1,unit:'muffin'},{item:'Eggs',amount:2,unit:'egg'},{item:'Spinach',amount:30,unit:'g'},{item:'Tomato, sliced',amount:50,unit:'g'},{item:'Reduced-fat cheese',amount:20,unit:'g'}],
     instructions:['Toast English muffin.','Scramble eggs with spinach.','Layer on muffin with tomato and cheese.']},
   { id:'banana-bread-oatmeal', name:'Banana Bread Oatmeal', keywords:['banana bread oats','banana oatmeal','baked oatmeal'], mealTypes:['breakfast'],
-    description:'Warm oatmeal that tastes like banana bread. Cozy, filling, and naturally sweet.',
+    description:'Warm oatmeal swirled with mashed ripe banana and warming cinnamon. Tastes like banana bread in a bowl — cozy, fragrant, and naturally sweet.',
     prepTime:'3 min', cookTime:'6 min', baseCal:549, baseP:18, baseC:84, baseF:18,
     ingredients:[{item:'Rolled oats',amount:80,unit:'g'},{item:'Ripe banana, mashed',amount:1,unit:'banana'},{item:'Almond milk',amount:200,unit:'ml'},{item:'Cinnamon',amount:2,unit:'g'},{item:'Walnuts, chopped',amount:15,unit:'g'}],
     instructions:['Cook oats in almond milk over medium heat.','Stir in mashed banana and cinnamon.','Top with chopped walnuts.']},
   { id:'full-english-light', name:'Light Full Breakfast', keywords:['full breakfast','english breakfast','cooked breakfast'], mealTypes:['breakfast'],
-    description:'A lighter take on a full breakfast: poached eggs, turkey bacon, tomatoes, and mushrooms.',
+    description:'A classic spread of silky poached eggs, crisp turkey bacon, roasted tomatoes, and golden sautéed mushrooms. A British-inspired full breakfast.',
     prepTime:'10 min', cookTime:'15 min', baseCal:363, baseP:33, baseC:8, baseF:21,
     ingredients:[{item:'Eggs',amount:2,unit:'egg'},{item:'Turkey bacon',amount:60,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Mushrooms, sliced',amount:80,unit:'g'},{item:'Olive oil',amount:5,unit:'ml'}],
     instructions:['Cook turkey bacon in a pan until crispy.','Saute mushrooms and tomatoes in olive oil.','Poach or fry eggs.','Plate together and serve.']},
   { id:'high-cal-breakfast-bowl', name:'High-Cal Power Breakfast Bowl', keywords:['high calorie breakfast','power bowl','big breakfast'], mealTypes:['breakfast'],
-    description:'A big, satisfying breakfast bowl for high-calorie budgets: eggs, avocado, hash browns, and cheese.',
+    description:'A generous breakfast bowl piled with eggs, creamy avocado, crispy golden hash browns, and melted cheese. A diner-style morning classic.',
     prepTime:'10 min', cookTime:'15 min', baseCal:842, baseP:33, baseC:39, baseF:62,
     ingredients:[{item:'Eggs',amount:3,unit:'egg'},{item:'Ripe avocado',amount:100,unit:'g'},{item:'Hash browns',amount:120,unit:'g'},{item:'Shredded cheddar',amount:40,unit:'g'},{item:'Salsa',amount:40,unit:'g'},{item:'Olive oil',amount:10,unit:'ml'}],
     instructions:['Cook hash browns in olive oil until golden.','Scramble or fry eggs.','Slice avocado.','Layer into a bowl: hash browns, eggs, avocado, cheese, salsa.']},
   { id:'steak-eggs-breakfast', name:'Steak and Eggs', keywords:['steak and eggs','steak breakfast','hearty breakfast'], mealTypes:['breakfast'],
-    description:'A classic bodybuilder breakfast: lean sirloin steak with fried eggs. High protein and deeply satisfying.',
+    description:'A bold steak-and-eggs plate: seared sirloin with a rich, peppery crust alongside crispy-edged fried eggs. A hearty, old-school diner classic.',
     prepTime:'5 min', cookTime:'12 min', baseCal:586, baseP:59, baseC:1, baseF:36,
     ingredients:[{item:'Sirloin steak',amount:180,unit:'g'},{item:'Eggs',amount:2,unit:'egg'},{item:'Butter',amount:8,unit:'g'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
     instructions:['Season steak generously with salt and pepper.','Sear in a hot pan 3-4 min per side. Rest.','Fry eggs in butter to your liking.','Slice steak and serve with eggs.']},
   { id:'granola-yogurt-big', name:'Granola & Greek Yogurt Feast', keywords:['granola yogurt','big yogurt bowl','granola bowl'], mealTypes:['breakfast'],
-    description:'A generous granola and yogurt bowl with plenty of fruit, honey, and crunchy granola.',
+    description:'Layers of tangy yogurt, golden crunchy granola, and ripe colorful fruit with a warm honey drizzle. A generous, beautiful bowl.',
     prepTime:'4 min', cookTime:'0 min', baseCal:736, baseP:40, baseC:103, baseF:15,
     ingredients:[{item:'Non-fat Greek yogurt',amount:300,unit:'g'},{item:'Granola',amount:80,unit:'g'},{item:'Mixed berries',amount:100,unit:'g'},{item:'Honey',amount:20,unit:'g'},{item:'Banana, sliced',amount:80,unit:'g'}],
     instructions:['Layer yogurt in a large bowl.','Top with granola, berries, and banana.','Drizzle with honey and serve.']},
   { id:'breakfast-quesadilla', name:'Breakfast Quesadilla', keywords:['breakfast quesadilla','egg quesadilla'], mealTypes:['breakfast'],
-    description:'Crispy quesadilla stuffed with scrambled eggs, cheese, and salsa. Ready in 12 minutes.',
+    description:'A golden, crispy quesadilla stuffed with soft scrambled eggs, melted cheese, and zesty salsa. Crisp outside, gooey within, ready in 12 minutes.',
     prepTime:'5 min', cookTime:'8 min', baseCal:530, baseP:29, baseC:41, baseF:27,
     ingredients:[{item:'Large flour tortilla',amount:1,unit:'tortilla'},{item:'Eggs',amount:2,unit:'egg'},{item:'Shredded cheese',amount:40,unit:'g'},{item:'Salsa',amount:40,unit:'g'},{item:'Cooking spray',amount:1,unit:'spray'}],
     instructions:['Scramble eggs.','Place tortilla in a pan, add cheese and eggs to one half.','Fold and cook 2-3 min per side until crispy.','Serve with salsa.']},
   { id:'lox-scramble', name:'Smoked Salmon Scramble', keywords:['smoked salmon eggs','lox scramble','salmon eggs'], mealTypes:['breakfast'],
-    description:'Silky scrambled eggs with smoked salmon and cream cheese. Elegant and protein-rich.',
+    description:'Silky scrambled eggs layered with smoky cured salmon and cool, tangy cream cheese. Elegant brunch flavors in a single pan.',
     prepTime:'5 min', cookTime:'6 min', baseCal:468, baseP:34, baseC:3, baseF:33,
     ingredients:[{item:'Eggs',amount:3,unit:'egg'},{item:'Smoked salmon',amount:80,unit:'g'},{item:'Cream cheese',amount:30,unit:'g'},{item:'Chives, chopped',amount:8,unit:'g'},{item:'Butter',amount:5,unit:'g'}],
     instructions:['Whisk eggs with cream cheese.','Cook over low heat in butter, folding gently.','Fold in smoked salmon just before done.','Garnish with chives.']},
   { id:'big-breakfast-burrito', name:'Loaded Breakfast Burrito Deluxe', keywords:['big breakfast burrito','loaded burrito','breakfast wrap'], mealTypes:['breakfast'],
-    description:'A huge, hearty breakfast burrito packed with eggs, sausage, potatoes, cheese, and all the fixings.',
+    description:'A massive, overstuffed breakfast burrito with fluffy eggs, savory sausage, golden potatoes, melted cheese, and all the fixings.',
     prepTime:'12 min', cookTime:'15 min', baseCal:1137, baseP:53, baseC:70, baseF:71,
     ingredients:[{item:'Large flour tortilla (12")',amount:1,unit:'tortilla'},{item:'Eggs',amount:3,unit:'egg'},{item:'Breakfast sausage, cooked',amount:80,unit:'g'},{item:'Hash browns, cooked',amount:100,unit:'g'},{item:'Shredded cheese',amount:50,unit:'g'},{item:'Salsa',amount:50,unit:'g'},{item:'Avocado',amount:60,unit:'g'}],
     instructions:['Warm tortilla.','Layer all ingredients in center.','Fold sides and roll tightly.','Cut diagonally and serve.']},
   { id:'pumpkin-oatmeal', name:'Pumpkin Spice Oatmeal', keywords:['pumpkin oatmeal','pumpkin spice oats'], mealTypes:['breakfast'],
-    description:'Warm, cozy oatmeal with pumpkin puree and warming spices. Feels like fall in a bowl.',
+    description:'Warm oatmeal stirred with velvety pumpkin puree, cinnamon, and nutmeg. Earthy, spiced, and deeply autumnal — feels like fall in a bowl.',
     prepTime:'2 min', cookTime:'5 min', baseCal:434, baseP:15, baseC:64, baseF:15,
     ingredients:[{item:'Rolled oats',amount:70,unit:'g'},{item:'Pumpkin puree (canned)',amount:80,unit:'g'},{item:'Almond milk',amount:200,unit:'ml'},{item:'Pumpkin pie spice',amount:2,unit:'g'},{item:'Honey',amount:12,unit:'g'},{item:'Pecans, chopped',amount:10,unit:'g'}],
     instructions:['Cook oats with almond milk.','Stir in pumpkin puree and spice.','Sweeten with honey.','Top with pecans.']},
 
   // ─── ADDITIONAL LUNCH (200-1100 cal range) ───
   { id:'light-chicken-salad', name:'Light Lemon Herb Chicken Salad', keywords:['light salad','chicken salad','low calorie lunch'], mealTypes:['lunch'],
-    description:'A simple, light chicken salad with lemon herb dressing. Clean eating at its most satisfying.',
+    description:'Tender chicken tossed in a bright lemon-herb dressing over crisp greens. Fresh, zesty, and effortlessly elegant.',
     prepTime:'8 min', cookTime:'0 min', baseCal:343, baseP:49, baseC:11, baseF:11,
     ingredients:[{item:'Chicken breast, grilled and sliced',amount:150,unit:'g'},{item:'Romaine lettuce',amount:120,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Cucumber',amount:80,unit:'g'},{item:'Lemon juice',amount:15,unit:'ml'},{item:'Olive oil',amount:5,unit:'ml'}],
     instructions:['Slice grilled chicken.','Combine all vegetables in a bowl.','Whisk lemon juice with olive oil for dressing.','Toss and serve.']},
   { id:'tuna-salad-lettuce', name:'Tuna Salad in Lettuce Cups', keywords:['tuna salad lettuce','tuna lettuce wrap','low carb tuna'], mealTypes:['lunch'],
-    description:'Creamy tuna salad served in crisp lettuce cups instead of bread. Light and high-protein.',
+    description:'Creamy, herb-flecked tuna salad nestled in crisp, cool lettuce cups. A fresh, handheld bite with satisfying crunch.',
     prepTime:'6 min', cookTime:'0 min', baseCal:210, baseP:43, baseC:5, baseF:2,
     ingredients:[{item:'Canned tuna in water',amount:150,unit:'g'},{item:'Non-fat Greek yogurt',amount:30,unit:'g'},{item:'Celery, diced',amount:30,unit:'g'},{item:'Romaine lettuce',amount:4,unit:'leaves'},{item:'Lemon juice',amount:8,unit:'ml'}],
     instructions:['Mix tuna with yogurt, celery, and lemon juice.','Spoon into lettuce cups.','Season and serve.']},
   { id:'veggie-soup', name:'Chunky Vegetable Soup', keywords:['vegetable soup','veggie soup','minestrone'], mealTypes:['lunch','dinner'],
-    description:'A hearty bowl of chunky vegetable soup loaded with seasonal vegetables and beans.',
+    description:'A rustic, chunky vegetable soup brimming with seasonal produce and earthy beans. Slow-simmered comfort in every colorful spoonful.',
     prepTime:'10 min', cookTime:'20 min', baseCal:222, baseP:13, baseC:43, baseF:1,
     ingredients:[{item:'Mixed vegetables (carrot, celery, zucchini)',amount:200,unit:'g'},{item:'Canned diced tomatoes',amount:150,unit:'g'},{item:'Cannellini beans',amount:100,unit:'g'},{item:'Low-sodium broth',amount:400,unit:'ml'},{item:'Garlic cloves',amount:2,unit:'clove'},{item:'Italian seasoning',amount:2,unit:'g'}],
     instructions:['Saute garlic and vegetables in a pot.','Add tomatoes, beans, and broth.','Simmer 15 minutes.','Season and serve.']},
   { id:'chicken-noodle-soup', name:'Classic Chicken Noodle Soup', keywords:['chicken noodle soup','chicken soup','noodle soup'], mealTypes:['lunch','dinner'],
-    description:'The ultimate comfort food. Rich broth with tender chicken and egg noodles.',
+    description:'The ultimate comfort food: golden broth simmered with tender shredded chicken and silky egg noodles. Warming and deeply restorative from the first sip.',
     prepTime:'10 min', cookTime:'25 min', baseCal:526, baseP:57, baseC:55, baseF:8,
     ingredients:[{item:'Chicken breast',amount:150,unit:'g'},{item:'Egg noodles',amount:60,unit:'g'},{item:'Carrot, sliced',amount:80,unit:'g'},{item:'Celery, sliced',amount:60,unit:'g'},{item:'Low-sodium chicken broth',amount:480,unit:'ml'},{item:'Garlic and thyme',amount:4,unit:'g'}],
     instructions:['Simmer chicken in broth with vegetables until cooked.','Remove chicken, shred, and return.','Add noodles and cook until tender.','Season well.']},
@@ -1338,12 +1338,12 @@ const RECIPE_DB = [
     ingredients:[{item:'Sushi-grade ahi tuna',amount:180,unit:'g'},{item:'White rice (cooked)',amount:180,unit:'g'},{item:'Avocado',amount:60,unit:'g'},{item:'Edamame, shelled',amount:60,unit:'g'},{item:'Sesame oil',amount:5,unit:'ml'},{item:'Low-sodium soy sauce',amount:15,unit:'ml'},{item:'Sesame seeds',amount:5,unit:'g'}],
     instructions:['Cube tuna and marinate in soy sauce and sesame oil for 5 minutes.','Build bowl over rice.','Top with avocado, edamame, and sesame seeds.']},
   { id:'philly-cheesesteak-bowl', name:'Philly Cheesesteak Bowl', keywords:['philly cheesesteak','cheesesteak bowl','beef bowl'], mealTypes:['lunch','dinner'],
-    description:'All the flavors of a Philly cheesesteak in a low-carb bowl with peppers, onions, and provolone.',
+    description:'All the bold flavors of a Philly cheesesteak — caramelized onions, charred peppers, and melted provolone — piled into a hearty bowl.',
     prepTime:'10 min', cookTime:'12 min', baseCal:632, baseP:57, baseC:17, baseF:36,
     ingredients:[{item:'Shaved beef or sirloin, thinly sliced',amount:200,unit:'g'},{item:'Bell peppers, sliced',amount:100,unit:'g'},{item:'Onion, sliced',amount:80,unit:'g'},{item:'Provolone cheese',amount:40,unit:'g'},{item:'Olive oil',amount:8,unit:'ml'},{item:'Garlic powder',amount:2,unit:'g'}],
     instructions:['Cook peppers and onions in olive oil until caramelized.','Cook beef on high heat until browned.','Combine, top with provolone, and let melt.']},
   { id:'big-mac-bowl', name:'Big Mac Bowl', keywords:['big mac','burger bowl','special sauce salad'], mealTypes:['lunch','dinner'],
-    description:'All the Big Mac flavors in a bowl: beef, special sauce, lettuce, cheese, pickles. Zero bun needed.',
+    description:'All the Big Mac flavors — juicy beef, tangy special sauce, pickles, and cheddar — piled into a crunchy salad bowl. Zero bun needed.',
     prepTime:'10 min', cookTime:'10 min', baseCal:532, baseP:60, baseC:6, baseF:28,
     ingredients:[{item:'Ground beef (90% lean)',amount:180,unit:'g'},{item:'Romaine lettuce',amount:100,unit:'g'},{item:'Dill pickles',amount:30,unit:'g'},{item:'Cheddar cheese, shredded',amount:30,unit:'g'},{item:'Greek yogurt',amount:40,unit:'g'},{item:'Dijon mustard',amount:8,unit:'g'},{item:'White wine vinegar',amount:5,unit:'ml'}],
     instructions:['Brown beef, season well.','Mix yogurt, mustard, vinegar for special sauce.','Assemble bowl with all ingredients.','Drizzle with sauce.']},
@@ -1375,22 +1375,22 @@ const RECIPE_DB = [
 
   // ─── ADDITIONAL DINNER (200-1100 cal range) ───
   { id:'poached-salmon-veggies', name:'Poached Salmon with Steamed Vegetables', keywords:['poached salmon','light salmon','steamed vegetables'], mealTypes:['dinner'],
-    description:'Delicately poached salmon with a medley of steamed vegetables. Clean, nourishing, and elegant.',
+    description:'Delicately poached salmon with silky, rose-pink flesh alongside a medley of bright steamed vegetables. Simple French-inspired cooking at its finest.',
     prepTime:'8 min', cookTime:'12 min', baseCal:451, baseP:42, baseC:17, baseF:24,
     ingredients:[{item:'Salmon fillet',amount:180,unit:'g'},{item:'Broccoli florets',amount:120,unit:'g'},{item:'Zucchini, sliced',amount:100,unit:'g'},{item:'Lemon',amount:1,unit:'lemon'},{item:'Fresh dill',amount:5,unit:'g'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
     instructions:['Simmer water with lemon slices.','Poach salmon 8-10 min until flaky.','Steam vegetables until tender-crisp.','Plate and garnish with dill.']},
   { id:'chicken-veggie-soup', name:'Chicken and Vegetable Stew', keywords:['chicken stew','chicken vegetable','hearty stew'], mealTypes:['dinner'],
-    description:'A warm, thick chicken and vegetable stew that is both comforting and lean.',
+    description:'A warm, thick chicken and vegetable stew with golden broth, tender meat, and earthy root vegetables. Slow-simmered, deeply comforting.',
     prepTime:'10 min', cookTime:'25 min', baseCal:493, baseP:67, baseC:35, baseF:8,
     ingredients:[{item:'Chicken breast, diced',amount:200,unit:'g'},{item:'Potato, diced',amount:120,unit:'g'},{item:'Carrot, sliced',amount:80,unit:'g'},{item:'Celery',amount:60,unit:'g'},{item:'Low-sodium broth',amount:480,unit:'ml'},{item:'Thyme and rosemary',amount:3,unit:'g'}],
     instructions:['Brown chicken in a pot.','Add vegetables and broth.','Simmer 20 minutes until vegetables are tender.','Season well.']},
   { id:'grilled-chicken-asparagus', name:'Grilled Chicken with Asparagus', keywords:['grilled chicken asparagus','chicken asparagus','simple dinner'], mealTypes:['dinner'],
-    description:'Simply grilled chicken breast alongside crisp asparagus spears with lemon. Light and satisfying.',
+    description:'Simply grilled chicken with golden char marks alongside bright asparagus spears and a squeeze of fresh lemon. Clean flavors, beautifully executed.',
     prepTime:'8 min', cookTime:'15 min', baseCal:464, baseP:68, baseC:14, baseF:16,
     ingredients:[{item:'Chicken breast',amount:200,unit:'g'},{item:'Asparagus',amount:200,unit:'g'},{item:'Olive oil',amount:8,unit:'ml'},{item:'Lemon',amount:1,unit:'lemon'},{item:'Garlic powder',amount:2,unit:'g'}],
     instructions:['Season chicken with garlic powder, salt, and pepper.','Grill 6-7 min per side.','Toss asparagus in olive oil and grill 4-5 min.','Squeeze lemon over both.']},
   { id:'shrimp-scampi', name:'Classic Shrimp Scampi', keywords:['shrimp scampi','garlic shrimp','scampi'], mealTypes:['dinner'],
-    description:'Plump shrimp in a buttery garlic wine sauce over linguine. A restaurant classic done lighter.',
+    description:'Plump shrimp swimming in a golden garlic-wine butter sauce over silky linguine. An Italian-American trattoria classic in 20 minutes.',
     prepTime:'8 min', cookTime:'12 min', baseCal:725, baseP:61, baseC:74, baseF:20,
     ingredients:[{item:'Large shrimp, peeled',amount:200,unit:'g'},{item:'Linguine (dry)',amount:90,unit:'g'},{item:'Garlic cloves',amount:5,unit:'clove'},{item:'Butter',amount:12,unit:'g'},{item:'Olive oil',amount:8,unit:'ml'},{item:'White wine or chicken broth',amount:60,unit:'ml'},{item:'Lemon juice',amount:15,unit:'ml'},{item:'Parsley',amount:10,unit:'g'}],
     instructions:['Cook pasta until al dente.','Saute shrimp in butter and oil over medium-high heat.','Add garlic, wine, lemon juice.','Toss with pasta and parsley.']},
@@ -1410,7 +1410,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Rack of lamb (8 ribs)',amount:300,unit:'g'},{item:'Garlic cloves',amount:4,unit:'clove'},{item:'Fresh rosemary and thyme',amount:10,unit:'g'},{item:'Dijon mustard',amount:20,unit:'g'},{item:'Olive oil',amount:12,unit:'ml'},{item:'Breadcrumbs',amount:20,unit:'g'}],
     instructions:['Coat lamb with mustard, then press in herbs and breadcrumbs.','Sear in a hot pan, then roast at 400F for 20-25 min.','Rest 5 minutes before slicing.']},
   { id:'lobster-tail', name:'Butter-Poached Lobster Tail with Rice', keywords:['lobster','lobster tail','seafood dinner'], mealTypes:['dinner'],
-    description:'Luxurious butter-poached lobster tail over jasmine rice. An indulgent treat that is worth every calorie.',
+    description:'Luxurious butter-poached lobster tail with sweet, tender flesh served over fragrant jasmine rice. A restaurant-quality indulgence for a special night.',
     prepTime:'10 min', cookTime:'15 min', baseCal:518, baseP:44, baseC:53, baseF:14,
     ingredients:[{item:'Lobster tail',amount:180,unit:'g'},{item:'Jasmine rice (cooked)',amount:160,unit:'g'},{item:'Butter',amount:15,unit:'g'},{item:'Garlic',amount:2,unit:'clove'},{item:'Lemon',amount:1,unit:'lemon'},{item:'Fresh parsley',amount:8,unit:'g'}],
     instructions:['Split lobster tail and brush with garlic butter.','Broil 10-12 min until cooked through.','Serve over jasmine rice with lemon and parsley.']},
@@ -1430,7 +1430,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Duck confit leg',amount:200,unit:'g'},{item:'Baby potatoes, halved',amount:200,unit:'g'},{item:'Arugula or spinach',amount:60,unit:'g'},{item:'Olive oil',amount:10,unit:'ml'},{item:'Garlic',amount:3,unit:'clove'},{item:'Thyme',amount:3,unit:'g'}],
     instructions:['Roast potatoes at 425F with olive oil and thyme.','Sear duck skin-side down until very crispy, flip and heat through.','Wilt greens in pan drippings.','Serve together.']},
   { id:'giant-salad-bowl', name:'Giant Power Salad Bowl', keywords:['big salad','power salad','loaded salad'], mealTypes:['dinner','lunch'],
-    description:'A massive, meal-worthy salad loaded with protein, healthy fats, and tons of vegetables.',
+    description:'A towering, meal-worthy salad piled with grilled chicken, creamy avocado, crunchy toasted nuts, and a rainbow of crisp vegetables.',
     prepTime:'12 min', cookTime:'0 min', baseCal:686, baseP:59, baseC:27, baseF:40,
     ingredients:[{item:'Mixed greens',amount:120,unit:'g'},{item:'Chicken breast, grilled and sliced',amount:160,unit:'g'},{item:'Avocado',amount:80,unit:'g'},{item:'Cherry tomatoes',amount:80,unit:'g'},{item:'Cucumber',amount:80,unit:'g'},{item:'Chickpeas',amount:60,unit:'g'},{item:'Olive oil and lemon dressing',amount:20,unit:'ml'}],
     instructions:['Arrange greens in a large bowl.','Top with all ingredients in sections.','Drizzle with dressing and toss.']},
@@ -1442,7 +1442,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Cheddar cheese',amount:30,unit:'g'},{item:'Grapes',amount:80,unit:'g'},{item:'Apple, sliced',amount:80,unit:'g'}],
     instructions:['Slice cheese and apple.','Arrange on a plate with grapes.','Enjoy.']},
   { id:'peanut-butter-celery', name:'Peanut Butter Celery Sticks', keywords:['peanut butter celery','ants on a log','celery pb'], mealTypes:['snack'],
-    description:'Classic celery sticks topped with peanut butter. Crunchy, satisfying, and packed with protein.',
+    description:'Classic celery sticks with creamy peanut butter nestled in the groove. Cool, crunchy, and satisfying with a rich nutty bite.',
     prepTime:'3 min', cookTime:'0 min', baseCal:200, baseP:9, baseC:10, baseF:15,
     ingredients:[{item:'Celery stalks',amount:4,unit:'stalks'},{item:'Natural peanut butter',amount:30,unit:'g'}],
     instructions:['Cut celery into sticks.','Spread peanut butter in the groove.','Optional: add raisins on top for ants on a log.']},
@@ -1462,7 +1462,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Whole wheat crackers',amount:25,unit:'g'},{item:'Smoked salmon',amount:60,unit:'g'},{item:'Cream cheese',amount:20,unit:'g'},{item:'Capers',amount:8,unit:'g'}],
     instructions:['Spread cream cheese on crackers.','Top with smoked salmon and capers.']},
   { id:'deviled-eggs', name:'Deviled Eggs', keywords:['deviled eggs','stuffed eggs','egg snack'], mealTypes:['snack'],
-    description:'Classic creamy deviled eggs with a paprika finish. An irresistible protein-packed snack.',
+    description:'Classic creamy deviled eggs with a velvety mustard-mayo filling and a dusting of smoky paprika. A timeless party bite, irresistibly good.',
     prepTime:'8 min', cookTime:'12 min', baseCal:251, baseP:20, baseC:3, baseF:15,
     ingredients:[{item:'Eggs',amount:3,unit:'egg'},{item:'Non-fat Greek yogurt',amount:20,unit:'g'},{item:'Dijon mustard',amount:5,unit:'g'},{item:'Paprika',amount:1,unit:'pinch'},{item:'Salt and pepper',amount:1,unit:'to taste'}],
     instructions:['Hard boil eggs, peel and halve.','Mash yolks with yogurt and mustard.','Fill whites with mixture.','Sprinkle with paprika.']},
@@ -1477,7 +1477,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Plain rice cakes',amount:2,unit:'cake'},{item:'Almond butter',amount:20,unit:'g'},{item:'Banana',amount:60,unit:'g'},{item:'Honey',amount:8,unit:'g'}],
     instructions:['Spread almond butter on rice cakes.','Slice banana and layer on top.','Drizzle with honey.']},
   { id:'protein-pudding', name:'High-Protein Vanilla Pudding', keywords:['protein pudding','vanilla pudding','protein dessert snack'], mealTypes:['snack'],
-    description:'Thick, creamy vanilla pudding made with Greek yogurt and protein powder. Tastes like dessert.',
+    description:'Thick, silky vanilla pudding with warm vanilla bean flavor and a cloud-like creamy texture. Chilled, luxurious, and effortlessly indulgent.',
     prepTime:'5 min', cookTime:'0 min', baseCal:228, baseP:40, baseC:10, baseF:2,
     ingredients:[{item:'Non-fat Greek yogurt',amount:200,unit:'g'},{item:'Protein powder (vanilla)',amount:25,unit:'g'},{item:'Almond milk',amount:30,unit:'ml'},{item:'Vanilla extract',amount:2,unit:'ml'}],
     instructions:['Whisk all ingredients together until smooth and thick.','Refrigerate 10 minutes if desired.','Serve topped with a few berries.']},
@@ -1489,7 +1489,7 @@ const RECIPE_DB = [
 
   // ─── ADDITIONAL DESSERTS (200-400 cal range) ───
   { id:'panna-cotta', name:'Vanilla Panna Cotta', keywords:['panna cotta','vanilla dessert','creamy dessert'], mealTypes:['dessert'],
-    description:'Silky, elegant vanilla panna cotta that wobbles beautifully. Light, impressive, and only 180 calories.',
+    description:'Silky, elegant vanilla panna cotta that wobbles beautifully on the plate. Creamy, delicate, and impressive for how simple it is to make.',
     prepTime:'10 min', cookTime:'0 min', baseCal:227, baseP:19, baseC:31, baseF:2,
     ingredients:[{item:'Low-fat milk',amount:200,unit:'ml'},{item:'Greek yogurt',amount:80,unit:'g'},{item:'Gelatin',amount:5,unit:'g'},{item:'Honey',amount:15,unit:'g'},{item:'Vanilla extract',amount:3,unit:'ml'},{item:'Fresh berries',amount:50,unit:'g'}],
     instructions:['Bloom gelatin in cold milk.','Warm milk with honey and vanilla until gelatin dissolves.','Stir in yogurt.','Pour into ramekins and refrigerate 4 hours.','Unmold and top with berries.']},
@@ -1504,7 +1504,7 @@ const RECIPE_DB = [
     ingredients:[{item:'Pears',amount:2,unit:'medium'},{item:'Honey',amount:30,unit:'ml'},{item:'Vanilla extract',amount:3,unit:'ml'},{item:'Cinnamon stick',amount:1,unit:'piece'},{item:'Water',amount:300,unit:'ml'}],
     instructions:['Simmer water, honey, vanilla, and cinnamon.','Peel pears and poach in liquid 15-20 min until soft.','Serve warm with a spoonful of the syrup.']},
   { id:'no-bake-cheesecake-cups', name:'No-Bake Protein Cheesecake Cups', keywords:['no bake cheesecake','protein cheesecake','cheesecake cups'], mealTypes:['dessert'],
-    description:'Creamy no-bake cheesecake cups with a granola crust and berry topping. Made with cottage cheese for a protein boost.',
+    description:'Creamy no-bake cheesecake cups with a crunchy granola crust and a vibrant fresh berry topping. Tangy, sweet, and effortlessly elegant.',
     prepTime:'10 min', cookTime:'0 min', baseCal:484, baseP:27, baseC:47, baseF:18,
     ingredients:[{item:'Low-fat cottage cheese',amount:200,unit:'g'},{item:'Cream cheese',amount:30,unit:'g'},{item:'Honey',amount:20,unit:'g'},{item:'Vanilla extract',amount:2,unit:'ml'},{item:'Granola',amount:30,unit:'g'},{item:'Mixed berries',amount:60,unit:'g'}],
     instructions:['Blend cottage cheese and cream cheese until completely smooth.','Stir in honey and vanilla.','Layer granola in cups, top with cream mixture.','Refrigerate 30 min, then top with berries.']},
@@ -1524,12 +1524,12 @@ const RECIPE_DB = [
     ingredients:[{item:'Dark chocolate chips (70%+)',amount:60,unit:'g'},{item:'Almond milk',amount:30,unit:'ml'},{item:'Strawberries',amount:120,unit:'g'},{item:'Banana',amount:80,unit:'g'}],
     instructions:['Melt chocolate with almond milk until smooth.','Slice banana.','Dip fruit in chocolate and enjoy.']},
   { id:'tiramisu-cups', name:'Lightened Tiramisu Cups', keywords:['tiramisu','coffee dessert','mascarpone'], mealTypes:['dessert'],
-    description:'Individual tiramisu cups made lighter with Greek yogurt. All the coffee-mascarpone drama, fewer calories.',
+    description:'Individual tiramisu cups layered with espresso-soaked ladyfingers and a cloud of creamy mascarpone. All the coffee-mascarpone drama of the Italian classic.',
     prepTime:'15 min', cookTime:'0 min', baseCal:392, baseP:20, baseC:45, baseF:16,
     ingredients:[{item:'Non-fat Greek yogurt',amount:150,unit:'g'},{item:'Cream cheese',amount:40,unit:'g'},{item:'Strong espresso or coffee',amount:60,unit:'ml'},{item:'Ladyfinger biscuits',amount:30,unit:'g'},{item:'Cocoa powder',amount:5,unit:'g'},{item:'Honey',amount:15,unit:'ml'}],
     instructions:['Mix yogurt, cream cheese, and honey until smooth.','Dip ladyfingers briefly in coffee.','Layer ladyfingers and cream mixture in cups.','Dust generously with cocoa powder.','Refrigerate 1 hour.']},
   { id:'strawberry-shortcake', name:'Lightened Strawberry Shortcake', keywords:['strawberry shortcake','strawberry dessert','shortcake'], mealTypes:['dessert'],
-    description:'Fluffy biscuit with fresh strawberries and light whipped cream. A summer classic made healthier.',
+    description:'A golden, fluffy biscuit crowned with juicy fresh strawberries and billowing whipped cream. A quintessential American summer classic.',
     prepTime:'10 min', cookTime:'12 min', baseCal:387, baseP:11, baseC:67, baseF:11,
     ingredients:[{item:'Whole wheat flour',amount:60,unit:'g'},{item:'Baking powder',amount:4,unit:'g'},{item:'Low-fat milk',amount:60,unit:'ml'},{item:'Honey',amount:10,unit:'g'},{item:'Strawberries, sliced',amount:150,unit:'g'},{item:'Light whipped cream',amount:30,unit:'g'}],
     instructions:['Mix flour, baking powder, milk, and honey into biscuit dough.','Bake at 400F for 10-12 min.','Split and top with strawberries and whipped cream.']},
@@ -3568,8 +3568,34 @@ async function planWholeWeek(opts = {}) {
           weekUsedNames[cat].push(finalRecipe.name);
           dayFilled++;
         } catch(e) {
-          dayErrors++;
-          totalErrors++;
+          // Retry without name exclusions as fallback
+          try {
+            const recipe = await generateRecipe({
+              preference: (slot.preference || '') + (ingredientsToUse ? ` Use these ingredients: ${ingredientsToUse}` : ''),
+              targetCal:   cappedTargetCal,
+              targetProt:  Math.round(wt.prot),
+              targetCarbs: Math.round(wt.carbs),
+              targetFat:   Math.round(wt.fat),
+              mealType: cat,
+              excludeNames: []
+            });
+            let finalRecipe = recipe;
+            if ((finalRecipe.calories || 0) > budgetLeft && budgetLeft > 50) {
+              const cs = budgetLeft / finalRecipe.calories;
+              finalRecipe = { ...finalRecipe, calories: Math.round(budgetLeft), protein: Math.round((finalRecipe.protein||0)*cs), carbs: Math.round((finalRecipe.carbs||0)*cs), fat: Math.round((finalRecipe.fat||0)*cs) };
+            }
+            slot.meal  = finalRecipe;
+            usedCal   += finalRecipe.calories || 0;
+            usedProt  += finalRecipe.protein  || 0;
+            usedCarbs += finalRecipe.carbs    || 0;
+            usedFat   += finalRecipe.fat      || 0;
+            if (!weekUsedNames[cat]) weekUsedNames[cat] = [];
+            weekUsedNames[cat].push(finalRecipe.name);
+            dayFilled++;
+          } catch(e2) {
+            dayErrors++;
+            totalErrors++;
+          }
         }
       }
     }
@@ -3594,9 +3620,13 @@ function showWeekPlanSummary(results, totalFilled, totalErrors, target) {
       </div>`;
     const calPct = target.calories ? r.cal / target.calories : 0;
     const calColor = calPct > 1.0 ? '#ef4444' : calPct >= 0.85 ? '#16a34a' : calPct >= 0.7 ? '#d97706' : '#ef4444';
-    const protPct = target.protein ? r.prot / target.protein : 0;
-    const protBar = Math.min(100, Math.round(protPct * 100));
-    const calBar  = Math.min(100, Math.round(calPct  * 100));
+    const protPct  = target.protein ? r.prot  / target.protein  : 0;
+    const carbsPct = target.carbs   ? r.carbs / target.carbs    : 0;
+    const fatPct   = target.fat     ? r.fat   / target.fat      : 0;
+    const protBar  = Math.min(100, Math.round(protPct  * 100));
+    const carbsBar = Math.min(100, Math.round(carbsPct * 100));
+    const fatBar   = Math.min(100, Math.round(fatPct   * 100));
+    const calBar   = Math.min(100, Math.round(calPct   * 100));
     const dayPlan = STATE.dailyPlans[r.date];
     const mealRows = dayPlan ? dayPlan.slots.filter(s => s.meal).map(s => `
       <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid var(--border)">
@@ -3623,12 +3653,26 @@ function showWeekPlanSummary(results, totalFilled, totalErrors, target) {
           </div>
           <span style="font-size:11px;color:var(--text-3);width:32px;text-align:right">${calBar}%</span>
         </div>
-        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:3px">
           <span style="font-size:11px;color:var(--text-3);width:28px">Pro</span>
           <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
             <div style="height:100%;width:${protBar}%;background:var(--protein);border-radius:3px;transition:width .3s"></div>
           </div>
           <span style="font-size:11px;color:var(--text-3);width:32px;text-align:right">${protBar}%</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:3px">
+          <span style="font-size:11px;color:var(--text-3);width:28px">Carb</span>
+          <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${carbsBar}%;background:var(--carbs);border-radius:3px;transition:width .3s"></div>
+          </div>
+          <span style="font-size:11px;color:var(--text-3);width:32px;text-align:right">${carbsBar}%</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+          <span style="font-size:11px;color:var(--text-3);width:28px">Fat</span>
+          <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${fatBar}%;background:var(--fat);border-radius:3px;transition:width .3s"></div>
+          </div>
+          <span style="font-size:11px;color:var(--text-3);width:32px;text-align:right">${fatBar}%</span>
         </div>
         ${mealRows}
         <div style="margin-top:5px;font-size:11px;color:var(--text-3)">${r.filled} meal${r.filled !== 1 ? 's' : ''} added${r.errors ? ` · <span style="color:#ef4444">${r.errors} error${r.errors > 1 ? 's' : ''}</span>` : ''}</div>
