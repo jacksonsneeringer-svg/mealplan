@@ -320,8 +320,8 @@ function defaultState() {
   return {
     onboardingComplete: false,
     profile: {
-      name: '', age: 25, sex: 'male',
-      weightLbs: 180, heightFt: 5, heightIn: 10,
+      name: '', age: '', sex: '',
+      weightLbs: '', heightFt: '', heightIn: '',
       goal: 'maintain', activity: 'moderate',
       calories: 2200, protein: 165, carbs: 220, fat: 73
     },
@@ -2002,11 +2002,12 @@ function renderOB1() {
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Age</label>
-        <input class="form-input" id="ob-age" type="number" min="13" max="100" value="${p.age||25}">
+        <input class="form-input" id="ob-age" type="number" min="13" max="100" placeholder="e.g. 28" value="${p.age||''}">
       </div>
       <div class="form-group">
         <label class="form-label">Sex</label>
         <select class="form-input" id="ob-sex">
+          <option value="" ${!p.sex?'selected':''} disabled>Select</option>
           <option value="male" ${p.sex==='male'?'selected':''}>Male</option>
           <option value="female" ${p.sex==='female'?'selected':''}>Female</option>
         </select>
@@ -2015,15 +2016,17 @@ function renderOB1() {
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Weight (lbs)</label>
-        <input class="form-input" id="ob-weight" type="number" min="80" max="500" value="${p.weightLbs||180}">
+        <input class="form-input" id="ob-weight" type="number" min="80" max="500" placeholder="e.g. 155" value="${p.weightLbs||''}">
       </div>
       <div class="form-group">
         <label class="form-label">Height</label>
         <div style="display:flex;gap:6px">
           <select class="form-input" id="ob-hft" style="width:50%">
+            <option value="" ${!p.heightFt&&p.heightFt!==0?'selected':''} disabled>ft</option>
             ${Array.from({length:5},(_,i)=>`<option value="${i+4}" ${p.heightFt===i+4?'selected':''}>${i+4}ft</option>`).join('')}
           </select>
           <select class="form-input" id="ob-hin" style="width:50%">
+            <option value="" ${p.heightIn===''?'selected':''} disabled>in</option>
             ${Array.from({length:12},(_,i)=>`<option value="${i}" ${p.heightIn===i?'selected':''}>${i}in</option>`).join('')}
           </select>
         </div>
@@ -2160,11 +2163,11 @@ function bindOnboarding() {
   if (s === 1) {
     document.getElementById('ob-next1')?.addEventListener('click', () => {
       const name = document.getElementById('ob-name').value.trim();
-      const age = parseInt(document.getElementById('ob-age').value) || 25;
+      const age = parseInt(document.getElementById('ob-age').value) || 0;
       const sex = document.getElementById('ob-sex').value;
-      const weightLbs = parseFloat(document.getElementById('ob-weight').value) || 180;
-      const heightFt = parseInt(document.getElementById('ob-hft').value) || 5;
-      const heightIn = parseInt(document.getElementById('ob-hin').value) || 10;
+      const weightLbs = parseFloat(document.getElementById('ob-weight').value) || 0;
+      const heightFt = parseInt(document.getElementById('ob-hft').value) || 0;
+      const heightIn = parseInt(document.getElementById('ob-hin').value) || 0;
       Object.assign(STATE.profile, { name, age, sex, weightLbs, heightFt, heightIn });
       saveState();
       STATE.onboardingStep = 2;
@@ -2394,7 +2397,7 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
 
   return `<div class="meal-slot" id="slot-${slot.id}" data-slot-id="${slot.id}" draggable="true">
     <div class="slot-header">
-      <span class="drag-handle" title="Drag to reorder">⠿</span>
+      <span class="drag-handle" title="Drag to reorder"><svg width="14" height="18" viewBox="0 0 14 18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="4" cy="3" r="1.5" fill="#9ca3af"/><circle cx="10" cy="3" r="1.5" fill="#9ca3af"/><circle cx="4" cy="9" r="1.5" fill="#9ca3af"/><circle cx="10" cy="9" r="1.5" fill="#9ca3af"/><circle cx="4" cy="15" r="1.5" fill="#9ca3af"/><circle cx="10" cy="15" r="1.5" fill="#9ca3af"/></svg></span>
       <div style="flex:1">
         <div class="slot-title">${slot.label}</div>
         ${!slot.meal && !slot.open ? `<div class="slot-target">~${perSlotCal} cal · ${perSlotProt}g P target</div>` : ''}
@@ -2590,10 +2593,16 @@ function bindToday() {
 }
 
 let dragSrcId = null;
+let touchDragId = null;
+let touchClone = null;
+let touchOffsetX = 0;
+let touchOffsetY = 0;
+let touchActiveDateStr = null;
 
 function initDragDrop(dateStr) {
   const slots = document.querySelectorAll('.meal-slot[data-slot-id]');
   slots.forEach(el => {
+    // Desktop drag-and-drop
     el.addEventListener('dragstart', e => {
       dragSrcId = el.dataset.slotId;
       setTimeout(() => el.classList.add('dragging'), 0);
@@ -2617,6 +2626,54 @@ function initDragDrop(dateStr) {
         reorderSlots(dateStr, dragSrcId, el.dataset.slotId);
       }
     });
+
+    // Mobile touch drag-and-drop
+    const handle = el.querySelector('.drag-handle');
+    if (!handle) return;
+    handle.addEventListener('touchstart', e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      touchDragId = el.dataset.slotId;
+      touchActiveDateStr = dateStr;
+      const rect = el.getBoundingClientRect();
+      touchOffsetX = touch.clientX - rect.left;
+      touchOffsetY = touch.clientY - rect.top;
+      touchClone = el.cloneNode(true);
+      touchClone.style.cssText = `position:fixed;z-index:9999;width:${rect.width}px;left:${rect.left}px;top:${rect.top}px;opacity:0.85;pointer-events:none;box-shadow:0 8px 25px rgba(0,0,0,0.2);border-radius:12px;`;
+      document.body.appendChild(touchClone);
+      el.classList.add('dragging');
+    }, { passive: false });
+
+    handle.addEventListener('touchmove', e => {
+      e.preventDefault();
+      if (!touchClone) return;
+      const touch = e.touches[0];
+      touchClone.style.left = `${touch.clientX - touchOffsetX}px`;
+      touchClone.style.top = `${touch.clientY - touchOffsetY}px`;
+      touchClone.style.display = 'none';
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      touchClone.style.display = '';
+      const targetSlot = target?.closest('.meal-slot[data-slot-id]');
+      document.querySelectorAll('.meal-slot').forEach(s => s.classList.remove('drag-over'));
+      if (targetSlot && targetSlot.dataset.slotId !== touchDragId) {
+        targetSlot.classList.add('drag-over');
+      }
+    }, { passive: false });
+
+    handle.addEventListener('touchend', e => {
+      if (!touchDragId) return;
+      const touch = e.changedTouches[0];
+      if (touchClone) { touchClone.remove(); touchClone = null; }
+      el.classList.remove('dragging');
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      const targetSlot = target?.closest('.meal-slot[data-slot-id]');
+      document.querySelectorAll('.meal-slot').forEach(s => s.classList.remove('drag-over'));
+      if (targetSlot && targetSlot.dataset.slotId !== touchDragId) {
+        reorderSlots(touchActiveDateStr, touchDragId, targetSlot.dataset.slotId);
+      }
+      touchDragId = null;
+      touchActiveDateStr = null;
+    });
   });
 }
 
@@ -2639,16 +2696,16 @@ function showAddMealModal(dateStr) {
       <div class="modal-sub">What type of meal would you like to add?</div>
       <div class="meal-type-grid">
         <div class="meal-type-card" onclick="addSlot('${dateStr}','breakfast');closeAddMealModal()">
-          <span class="mti">🌅</span><span class="mtl">Breakfast</span><span class="mts">Morning fuel</span>
+          <span class="mti"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4" fill="#f59e0b"/><line x1="12" y1="2" x2="12" y2="4" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="20" x2="12" y2="22" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="12" x2="4" y2="12" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="12" x2="22" y2="12" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/></svg></span><span class="mtl">Breakfast</span><span class="mts">Morning fuel</span>
         </div>
         <div class="meal-type-card" onclick="addSlot('${dateStr}','lunch');closeAddMealModal()">
-          <span class="mti">🥗</span><span class="mtl">Lunch</span><span class="mts">Midday meal</span>
+          <span class="mti"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8 2 4 5 4 9c0 3.5 2.5 6.5 6 7.7V20h4v-3.3C17.5 15.5 20 12.5 20 9c0-4-4-7-8-7z" fill="#22c55e" opacity="0.2"/><path d="M12 2C8 2 4 5 4 9c0 3.5 2.5 6.5 6 7.7V20h4v-3.3C17.5 15.5 20 12.5 20 9c0-4-4-7-8-7z" stroke="#16a34a" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 10c1-2 3-3 5-2" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="mtl">Lunch</span><span class="mts">Midday meal</span>
         </div>
         <div class="meal-type-card" onclick="addSlot('${dateStr}','dinner');closeAddMealModal()">
-          <span class="mti">🍽️</span><span class="mtl">Dinner</span><span class="mts">Evening meal</span>
+          <span class="mti"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="#6366f1" stroke-width="1.5"/><path d="M8 12a5 5 0 0 0 8.66 2.5" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/><path d="M6 9h12" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="mtl">Dinner</span><span class="mts">Evening meal</span>
         </div>
         <div class="meal-type-card" onclick="addCustomMeal('${dateStr}');closeAddMealModal()">
-          <span class="mti">✏️</span><span class="mtl">Custom</span><span class="mts">Name it yourself</span>
+          <span class="mti"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="#0ea5e9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" fill="#bae6fd" stroke="#0ea5e9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="mtl">Custom</span><span class="mts">Name it yourself</span>
         </div>
       </div>
     </div>
