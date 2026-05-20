@@ -2681,9 +2681,7 @@ function renderRecipeCard(meal, slotId) {
     ` : ''}
     ${meal.instructions?.length ? `
     <div class="recipe-section">
-      <button class="collapsible-toggle" onclick="toggleInstructions('inst-${id}',this)">
-        <span>▶</span> Show instructions
-      </button>
+      <button class="collapsible-toggle" onclick="toggleInstructions('inst-${id}',this)"><span>▶</span> Show instructions</button>
       <div class="collapsible-content" id="inst-${id}" style="max-height:0">
         <ol class="instruction-list">
           ${meal.instructions.map(step=>`<li>${step}</li>`).join('')}
@@ -3199,8 +3197,11 @@ function renderWeek() {
         const plannedCount = plan ? plan.slots.filter(s=>s.meal).length : 0;
         const totalCount = plan ? plan.slots.length : 0;
         const { totals: fixedTotals } = getActiveFixedTotals(d);
-        const mealCals = plan ? getPlanTotals(plan).calories : 0;
-        const plannedCals = mealCals + fixedTotals.calories;
+        const mealTotalsObj = plan ? getPlanTotals(plan) : {calories:0,protein:0,carbs:0,fat:0};
+        const plannedCals = mealTotalsObj.calories + fixedTotals.calories;
+        const plannedProt = mealTotalsObj.protein + fixedTotals.protein;
+        const plannedCarbs = mealTotalsObj.carbs + fixedTotals.carbs;
+        const plannedFat = mealTotalsObj.fat + fixedTotals.fat;
         const isActive = weekState.activeDay === d;
         const isToday = d === today();
         const isPast = d < today();
@@ -3212,7 +3213,7 @@ function renderWeek() {
         return `<div class="day-card ${isActive?'active':''} ${status==='planned'?'planned':''} ${isPast?'past':''}" onclick="selectWeekDay('${d}')">
           <div class="day-name">${dayName}${isToday ? ' <span style="display:inline-block;width:6px;height:6px;background:var(--primary);border-radius:50%;vertical-align:2px;margin-left:2px"></span>' : ''}</div>
           <div class="day-date">${parseInt(mm)}/${parseInt(dd)}</div>
-          ${plannedCals > 0 ? `<div class="day-cals">${plannedCals}</div><div style="font-size:10px;opacity:.6">${fixedTotals.calories > 0 ? 'cal total' : 'cal planned'}</div>` : '<div class="day-cals" style="color:var(--text-3)">—</div>'}
+          ${plannedCals > 0 ? `<div style="font-size:10px;opacity:.75;margin-top:2px;line-height:1.3">${plannedCals} cal · ${plannedProt}g P · ${plannedCarbs}g C · ${plannedFat}g F</div>` : ''}
           <div class="day-status ${status}">${statusText}</div>
         </div>`;
       }).join('')}
@@ -4059,7 +4060,7 @@ function renderSaved() {
   return `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
       <div style="font-size:20px;font-weight:800;letter-spacing:-.5px">Saved Meals</div>
-      <button class="btn btn-primary btn-sm" onclick="showBuildMealModal()" style="gap:4px;font-size:12px;padding:9px 11px;align-self:flex-end;width:50%">+ Build a Meal</button>
+      <button class="btn btn-primary btn-sm" onclick="showBuildMealModal()" style="gap:4px;font-size:12px;padding:4px 10px">+ Build a Meal</button>
     </div>
     <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">${STATE.savedMeals.length} saved · Filter by macros</div>
 
