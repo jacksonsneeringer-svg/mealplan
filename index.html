@@ -4104,10 +4104,11 @@ function renderGroceryList(dates) {
         [/broccoli/, 350, 'head of broccoli'],
         [/cauliflower/, 600, 'head of cauliflower'],
       ];
-      for (const [re, wt] of byCount) {
+      for (const [re, wt, label] of byCount) {
         if (re.test(name)) {
           const n = Math.ceil(g / wt);
-          return `~${n}`;
+          const unit = label + (n > 1 && !label.endsWith('s') ? 's' : '');
+          return `~${n} ${unit}`;
         }
       }
       if (/spinach|kale|arugula|romaine|lettuce|cabbage/.test(name)) return g <= 100 ? 'small bag (5 oz)' : 'large bag (10 oz)';
