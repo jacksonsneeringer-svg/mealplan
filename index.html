@@ -21,13 +21,14 @@
   --shadow-lg: 0 12px 40px rgba(0,0,0,0.09);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+html{overflow-x:hidden}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;max-width:100vw}
 button{cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;border:none;outline:none}
 input,select,textarea{font-family:'Plus Jakarta Sans',sans-serif;outline:none}
 a{color:inherit;text-decoration:none}
 
 /* ── Layout ── */
-#app{min-height:100vh;display:flex;flex-direction:column}
+#app{min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;max-width:100vw}
 .nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
 .nav-bar.top{position:fixed;top:0;bottom:auto;border-top:none;border-bottom:1px solid var(--border);padding:0;overflow:visible}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;color:var(--text-3);font-size:11px;font-weight:500;transition:color .2s}
@@ -233,8 +234,8 @@ a{color:inherit;text-decoration:none}
 .grocery-item.checked .grocery-text{text-decoration:line-through;color:var(--text-3)}
 
 /* ── Modals & Overlays ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;animation:fadeIn .2s ease}
-.modal-sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:24px;max-height:90vh;overflow-y:auto;width:100%;max-width:680px;margin:0 auto;animation:slideUp .3s ease}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;animation:fadeIn .2s ease;overflow:hidden}
+.modal-sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:24px;max-height:90vh;overflow-y:auto;overflow-x:hidden;width:100%;max-width:680px;margin:0 auto;animation:slideUp .3s ease}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{transform:translateY(40px)}to{transform:translateY(0)}}
 .modal-title{font-size:20px;font-weight:700;margin-bottom:4px}
