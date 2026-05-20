@@ -3223,7 +3223,7 @@ function renderWeek() {
 
     ${dates.some(d => STATE.dailyPlans[d] && getPlanTotals(STATE.dailyPlans[d]).calories > 0) ? `
       <button class="btn btn-primary" onclick="weekState.groceryMode=true;render()" style="margin-top:8px">
-        ${IC.cart} Generate Grocery List
+        ${IC.cart} Show Grocery List
       </button>
     ` : ''}
   `;
@@ -3981,8 +3981,7 @@ function showWeekPlanSummary(results, totalFilled, totalErrors, target, snapshot
       </div>
       <div style="margin-bottom:12px">${rows}</div>
       <div class="modal-actions">
-        <button class="btn btn-secondary" style="flex:1" onclick="weekState.groceryMode=true;render();document.getElementById('week-plan-summary-modal').remove()">${IC.cart} Show Grocery List</button>
-        <button class="btn btn-primary" style="flex:1" onclick="saveAsWeeklyTemplate();document.getElementById('week-plan-summary-modal').remove()">Apply &amp; Save Template</button>
+        <button class="btn btn-primary" style="flex:1" onclick="saveAsWeeklyTemplate();document.getElementById('week-plan-summary-modal').remove()">Apply &amp; Save Plan</button>
       </div>
     </div>
   </div>`;
@@ -4013,7 +4012,52 @@ function renderGroceryList(dates) {
     grouped[key].uses.push(`${ing.amount} (${ing.day} – ${ing.meal})`);
   });
 
+  const CATEGORIES = [
+    { label: 'Produce', keywords: ['apple','apples','banana','bananas','orange','oranges','lemon','lemons','lime','limes','berry','berries','strawberry','blueberry','raspberry','grape','grapes','mango','pineapple','peach','pear','plum','watermelon','melon','avocado','tomato','tomatoes','cucumber','zucchini','squash','pepper','peppers','onion','onions','garlic','shallot','potato','potatoes','sweet potato','carrot','carrots','celery','broccoli','cauliflower','spinach','kale','lettuce','arugula','cabbage','brussels','mushroom','mushrooms','asparagus','corn','pea','peas','bean','beans','edamame','leek','ginger','beet','beets','radish','artichoke','eggplant','fennel','chard','cilantro','parsley','basil','mint','thyme','rosemary','sage','dill','chive','chives','scallion','scallions','herb','herbs','jalapeño','jalapeno'] },
+    { label: 'Meat & Seafood', keywords: ['chicken','beef','pork','turkey','lamb','veal','duck','steak','ground beef','bacon','sausage','ham','salami','pepperoni','brisket','ribs','loin','thigh','breast','wing','drumstick','fish','salmon','tuna','tilapia','cod','shrimp','shrimp','prawn','prawns','crab','lobster','scallop','scallops','clam','clams','oyster','oysters','anchovy','anchovies','sardine','sardines','mahi','halibut','trout','catfish','sea bass','meatball','meatballs','chorizo','pancetta','prosciutto','turkey','deli meat','ground turkey','ground pork'] },
+    { label: 'Dairy & Eggs', keywords: ['milk','cream','butter','cheese','cheddar','mozzarella','parmesan','feta','ricotta','brie','gouda','swiss','provolone','cream cheese','cottage cheese','sour cream','yogurt','greek yogurt','kefir','half and half','heavy cream','whipped cream','egg','eggs','ghee','buttermilk','ice cream','gelato'] },
+    { label: 'Grains & Bread', keywords: ['bread','roll','rolls','bun','buns','bagel','bagels','tortilla','tortillas','pita','naan','rice','brown rice','white rice','pasta','spaghetti','penne','fettuccine','lasagna','noodle','noodles','quinoa','oat','oats','oatmeal','granola','cereal','flour','whole wheat','cornmeal','breadcrumb','breadcrumbs','cracker','crackers','pretzel','pretzels','wrap','wraps','couscous','bulgur','barley','farro','millet','rye','sourdough','baguette','croissant','muffin','muffins','waffle','waffles','pancake','pancakes'] },
+    { label: 'Canned & Pantry', keywords: ['canned','can of','tomato sauce','tomato paste','crushed tomatoes','diced tomatoes','chicken broth','beef broth','vegetable broth','stock','coconut milk','coconut cream','chickpea','chickpeas','lentil','lentils','black bean','kidney bean','white bean','navy bean','pinto bean','refried beans','olive','olives','pickle','pickles','soy sauce','fish sauce','worcestershire','vinegar','oil','olive oil','vegetable oil','coconut oil','sesame oil','honey','maple syrup','sugar','brown sugar','salt','pepper','spice','spices','cumin','paprika','chili powder','curry','turmeric','cinnamon','nutmeg','oregano','dried','bouillon','hot sauce','sriracha','ketchup','mustard','mayo','mayonnaise','relish','jam','jelly','peanut butter','almond butter','tahini','hummus','salsa','guacamole','nut','nuts','almond','almonds','walnut','walnuts','cashew','cashews','pecan','pecans','pine nut','pine nuts','seed','seeds','flaxseed','chia','sunflower seed','pumpkin seed','raisin','raisins','dried fruit','chocolate','cocoa','vanilla','baking powder','baking soda','yeast','cornstarch','gelatin','protein powder'] },
+    { label: 'Beverages', keywords: ['water','juice','coffee','tea','soda','milk','almond milk','oat milk','soy milk','coconut water','sports drink','protein shake','smoothie','broth','wine','beer','kombucha'] },
+    { label: 'Frozen', keywords: ['frozen','ice cream','gelato','frozen vegetable','frozen fruit','frozen meal','frozen pizza','frozen waffle'] },
+  ];
+
+  function getCategory(itemName) {
+    const name = itemName.toLowerCase();
+    for (const cat of CATEGORIES) {
+      if (cat.keywords.some(kw => name.includes(kw))) return cat.label;
+    }
+    return 'Other';
+  }
+
+  const CATEGORY_ORDER = ['Produce','Meat & Seafood','Dairy & Eggs','Grains & Bread','Canned & Pantry','Beverages','Frozen','Other'];
+
   const items = Object.values(grouped);
+  const byCategory = {};
+  CATEGORY_ORDER.forEach(c => byCategory[c] = []);
+  items.forEach(item => {
+    const cat = getCategory(item.item);
+    byCategory[cat].push(item);
+  });
+  CATEGORY_ORDER.forEach(c => byCategory[c].sort((a,b) => a.item.localeCompare(b.item)));
+
+  let itemIndex = 0;
+  const categoryBlocks = CATEGORY_ORDER
+    .filter(cat => byCategory[cat].length > 0)
+    .map(cat => `
+      <div style="margin-top:16px;margin-bottom:4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);padding:0 2px">${cat}</div>
+      ${byCategory[cat].map(item => {
+        const i = itemIndex++;
+        return `
+        <div class="grocery-item" id="gi-${i}">
+          <input type="checkbox" class="grocery-check" onchange="this.closest('.grocery-item').classList.toggle('checked',this.checked)">
+          <div class="grocery-text">
+            <span style="font-weight:600">${item.item}</span>
+            <span style="font-size:12px;color:var(--text-3);display:block">${item.uses[0]}${item.uses.length>1?` +${item.uses.length-1} more`:''}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    `).join('');
 
   return `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
@@ -4022,15 +4066,7 @@ function renderGroceryList(dates) {
       <button class="btn btn-secondary btn-sm" onclick="printGroceryList()">${IC.printer} Print</button>
     </div>
     <div class="grocery-wrap" id="grocery-list">
-      ${items.length ? items.map((item,i) => `
-        <div class="grocery-item" id="gi-${i}">
-          <input type="checkbox" class="grocery-check" onchange="this.closest('.grocery-item').classList.toggle('checked',this.checked)">
-          <div class="grocery-text">
-            <span style="font-weight:600">${item.item}</span>
-            <span style="font-size:12px;color:var(--text-3);display:block">${item.uses[0]}${item.uses.length>1?` +${item.uses.length-1} more`:''}</span>
-          </div>
-        </div>
-      `).join('') : '<p style="color:var(--text-3);text-align:center;padding:20px">No meals planned yet.</p>'}
+      ${items.length ? categoryBlocks : '<p style="color:var(--text-3);text-align:center;padding:20px">No meals planned yet.</p>'}
     </div>
     <div style="margin-top:12px;font-size:12px;color:var(--text-3);text-align:center">${items.length} items from your weekly meal plan</div>
   `;
