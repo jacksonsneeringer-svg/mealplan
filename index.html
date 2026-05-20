@@ -2708,6 +2708,11 @@ function toggleFixedItem(dateStr, itemId, checked) {
   renderTodayInPlace(dateStr);
 }
 
+function toggleFixedItemWeek(dateStr, itemId, checked) {
+  setFixedItemActive(dateStr, itemId, checked);
+  render();
+}
+
 function addSlot(dateStr, category) {
   const plan = getOrCreatePlan(dateStr);
   const type = category === 'snack' ? 'snack' : 'meal';
@@ -3189,7 +3194,9 @@ function renderWeek() {
         const plan = STATE.dailyPlans[d];
         const plannedCount = plan ? plan.slots.filter(s=>s.meal).length : 0;
         const totalCount = plan ? plan.slots.length : 0;
-        const plannedCals = plan ? getPlanTotals(plan).calories : 0;
+        const { totals: fixedTotals } = getActiveFixedTotals(d);
+        const mealCals = plan ? getPlanTotals(plan).calories : 0;
+        const plannedCals = mealCals + fixedTotals.calories;
         const isActive = weekState.activeDay === d;
         const isToday = d === today();
         const isPast = d < today();
@@ -3201,7 +3208,7 @@ function renderWeek() {
         return `<div class="day-card ${isActive?'active':''} ${status==='planned'?'planned':''} ${isPast?'past':''}" onclick="selectWeekDay('${d}')">
           <div class="day-name">${dayName}${isToday ? ' <span style="display:inline-block;width:6px;height:6px;background:var(--primary);border-radius:50%;vertical-align:2px;margin-left:2px"></span>' : ''}</div>
           <div class="day-date">${parseInt(mm)}/${parseInt(dd)}</div>
-          ${plannedCals > 0 ? `<div class="day-cals">${plannedCals}</div><div style="font-size:10px;opacity:.6">cal planned</div>` : '<div class="day-cals" style="color:var(--text-3)">—</div>'}
+          ${plannedCals > 0 ? `<div class="day-cals">${plannedCals}</div><div style="font-size:10px;opacity:.6">${fixedTotals.calories > 0 ? 'cal total' : 'cal planned'}</div>` : '<div class="day-cals" style="color:var(--text-3)">—</div>'}
           <div class="day-status ${status}">${statusText}</div>
         </div>`;
       }).join('')}
@@ -3220,11 +3227,35 @@ function renderWeek() {
 function renderWeekDayDetail(dateStr) {
   const plan = getOrCreatePlan(dateStr);
   const label = new Date(dateStr+'T12:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+  const { active: fixedActive, totals: fixedTotals } = getActiveFixedTotals(dateStr);
+  const mealTotals = getPlanTotals(plan);
+  const totalCals  = mealTotals.calories + fixedTotals.calories;
+  const totalProt  = mealTotals.protein  + fixedTotals.protein;
+  const totalCarbs = mealTotals.carbs    + fixedTotals.carbs;
+  const totalFat   = mealTotals.fat      + fixedTotals.fat;
   return `<div class="day-detail">
     <div class="day-detail-header">
       <div style="font-size:16px;font-weight:700">${label}</div>
       <button class="btn btn-secondary btn-sm" onclick="planDay('${dateStr}')">${IC.sparkle} Plan day</button>
     </div>
+    ${STATE.fixedItems.length ? `
+    <div style="padding:8px 0;border-bottom:1px solid var(--border);margin-bottom:4px">
+      <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px">Pre-logged items · <span style="color:var(--primary)">${fixedTotals.calories} cal auto-added</span></div>
+      ${STATE.fixedItems.map(it => `
+        <div class="fixed-item ${fixedActive[it.id]===false?'fixed-item-inactive':''}" style="margin-bottom:4px;padding:6px 10px">
+          <label class="fixed-item-toggle">
+            <input type="checkbox" ${fixedActive[it.id]!==false?'checked':''} onchange="toggleFixedItemWeek('${dateStr}','${it.id}',this.checked)">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <div class="fixed-item-info">
+            <div class="fixed-item-name" style="font-size:13px">${it.name}</div>
+            <div class="fixed-item-macros">${it.calories} cal · ${it.protein}g P · ${it.carbs}g C · ${it.fat}g F</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
     ${plan.slots.map(slot => `
       <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
         <div style="flex:1;min-width:0">
@@ -3245,6 +3276,11 @@ function renderWeekDayDetail(dateStr) {
         </div>
       </div>
     `).join('')}
+    ${totalCals > 0 ? `
+    <div style="padding:8px 0;font-size:12px;font-weight:600;color:var(--text-2);border-top:2px solid var(--border);margin-top:2px">
+      Daily total: ${totalCals} cal · ${totalProt}g P · ${totalCarbs}g C · ${totalFat}g F
+    </div>
+    ` : ''}
     <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
       ${dateStr === today() ? `<button class="btn btn-secondary btn-sm" onclick="navigate('today')">Open Today →</button>` : ''}
       <button class="btn btn-secondary btn-sm" onclick="weekAddSlot('${dateStr}','meal')">+ Meal</button>
