@@ -2243,6 +2243,7 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
           <button class="btn btn-secondary btn-sm" onclick="saveSlotMeal('${slot.id}')">${IC.bookmark} Save</button>
         ` : !slot.open ? `
           <button class="pill" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Leave open</button>
+          ${STATE.savedMeals.length ? `<button class="pill" style="background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark)" onclick="showUseSaved('${dateStr}','${slot.id}')">Add from saved</button>` : ''}
         ` : ''}
         <button class="btn btn-ghost btn-sm" onclick="removeSlot('${dateStr}','${slot.id}')" title="Remove slot" style="color:var(--text-3);font-size:16px">✕</button>
       </div>
@@ -2257,7 +2258,6 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
             ${IC.sparkle} Generate
           </button>
         </div>
-        ${STATE.savedMeals.length ? `<div style="margin-top:8px"><button class="btn btn-secondary btn-sm" onclick="showUseSaved('${dateStr}','${slot.id}')">Use saved meal</button></div>` : ''}
       `}
     </div>
   </div>`;
@@ -2716,17 +2716,17 @@ function renderWeekDayDetail(dateStr) {
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:600">${slot.label}</div>
           ${slot.meal
-            ? `<div style="font-size:12px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${slot.meal.name} — ${slot.meal.calories} cal, ${slot.meal.protein}g P</div>`
+            ? `<div style="font-size:12px;color:var(--text-2);cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" onclick="showWeekMealDetail('${dateStr}','${slot.id}')" title="View recipe">${slot.meal.name} — ${slot.meal.calories} cal · ${slot.meal.protein}g P · ${slot.meal.carbs}g C · ${slot.meal.fat}g F</div>`
             : `<div style="font-size:12px;color:var(--text-3)">Not planned</div>`}
         </div>
         <div style="display:flex;gap:4px;flex-shrink:0">
           ${slot.meal ? `
             <button class="btn btn-secondary btn-sm" id="wgen-${slot.id}" onclick="weekGenerateSlot('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px" title="Regenerate">${IC.sparkle}</button>
-            <button class="btn btn-secondary btn-sm" onclick="weekShowUseSaved('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px" title="Swap from saved">${IC.bookmark}</button>
+            <button class="btn btn-secondary btn-sm" onclick="weekShowUseSaved('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px" title="Add from saved">${IC.bookmark} Saved</button>
             <button class="btn btn-danger btn-sm" onclick="clearWeekSlot('${dateStr}','${slot.id}')" style="padding:4px 7px">✕</button>
           ` : `
-            <button class="btn btn-secondary btn-sm" id="wgen-${slot.id}" onclick="weekGenerateSlot('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px">${IC.sparkle}</button>
-            <button class="btn btn-secondary btn-sm" onclick="weekShowUseSaved('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px" title="Pick from saved">${IC.bookmark}</button>
+            <button class="btn btn-secondary btn-sm" id="wgen-${slot.id}" onclick="weekGenerateSlot('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px">${IC.sparkle} Generate</button>
+            <button class="btn btn-secondary btn-sm" onclick="weekShowUseSaved('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px" title="Add from saved">${IC.bookmark} Saved</button>
           `}
         </div>
       </div>
@@ -2853,6 +2853,28 @@ function weekUseSavedMeal(dateStr, slotId, mealId) {
   saveState();
   document.getElementById('week-saved-modal')?.remove();
   render();
+}
+
+function showWeekMealDetail(dateStr, slotId) {
+  const plan = STATE.dailyPlans[dateStr];
+  const slot = plan?.slots.find(s => s.id === slotId);
+  if (!slot?.meal) return;
+  document.getElementById('week-meal-detail-modal')?.remove();
+  const html = `<div class="modal-overlay" id="week-meal-detail-modal" onclick="if(event.target.id==='week-meal-detail-modal')this.remove()">
+    <div class="modal-sheet" style="max-height:90vh;overflow-y:auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="modal-title" style="margin:0">${slot.label}</div>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('week-meal-detail-modal').remove()" style="font-size:18px;color:var(--text-3)">✕</button>
+      </div>
+      ${renderRecipeCard(slot.meal, slot.id)}
+      <div class="modal-actions" style="margin-top:12px">
+        ${STATE.savedMeals.length ? `<button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('week-meal-detail-modal').remove();weekShowUseSaved('${dateStr}','${slot.id}')">${IC.bookmark} Add from saved</button>` : ''}
+        <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('week-meal-detail-modal').remove();weekGenerateSlot('${dateStr}','${slot.id}')">${IC.sparkle} Regenerate</button>
+        <button class="btn btn-primary" style="flex:1" onclick="document.getElementById('week-meal-detail-modal').remove()">Done</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
 }
 
 async function planDay(dateStr) {
@@ -3134,6 +3156,16 @@ function showWeekPlanSummary(results, totalFilled, totalErrors, target) {
     const protPct = target.protein ? r.prot / target.protein : 0;
     const protBar = Math.min(100, Math.round(protPct * 100));
     const calBar  = Math.min(100, Math.round(calPct  * 100));
+    const dayPlan = STATE.dailyPlans[r.date];
+    const mealRows = dayPlan ? dayPlan.slots.filter(s => s.meal).map(s => `
+      <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid var(--border)">
+        <div style="flex:1;min-width:0">
+          <span style="font-size:12px;font-weight:600;color:var(--text-2)">${s.label}:</span>
+          <span style="font-size:12px;color:var(--text);cursor:pointer;text-decoration:underline;text-decoration-color:var(--border)" onclick="document.getElementById('week-plan-summary-modal').remove();weekState.activeDay='${r.date}';render();setTimeout(()=>showWeekMealDetail('${r.date}','${s.id}'),50)" title="View recipe">${s.meal.name}</span>
+          <span style="font-size:11px;color:var(--text-3);margin-left:4px">${s.meal.calories} cal · ${s.meal.protein}g P · ${s.meal.carbs}g C · ${s.meal.fat}g F</span>
+        </div>
+        ${STATE.savedMeals.length ? `<button class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 7px;flex-shrink:0" onclick="document.getElementById('week-plan-summary-modal').remove();weekState.activeDay='${r.date}';render();setTimeout(()=>weekShowUseSaved('${r.date}','${s.id}'),50)">${IC.bookmark} Saved</button>` : ''}
+      </div>`).join('') : '';
     return `
       <div style="padding:10px 0;border-bottom:1px solid var(--border)">
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
@@ -3150,13 +3182,14 @@ function showWeekPlanSummary(results, totalFilled, totalErrors, target) {
           </div>
           <span style="font-size:11px;color:var(--text-3);width:32px;text-align:right">${calBar}%</span>
         </div>
-        <div style="display:flex;gap:6px;align-items:center">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
           <span style="font-size:11px;color:var(--text-3);width:28px">Pro</span>
           <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
             <div style="height:100%;width:${protBar}%;background:#6366f1;border-radius:3px;transition:width .3s"></div>
           </div>
           <span style="font-size:11px;color:var(--text-3);width:32px;text-align:right">${protBar}%</span>
         </div>
+        ${mealRows}
         <div style="margin-top:5px;font-size:11px;color:var(--text-3)">${r.filled} meal${r.filled !== 1 ? 's' : ''} added${r.errors ? ` · <span style="color:#ef4444">${r.errors} error${r.errors > 1 ? 's' : ''}</span>` : ''}</div>
       </div>`;
   }).join('');
