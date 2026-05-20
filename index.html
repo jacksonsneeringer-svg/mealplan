@@ -30,12 +30,12 @@ a{color:inherit;text-decoration:none}
 /* ── Layout ── */
 #app{min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;max-width:100vw}
 .nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
-.nav-bar.top{position:fixed;top:0;bottom:auto;border-top:none;border-bottom:1px solid var(--border);padding:0;overflow:visible}
+.nav-bar.top{position:fixed;top:0;bottom:auto;border-top:none;border-bottom:1px solid var(--border);padding:0;overflow:hidden}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;color:var(--text-3);font-size:11px;font-weight:500;transition:color .2s}
 .nav-item.active{color:var(--primary)}
 .nav-item svg{width:22px;height:22px}
 .hamburger-btn{display:none;margin-left:auto;padding:8px 14px;align-items:center;justify-content:center;background:none;color:var(--text);flex-shrink:0}
-.mobile-nav-dropdown{display:none;position:absolute;top:100%;right:0;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 0 var(--radius);z-index:200;min-width:160px;box-shadow:0 4px 16px rgba(0,0,0,.1);flex-direction:column}
+.mobile-nav-dropdown{display:none;position:fixed;top:0;right:0;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 0 var(--radius);z-index:200;min-width:160px;box-shadow:0 4px 16px rgba(0,0,0,.1);flex-direction:column}
 .mobile-nav-dropdown.open{display:flex}
 .mobile-nav-item{display:flex;align-items:center;gap:10px;padding:12px 20px;background:none;color:var(--text-2);font-size:14px;font-weight:500;width:100%;text-align:left;transition:color .2s}
 .mobile-nav-item:not(:last-child){border-bottom:1px solid var(--border)}
@@ -312,6 +312,7 @@ a{color:inherit;text-decoration:none}
 @media(max-width:499px){
   .hamburger-btn{display:flex}
   .nav-item{display:none}
+  .nav-bar.top > div:first-child{border-right:none}
   .slot-reorder-btns{display:flex}
   .drag-handle{display:none}
   /* Prevent iOS auto-zoom — all inputs must be ≥16px */
@@ -1948,7 +1949,11 @@ function navigate(view) {
 function toggleMobileMenu(e) {
   e.stopPropagation();
   const dropdown = document.getElementById('mobile-nav-dropdown');
-  if (dropdown) dropdown.classList.toggle('open');
+  if (dropdown) {
+    const nav = document.querySelector('.nav-bar.top');
+    if (nav) dropdown.style.top = nav.getBoundingClientRect().bottom + 'px';
+    dropdown.classList.toggle('open');
+  }
 }
 
 document.addEventListener('click', function() {
