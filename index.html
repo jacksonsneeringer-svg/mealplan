@@ -2822,7 +2822,6 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
       <div class="slot-actions">
         ${slot.meal ? `
           <button class="btn btn-secondary btn-sm" onclick="regenerateSlot('${dateStr}','${slot.id}')">↺ New</button>
-          ${(() => { const isSaved = STATE.savedMeals.some(m => m.name === slot.meal.name); return `<button class="btn btn-secondary btn-sm" onclick="saveSlotMeal('${slot.id}')" style="${isSaved ? 'color:var(--primary);border-color:var(--primary)' : ''}" title="${isSaved ? 'Remove from saved' : 'Save meal'}">${isSaved ? IC.bookmarkFilled : IC.bookmark} ${isSaved ? 'Saved' : 'Save'}</button>`; })()}
         ` : !slot.open ? `
           <button class="pill" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Leave open</button>
           ${STATE.savedMeals.length ? `<button class="pill" style="background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark)" onclick="showUseSaved('${dateStr}','${slot.id}')">Add from saved</button>` : ''}
@@ -3959,6 +3958,18 @@ function showPlanWeekModal() {
       </div>
 
       <div style="${sectionStyle}">
+        <div style="${headerStyle}" onclick="pwToggleSection('pw-variety')">
+          <span style="font-size:13px;font-weight:600">Variety per category <span style="font-size:11px;font-weight:400;color:var(--text-3)">(unique meals per week)</span></span>
+          <span id="pw-variety-arrow" style="${arrowStyle}">▼</span>
+        </div>
+        <div id="pw-variety-body" style="display:none;padding:12px 14px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            ${varietyRows}
+          </div>
+        </div>
+      </div>
+
+      <div style="${sectionStyle}">
         <div style="${headerStyle}" onclick="pwToggleSection('pw-ingredients')">
           <span style="font-size:13px;font-weight:600">Ingredients to use <span style="font-size:11px;font-weight:400;color:var(--text-3)">(optional)</span></span>
           <span id="pw-ingredients-arrow" style="${arrowStyle}">▼</span>
@@ -3985,18 +3996,6 @@ function showPlanWeekModal() {
             ${CUISINES.map(c => `<button data-cuisine="${c}" onclick="pwToggleCuisine('${c}')" style="border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s">${c}</button>`).join('')}
           </div>
           <div style="font-size:11px;color:var(--text-3);margin-top:8px">Select any cuisines you'd like for this week. Meals will lean toward your selections.</div>
-        </div>
-      </div>
-
-      <div style="${sectionStyle}">
-        <div style="${headerStyle}" onclick="pwToggleSection('pw-variety')">
-          <span style="font-size:13px;font-weight:600">Variety per category <span style="font-size:11px;font-weight:400;color:var(--text-3)">(unique meals per week)</span></span>
-          <span id="pw-variety-arrow" style="${arrowStyle}">▼</span>
-        </div>
-        <div id="pw-variety-body" style="display:none;padding:12px 14px">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-            ${varietyRows}
-          </div>
         </div>
       </div>
 
