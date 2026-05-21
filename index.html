@@ -3304,7 +3304,7 @@ function saveSlotMeal(slotId) {
     saveState();
     showToast(`"${slot.meal.name}" removed from saved`);
   } else {
-    STATE.savedMeals.push({ id: uid(), ...slot.meal, savedAt: Date.now() });
+    STATE.savedMeals.push({ id: uid(), ...slot.meal, category: slot.category, savedAt: Date.now() });
     saveState();
     showToast(`"${slot.meal.name}" saved to favorites!`);
   }
@@ -3885,16 +3885,15 @@ function showPlanWeekModal() {
       <button onclick="pwCopyDayToAll(${i})" title="Copy to all days" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;padding:0;line-height:1">⤓</button>
     </div>`).join('');
 
-  const _importCatNames = { breakfast: 'Breakfasts', lunch: 'Lunches', dinner: 'Dinners', snack: 'Snacks', dessert: 'Desserts' };
+  const _importCatNames = { breakfast: 'Breakfasts', lunch: 'Lunches', dinner: 'Dinners', snack: 'Snacks', dessert: 'Desserts', other: 'Other' };
   const _savedByCategory = {};
   (STATE.savedMeals || []).forEach(m => {
-    const cat = m.category;
-    if (!cat || !_importCatNames[cat]) return;
+    const cat = (m.category && _importCatNames[m.category]) ? m.category : 'other';
     if (!_savedByCategory[cat]) _savedByCategory[cat] = [];
     _savedByCategory[cat].push(m);
   });
-  const _importCatOrder = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert'];
-  const _hasSaved = _importCatOrder.some(c => (_savedByCategory[c] || []).length > 0);
+  const _importCatOrder = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert', 'other'];
+  const _hasSaved = (STATE.savedMeals || []).length > 0;
   const importBodyHtml = _hasSaved
     ? _importCatOrder.filter(cat => (_savedByCategory[cat] || []).length > 0).map(cat => `
         <div style="margin-bottom:10px">
@@ -4007,7 +4006,6 @@ function showPlanWeekModal() {
           <span id="pw-import-arrow" style="${arrowStyle}">▼</span>
         </div>
         <div id="pw-import-body" style="display:none;padding:12px 14px">
-          <div style="font-size:11px;color:var(--text-3);margin-bottom:10px">Select meals from your saved list to use in this week's plan. Checked meals are added to the generation pool — if you import fewer meals than your variety setting, the rest are AI-generated.</div>
           ${importBodyHtml}
         </div>
       </div>
@@ -4048,9 +4046,10 @@ function submitPlanWeek() {
   const importedMeals = {};
   pwImportedMealIds.forEach(id => {
     const meal = (STATE.savedMeals || []).find(m => m.id === id);
-    if (!meal || !meal.category) return;
-    if (!importedMeals[meal.category]) importedMeals[meal.category] = [];
-    importedMeals[meal.category].push(meal);
+    if (!meal) return;
+    const cat = meal.category || 'dinner';
+    if (!importedMeals[cat]) importedMeals[cat] = [];
+    importedMeals[cat].push({ ...meal, category: cat });
   });
   document.getElementById('plan-week-modal').remove();
   planWholeWeek({ targets, ingredientsToUse, cuisinePrefs, mealCounts, perDayStructures, importedMeals });
