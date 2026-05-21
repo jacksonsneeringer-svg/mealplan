@@ -2733,7 +2733,7 @@ function renderToday() {
           { label:'Fat', val:consumed.fat, tgt:target.fat, unit:'g', color:'var(--fat)' }
         ].map(m => {
           const mPct = m.tgt > 0 ? m.val / m.tgt : 0;
-          const barColor = mPct >= 1 ? '#ef4444' : mPct >= 0.75 ? '#fbbf24' : '#ffffff';
+          const barColor = mPct >= 1 ? '#fca5a5' : mPct >= 0.8 ? '#fed7aa' : '#ffffff';
           return `<div class="macro-bar-item">
             <label>${m.label}</label>
             <div class="macro-bar-track"><div class="macro-bar-fill" style="width:${Math.min(100,mPct*100).toFixed(1)}%;background:${barColor}"></div></div>
@@ -4341,10 +4341,10 @@ function saveMealPlan() {
 function showWeekSlotReplaceMenu(btn, dateStr, slotId) {
   document.getElementById('week-replace-menu')?.remove();
   const rect = btn.getBoundingClientRect();
-  const top = rect.bottom + window.scrollY + 4;
+  const top = rect.top + window.scrollY;
   const right = window.innerWidth - rect.right;
   const hasSaved = STATE.savedMeals.length > 0;
-  const html = `<div id="week-replace-menu" style="position:absolute;top:${top}px;right:${right}px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);z-index:2000;min-width:160px;overflow:hidden">
+  const html = `<div id="week-replace-menu" style="position:absolute;top:${top}px;right:${right}px;transform:translateY(calc(-100% - 4px));background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);z-index:2000;min-width:160px;overflow:hidden">
     <button onclick="document.getElementById('week-replace-menu').remove();weekGenerateSlot('${dateStr}','${slotId}')" style="display:block;width:100%;text-align:left;padding:10px 14px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-1)">↺ Regenerate</button>
     ${hasSaved ? `<button onclick="document.getElementById('week-replace-menu').remove();weekShowUseSaved('${dateStr}','${slotId}')" style="display:block;width:100%;text-align:left;padding:10px 14px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-1);border-top:1px solid var(--border)">${IC.bookmark} Add from saved</button>` : ''}
   </div>`;
@@ -4786,7 +4786,7 @@ function renderSaved() {
   return `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
       <div style="font-size:20px;font-weight:800;letter-spacing:-.5px">Saved Meals</div>
-      <button class="btn btn-primary btn-sm" onclick="showBuildMealModal()" style="gap:4px;font-size:12px;padding:4px 10px">+ Build a Meal</button>
+      <button class="btn btn-primary btn-sm" onclick="showBuildMealModal()" style="gap:4px;font-size:12px;padding:4px 10px;width:auto">+ Build a Meal</button>
     </div>
     <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">${STATE.savedMeals.length} saved · Filter by macros</div>
 
