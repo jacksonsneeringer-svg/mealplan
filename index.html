@@ -4263,6 +4263,9 @@ function renderGroceryList(dates) {
     const lower = name.toLowerCase().trim();
     if (/\b(white|basmati|jasmine|brown|long.grain|short.grain|arborio|wild|sushi|calrose)\s+rice\b/.test(lower)) return 'Rice';
     if (/\bromaine\b/.test(lower)) return 'Romaine lettuce';
+    if (/butter lettuce/.test(lower)) return 'Butter lettuce';
+    if (/rice cake/.test(lower)) return 'Rice cakes';
+    if (/\beggs?\b/.test(lower) && !/egg whites?/.test(lower)) return 'Eggs';
     if (/\bgarlic\b/.test(lower) && !/garlic\s+(powder|salt|flake|chip)/.test(lower)) return 'Garlic';
     if (/\bcheddar\b/.test(lower)) return 'Cheddar cheese';
     if (/\bmozzarella\b/.test(lower)) return 'Mozzarella';
@@ -4303,7 +4306,7 @@ function renderGroceryList(dates) {
   // Convert amounts to grocery-store-friendly quantities
   function toGroceryQuantity(itemName, amounts, category) {
     const name = itemName.toLowerCase();
-    const g = amounts['g'] || 0;
+    let g = amounts['g'] || 0;
     const ml = amounts['ml'] || 0;
 
     const isSpice = /\b(salt|pepper|paprika|cumin|oregano|thyme|rosemary|basil|seasoning|spice|garlic powder|onion powder|chili powder|curry powder|curry paste|cayenne|turmeric|cinnamon|nutmeg|cardamom|coriander|allspice|bouillon|tajin|smoked paprika|red pepper flake|italian herb|taco seasoning|black pepper|white pepper|dried herb)\b/.test(name);
@@ -4311,10 +4314,32 @@ function renderGroceryList(dates) {
       return 'as needed';
     }
 
-    for (const u of ['egg','eggs','egg white','egg whites','slice','slices','clove','cloves','medium','large','small','tortilla','corn tortilla','lemon','cucumber','wedge']) {
+    for (const u of ['egg','eggs','egg white','egg whites','cake','slice','slices','clove','cloves','tortilla','corn tortilla','lemon','cucumber','wedge']) {
       if (amounts[u] > 0) {
         const n = Math.ceil(amounts[u]);
         return `${n} ${u}${n > 1 && !u.endsWith('s') ? 's' : ''}`;
+      }
+    }
+
+    // Convert medium/large/small count units to grams via per-item weights
+    const countN = (amounts['medium'] || 0) + (amounts['large'] || 0) + (amounts['small'] || 0);
+    if (countN > 0) {
+      const countWeights = [
+        [/\bavocado\b/, 150], [/\bbanana\b/, 120], [/\bapple\b/, 180],
+        [/\borange\b/, 180], [/\blemon\b/, 80], [/\blime\b/, 60],
+        [/\bmango\b/, 200], [/bell pepper|red pepper(?! flake)|green pepper|yellow pepper/, 150],
+        [/\bred onion\b/, 150], [/\bonion\b/, 150], [/sweet potato/, 200],
+        [/\bpotato\b/, 150], [/(?<!cherry )\btomato\b/, 120], [/\bcucumber\b/, 200],
+        [/\bzucchini\b/, 200], [/\bcarrot\b/, 80],
+      ];
+      let converted = false;
+      for (const [re, wt] of countWeights) {
+        if (re.test(name)) { g += Math.round(countN * wt); converted = true; break; }
+      }
+      if (!converted && g === 0) {
+        const szUnit = amounts['medium'] > 0 ? 'medium' : amounts['large'] > 0 ? 'large' : 'small';
+        const n = Math.ceil(countN);
+        return `${n} ${szUnit}${n > 1 ? 's' : ''}`;
       }
     }
 
@@ -4328,6 +4353,7 @@ function renderGroceryList(dates) {
         [/\blime\b/, 60, 'lime'],
         [/\bmango\b/, 200, 'mango'],
         [/bell pepper|red pepper(?! flake)|green pepper|yellow pepper/, 150, 'bell pepper'],
+        [/\bred onion\b/, 150, 'red onion'],
         [/\bonion\b/, 150, 'onion'],
         [/sweet potato/, 200, 'sweet potato'],
         [/\bpotato\b/, 150, 'potato'],
@@ -4466,10 +4492,12 @@ function renderGroceryList(dates) {
         if (!isAsNeeded && amtStr) {
           const itemLower = item.item.toLowerCase();
           const labelPart = amtStr.replace(/^[~≈\d\s¼½¾⅛⅓⅔.]+/, '').trim().toLowerCase();
-          if (labelPart && (labelPart === itemLower || labelPart === itemLower + 's')) {
+          const exactMatch = labelPart && (labelPart === itemLower || labelPart === itemLower + 's');
+          const suffixMatch = !exactMatch && labelPart && labelPart.length > 3 && itemLower.endsWith(' ' + labelPart);
+          if (exactMatch || suffixMatch) {
             const labelRe = new RegExp('\\s*' + labelPart.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i');
             amtStr = amtStr.replace(labelRe, '').trim();
-            displayName = labelPart.charAt(0).toUpperCase() + labelPart.slice(1);
+            if (exactMatch) displayName = labelPart.charAt(0).toUpperCase() + labelPart.slice(1);
           }
         }
         const qtyPrefix = (!isAsNeeded && amtStr) ? `<span style="color:var(--text-2);font-weight:700;margin-right:6px">${amtStr}</span>` : '';
