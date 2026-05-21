@@ -4459,9 +4459,20 @@ function renderGroceryList(dates) {
         } else {
           amtStr = toGroceryQuantity(item.item, item.amounts, item.category);
         }
-        const displayName = item.item.charAt(0).toUpperCase() + item.item.slice(1);
+        let displayName = item.item.charAt(0).toUpperCase() + item.item.slice(1);
         const isAsNeeded = amtStr === 'as needed';
-        const qtyPrefix = (!isAsNeeded && amtStr) ? `<span style="color:var(--text-2);font-weight:500;margin-right:6px">${amtStr}</span>` : '';
+        // If the unit in amtStr is just the item name itself (e.g. "2 cucumbers Cucumber"),
+        // strip it from amtStr and use the correctly pluralized item name as displayName.
+        if (!isAsNeeded && amtStr) {
+          const itemLower = item.item.toLowerCase();
+          const labelPart = amtStr.replace(/^[~≈\d\s¼½¾⅛⅓⅔.]+/, '').trim().toLowerCase();
+          if (labelPart && (labelPart === itemLower || labelPart === itemLower + 's')) {
+            const labelRe = new RegExp('\\s*' + labelPart.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i');
+            amtStr = amtStr.replace(labelRe, '').trim();
+            displayName = labelPart.charAt(0).toUpperCase() + labelPart.slice(1);
+          }
+        }
+        const qtyPrefix = (!isAsNeeded && amtStr) ? `<span style="color:var(--text-2);font-weight:700;margin-right:6px">${amtStr}</span>` : '';
         const sourceLine = (isAsNeeded ? 'as needed' + (item.meals.length ? ' · ' : '') : '') + item.meals.join(', ');
         return `
         <div class="grocery-item" id="gi-${i}">
