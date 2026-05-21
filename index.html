@@ -3780,14 +3780,42 @@ function pwToggleCuisine(cuisine) {
   }
 }
 
-function pwToggleMeal(meal) {
-  const btn = document.getElementById(`pw-toggle-${meal}`);
+function pwToggleDayMeal(meal, dayIdx) {
+  const btn = document.getElementById(`pw-toggle-${meal}-${dayIdx}`);
   if (!btn) return;
   const nowActive = btn.dataset.active !== 'true';
   btn.dataset.active = String(nowActive);
   btn.style.borderColor = nowActive ? 'var(--primary)' : 'var(--border)';
   btn.style.background  = nowActive ? 'var(--primary)' : 'var(--surface-2)';
   btn.style.color       = nowActive ? '#fff' : 'var(--text-2)';
+}
+
+function pwCopyDayToAll(srcIdx) {
+  const meals = ['breakfast', 'lunch', 'dinner'];
+  const srcData = {
+    breakfast: document.getElementById(`pw-toggle-breakfast-${srcIdx}`)?.dataset.active === 'true',
+    lunch:     document.getElementById(`pw-toggle-lunch-${srcIdx}`)?.dataset.active === 'true',
+    dinner:    document.getElementById(`pw-toggle-dinner-${srcIdx}`)?.dataset.active === 'true',
+    snacks:    document.getElementById(`pw-snacks-${srcIdx}`)?.value || '0',
+    desserts:  document.getElementById(`pw-desserts-${srcIdx}`)?.value || '0',
+  };
+  for (let i = 0; i < 7; i++) {
+    if (i === srcIdx) continue;
+    meals.forEach(meal => {
+      const btn = document.getElementById(`pw-toggle-${meal}-${i}`);
+      if (!btn) return;
+      const active = srcData[meal];
+      btn.dataset.active = String(active);
+      btn.style.borderColor = active ? 'var(--primary)' : 'var(--border)';
+      btn.style.background  = active ? 'var(--primary)' : 'var(--surface-2)';
+      btn.style.color       = active ? '#fff' : 'var(--text-2)';
+    });
+    const snkEl = document.getElementById(`pw-snacks-${i}`);
+    if (snkEl) snkEl.value = srcData.snacks;
+    const desEl = document.getElementById(`pw-desserts-${i}`);
+    if (desEl) desEl.value = srcData.desserts;
+  }
+  showToast('Copied to all days');
 }
 
 function showPlanWeekModal() {
@@ -3825,6 +3853,31 @@ function showPlanWeekModal() {
   const headerStyle = 'display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;user-select:none;background:var(--surface-2)';
   const arrowStyle = 'font-size:12px;transition:transform .2s;display:inline-block';
 
+  const PW_DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const _pwMealBtn = (meal, active, i) => {
+    const label = meal === 'breakfast' ? 'Brk' : meal === 'lunch' ? 'Lun' : 'Din';
+    const bc = active ? 'var(--primary)' : 'var(--border)';
+    const bg = active ? 'var(--primary)' : 'var(--surface-2)';
+    const col = active ? '#fff' : 'var(--text-2)';
+    return `<button id="pw-toggle-${meal}-${i}" onclick="pwToggleDayMeal('${meal}',${i})" data-active="${active}" style="border:1px solid ${bc};background:${bg};color:${col};border-radius:12px;padding:3px 8px;font-size:11px;font-weight:500;cursor:pointer;transition:all .15s">${label}</button>`;
+  };
+  const dayRows = dates.map((d, i) => `
+    <div style="display:grid;grid-template-columns:34px 1fr 1fr 1fr 56px 56px 24px;gap:4px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border-faint,rgba(0,0,0,.05))">
+      <span style="font-size:12px;font-weight:600;color:var(--text-1)">${PW_DAY_NAMES[i]}</span>
+      ${_pwMealBtn('breakfast', defBrk, i)}
+      ${_pwMealBtn('lunch', true, i)}
+      ${_pwMealBtn('dinner', true, i)}
+      <div style="display:flex;align-items:center;gap:3px">
+        <span style="font-size:10px;color:var(--text-3)">Snk</span>
+        <input type="number" id="pw-snacks-${i}" value="${defSnacks}" min="0" max="5" style="width:30px;padding:2px;font-size:12px;text-align:center;border:1px solid var(--border);border-radius:4px;background:var(--surface-2);color:var(--text-1)">
+      </div>
+      <div style="display:flex;align-items:center;gap:3px">
+        <span style="font-size:10px;color:var(--text-3)">Des</span>
+        <input type="number" id="pw-desserts-${i}" value="${defDesserts}" min="0" max="3" style="width:30px;padding:2px;font-size:12px;text-align:center;border:1px solid var(--border);border-radius:4px;background:var(--surface-2);color:var(--text-1)">
+      </div>
+      <button onclick="pwCopyDayToAll(${i})" title="Copy to all days" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;padding:0;line-height:1">⤓</button>
+    </div>`).join('');
+
   document.getElementById('plan-week-modal')?.remove();
   const html = `<div class="modal-overlay" id="plan-week-modal" onclick="if(event.target.id==='plan-week-modal')this.remove()">
     <div class="modal-sheet" style="max-height:90vh;overflow-y:auto">
@@ -3857,30 +3910,21 @@ function showPlanWeekModal() {
 
       <div style="${sectionStyle}">
         <div style="${headerStyle}" onclick="pwToggleSection('pw-structure')">
-          <span style="font-size:13px;font-weight:600">Meals per day <span style="font-size:11px;font-weight:400;color:var(--text-3)">(daily structure)</span></span>
+          <span style="font-size:13px;font-weight:600">Meals per day <span style="font-size:11px;font-weight:400;color:var(--text-3)">(per day)</span></span>
           <span id="pw-structure-arrow" style="${arrowStyle};transform:rotate(180deg)">▼</span>
         </div>
-        <div id="pw-structure-body" style="padding:12px 14px">
-          <div style="margin-bottom:12px">
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Main meals to include each day:</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button id="pw-toggle-breakfast" onclick="pwToggleMeal('breakfast')" data-active="${defBrk}" style="border:1px solid ${defBrk ? 'var(--primary)' : 'var(--border)'};background:${defBrk ? 'var(--primary)' : 'var(--surface-2)'};color:${defBrk ? '#fff' : 'var(--text-2)'};border-radius:20px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s">Breakfast</button>
-              <button id="pw-toggle-lunch" onclick="pwToggleMeal('lunch')" data-active="true" style="border:1px solid var(--primary);background:var(--primary);color:#fff;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s">Lunch</button>
-              <button id="pw-toggle-dinner" onclick="pwToggleMeal('dinner')" data-active="true" style="border:1px solid var(--primary);background:var(--primary);color:#fff;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s">Dinner</button>
-            </div>
+        <div id="pw-structure-body" style="padding:10px 14px">
+          <div style="display:grid;grid-template-columns:34px 1fr 1fr 1fr 56px 56px 24px;gap:4px;margin-bottom:2px">
+            <div></div>
+            <div style="font-size:10px;color:var(--text-3);text-align:center">Breakfast</div>
+            <div style="font-size:10px;color:var(--text-3);text-align:center">Lunch</div>
+            <div style="font-size:10px;color:var(--text-3);text-align:center">Dinner</div>
+            <div style="font-size:10px;color:var(--text-3);text-align:center">Snacks</div>
+            <div style="font-size:10px;color:var(--text-3);text-align:center">Desserts</div>
+            <div></div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div class="macro-field">
-              <label style="font-size:10px">Snacks / day</label>
-              <input type="number" id="pw-snacks-per-day" value="${defSnacks}" min="0" max="5" style="font-size:18px">
-              <div class="unit">per day</div>
-            </div>
-            <div class="macro-field">
-              <label style="font-size:10px">Desserts / day</label>
-              <input type="number" id="pw-desserts-per-day" value="${defDesserts}" min="0" max="3" style="font-size:18px">
-              <div class="unit">per day</div>
-            </div>
-          </div>
+          ${dayRows}
+          <div style="font-size:11px;color:var(--text-3);margin-top:8px">Tap ⤓ to copy a day's setup to all days.</div>
         </div>
       </div>
 
@@ -3952,19 +3996,19 @@ function submitPlanWeek() {
       if (!isNaN(v)) mealCounts[cat] = Math.max(1, Math.min(7, v));
     }
   });
-  const slotStructure = {
-    breakfast: document.getElementById('pw-toggle-breakfast')?.dataset.active === 'true',
-    lunch:     document.getElementById('pw-toggle-lunch')?.dataset.active === 'true',
-    dinner:    document.getElementById('pw-toggle-dinner')?.dataset.active === 'true',
-    snacks:    Math.max(0, Math.min(5, parseInt(document.getElementById('pw-snacks-per-day')?.value) || 0)),
-    desserts:  Math.max(0, Math.min(3, parseInt(document.getElementById('pw-desserts-per-day')?.value) || 0))
-  };
+  const perDayStructures = Array.from({length: 7}, (_, i) => ({
+    breakfast: document.getElementById(`pw-toggle-breakfast-${i}`)?.dataset.active === 'true',
+    lunch:     document.getElementById(`pw-toggle-lunch-${i}`)?.dataset.active === 'true',
+    dinner:    document.getElementById(`pw-toggle-dinner-${i}`)?.dataset.active === 'true',
+    snacks:    Math.max(0, Math.min(5, parseInt(document.getElementById(`pw-snacks-${i}`)?.value) || 0)),
+    desserts:  Math.max(0, Math.min(3, parseInt(document.getElementById(`pw-desserts-${i}`)?.value) || 0))
+  }));
   document.getElementById('plan-week-modal').remove();
-  planWholeWeek({ targets, ingredientsToUse, cuisinePrefs, mealCounts, slotStructure });
+  planWholeWeek({ targets, ingredientsToUse, cuisinePrefs, mealCounts, perDayStructures });
 }
 
 async function planWholeWeek(opts = {}) {
-  const { targets: customTargets, ingredientsToUse = '', cuisinePrefs = [], mealCounts = {}, slotStructure } = opts;
+  const { targets: customTargets, ingredientsToUse = '', cuisinePrefs = [], mealCounts = {}, slotStructure, perDayStructures } = opts;
   // Save snapshot before making any changes so the X button can revert
   _planWeekSnapshot = JSON.parse(JSON.stringify(STATE.dailyPlans));
   const targets = customTargets || STATE.profile;
@@ -3973,9 +4017,10 @@ async function planWholeWeek(opts = {}) {
   const dates = getWeekDates();
 
   // Rebuild each day's slots to match the requested structure before filling
-  if (slotStructure) {
-    const { breakfast, lunch, dinner, snacks, desserts } = slotStructure;
-    dates.forEach(d => {
+  if (perDayStructures || slotStructure) {
+    dates.forEach((d, idx) => {
+      const struct = perDayStructures ? perDayStructures[idx] : slotStructure;
+      const { breakfast, lunch, dinner, snacks, desserts } = struct;
       const plan = getOrCreatePlan(d);
       const pool = [...plan.slots];
       const take = cat => {
