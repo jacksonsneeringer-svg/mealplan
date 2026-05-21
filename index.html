@@ -1864,6 +1864,225 @@ const IMAC_UNIT = {
   'stalks':      [6, 0.3, 1.1, 0.1],  // celery stalks (plural)
 };
 
+// ─── Kitchen measurement conversions ───────────────────────────────────────
+// Maps ingredient name → [kitchen_unit, grams_or_ml_per_one_kitchen_unit]
+// Factors are in grams for solid ingredients, ml for liquids (density ≈1 for broth/milk/juice)
+const ING_KITCHEN = {
+  // Grains & starches (per cup dry, unless noted)
+  'rolled oats':['cup',90],'oats':['cup',90],'oat flour':['cup',100],
+  'white rice':['cup',185],'brown rice':['cup',190],'jasmine rice':['cup',185],
+  'basmati rice':['cup',185],'white or brown rice':['cup',188],'quinoa':['cup',185],
+  'pasta':['cup',100],'penne pasta':['cup',100],'whole wheat pasta':['cup',100],
+  'soba noodles':['cup',85],'egg noodles':['cup',85],'rice noodles':['cup',90],
+  'linguine':['cup',100],'spaghetti':['cup',100],
+  'flour':['cup',125],'whole wheat flour':['cup',120],
+  'breadcrumbs':['cup',120],'whole wheat breadcrumbs':['cup',120],
+  'granola':['cup',122],'low-sugar granola':['cup',122],
+  'cornstarch':['tbsp',8],'baking powder':['tsp',4],'vanilla extract':['tsp',4],
+  'sugar':['cup',200],'brown sugar':['cup',220],'cocoa powder':['tbsp',8],
+  'cocoa':['tbsp',8],'chia seeds':['tbsp',10],'coconut flakes':['cup',80],
+  'sesame seeds':['tbsp',9],'dark chocolate chips':['cup',170],'chocolate chips':['cup',170],
+  'protein powder':['scoop',30],'protein powder (vanilla)':['scoop',30],
+  'red lentils':['cup',192],'red lentils (dry)':['cup',192],'lentils':['cup',192],
+  // Dairy
+  'greek yogurt':['cup',245],'non-fat greek yogurt':['cup',245],
+  'cottage cheese':['cup',225],'low-fat cottage cheese':['cup',225],
+  'milk':['cup',245],'low-fat milk':['cup',245],'water or milk':['cup',245],
+  'almond milk':['cup',240],'unsweetened almond milk':['cup',240],
+  'oat milk':['cup',240],'soy milk':['cup',240],
+  'heavy cream':['cup',238],'heavy cream or coconut milk':['cup',238],
+  'butter':['tbsp',14],'cream cheese':['tbsp',14],
+  'shredded cheese':['cup',113],'cheddar':['cup',113],
+  'reduced-fat cheddar':['cup',113],'cheddar cheese':['cup',113],
+  'reduced-fat cheddar cheese, shredded':['cup',113],'cheddar cheese, shredded':['cup',113],
+  'mozzarella':['cup',113],'part-skim mozzarella':['cup',113],
+  'fresh mozzarella pearls':['cup',113],'reduced-fat mexican cheese blend':['cup',113],
+  'parmesan':['cup',100],'parmesan cheese':['cup',100],'parmesan cheese, grated':['cup',100],
+  'feta':['cup',150],'feta cheese':['cup',150],
+  'ricotta':['cup',246],'part-skim ricotta':['cup',246],
+  'swiss cheese':['oz',28],'provolone cheese':['oz',28],
+  // Proteins (in oz — still human-scale; you buy meat by weight)
+  'chicken breast':['oz',28.35],'ground beef':['oz',28.35],
+  'ground turkey':['oz',28.35],'salmon fillet':['oz',28.35],'salmon':['oz',28.35],
+  'canned tuna in water':['oz',28.35],'tuna':['oz',28.35],
+  'shrimp':['oz',28.35],'large shrimp, peeled':['oz',28.35],
+  'deli turkey breast':['oz',28.35],'turkey breakfast sausage':['oz',28.35],
+  'sirloin or flank steak':['oz',28.35],'flank steak or sirloin, thinly sliced':['oz',28.35],
+  'bone-in chicken thighs':['oz',28.35],'ground chicken':['oz',28.35],
+  'pork tenderloin':['oz',28.35],'smoked salmon':['oz',28.35],
+  'cod fillet':['oz',28.35],'sushi-grade ahi tuna':['oz',28.35],
+  'sirloin steak':['oz',28.35],'baby back ribs':['oz',28.35],
+  'shaved beef or sirloin, thinly sliced':['oz',28.35],
+  'turkey bacon':['oz',28.35],'salami slices':['oz',28.35],
+  'deli turkey and ham':['oz',28.35],'turkey ham':['oz',28.35],
+  'ground pork or pork loin, diced':['oz',28.35],'rack of lamb':['oz',28.35],
+  'duck confit leg':['oz',28.35],'lobster tail':['oz',28.35],
+  // Whole produce — show as fraction-of-one for recipe display; grocery list uses count via toGroceryQuantity
+  'avocado':['each',150],'ripe avocado':['each',150],
+  'banana':['each',120],'frozen banana':['each',120],
+  'apple':['each',180],'orange':['each',180],
+  'bell pepper':['each',150],'bell peppers':['each',150],
+  'onion':['each',150],'red onion':['each',150],
+  'sweet potato':['each',200],'potato':['each',150],'baby potatoes, halved':['each',40],
+  'tomato':['each',120],'cucumber':['each',200],'zucchini':['each',200],
+  'carrot':['each',80],'broccoli':['each',350],'cauliflower':['each',600],
+  'jalapeño':['each',15],'lime':['each',60],'lemon':['each',80],
+  'mango':['each',200],'fresh mango':['each',200],
+  'kiwi':['each',70],'kiwi, sliced':['each',70],
+  // Produce measured in cups
+  'baby spinach':['cup',30],'spinach':['cup',30],'arugula':['cup',20],
+  'arugula or spinach':['cup',25],'mixed greens':['cup',20],
+  'mixed salad greens':['cup',20],'romaine lettuce':['cup',47],'romaine':['cup',47],
+  'shredded lettuce':['cup',47],'shredded cabbage':['cup',89],
+  'coleslaw mix':['cup',70],'butter lettuce leaves':['cup',55],
+  'cherry tomatoes':['cup',170],'broccoli florets':['cup',91],
+  'cauliflower florets':['cup',107],'cauliflower rice':['cup',107],
+  'mushrooms':['cup',70],'mushrooms, sliced':['cup',70],
+  'snap peas':['cup',98],'green beans':['cup',100],
+  'frozen peas':['cup',145],'frozen peas and carrots':['cup',130],
+  'frozen edamame in shell':['cup',120],'edamame':['cup',120],'edamame, shelled':['cup',120],
+  'corn':['cup',154],'asparagus':['cup',134],
+  'mixed berries':['cup',150],'fresh berries':['cup',150],'frozen mixed berries':['cup',150],
+  'blueberries':['cup',148],'strawberries':['cup',152],'strawberries, sliced':['cup',152],
+  'frozen mango chunks':['cup',165],'pineapple chunks':['cup',165],
+  'pineapple or peach chunks':['cup',165],'grapes':['cup',151],
+  'dried cranberries':['cup',145],'raisins or dried cranberries':['cup',145],
+  'dried fruit':['cup',145],'mixed nuts':['cup',146],
+  'raw almonds':['cup',143],'almonds':['cup',143],
+  'cashews':['cup',130],'walnuts, chopped':['cup',120],
+  'pecans, chopped':['cup',108],'pumpkin seeds':['cup',130],
+  // Beans / legumes (canned, drained)
+  'black beans':['cup',170],'black beans (canned)':['cup',170],
+  'black beans (canned, drained)':['cup',170],
+  'chickpeas':['cup',170],'chickpeas (canned, drained)':['cup',170],
+  'cannellini beans':['cup',170],'pinto beans':['cup',170],
+  // Condiments & sauces
+  'olive oil':['tbsp',14],'sesame oil':['tbsp',14],
+  'vegetable oil':['tbsp',14],'coconut oil':['tbsp',14],
+  'soy sauce':['tbsp',15],'low-sodium soy sauce':['tbsp',15],
+  'low-sodium soy sauce or worcestershire':['tbsp',15],
+  'fish sauce':['tbsp',15],'fish sauce or soy sauce':['tbsp',15],
+  'oyster sauce':['tbsp',16],'hoisin sauce':['tbsp',16],
+  'teriyaki sauce':['tbsp',18],'mirin or rice vinegar':['tbsp',15],
+  'honey':['tbsp',21],'maple syrup':['tbsp',20],
+  'almond butter':['tbsp',16],'natural peanut butter':['tbsp',16],
+  'peanut butter':['tbsp',16],'tahini':['tbsp',15],'hummus':['tbsp',16],
+  'salsa':['cup',260],'marinara sauce':['cup',250],'marinara or tomato sauce':['cup',250],
+  'light caesar dressing':['tbsp',15],'italian dressing':['tbsp',15],
+  'dijon mustard':['tsp',5],'light mayo':['tbsp',14],
+  'lemon juice':['tbsp',15],'lime juice':['tbsp',15],'fresh lime juice':['tbsp',15],
+  'red wine vinegar':['tbsp',15],'white wine vinegar':['tbsp',15],
+  'apple cider vinegar':['tbsp',15],'balsamic glaze':['tbsp',18],
+  'sriracha':['tbsp',16],'bbq sauce':['tbsp',17],'gochujang sauce':['tbsp',17],
+  'white miso paste':['tbsp',17],'capers':['tbsp',9],
+  'pumpkin puree':['cup',245],'pumpkin puree (canned)':['cup',245],
+  'light whipped cream':['cup',60],'heavy cream':['cup',238],
+  'diced tomatoes (canned)':['cup',240],'canned diced tomatoes':['cup',240],
+  // Broths & liquid bases (ml per cup)
+  'low-sodium chicken broth':['cup',240],'low-sodium broth':['cup',240],
+  'white wine or chicken broth':['cup',240],'coconut milk':['cup',240],
+  'white wine':['cup',240],'red wine':['cup',240],
+};
+
+// Return kitchen unit info for an ingredient, or null if already human-readable or unmeasurable
+function getKitchenInfo(ingItem, unit) {
+  // Count-based units (egg, slice, clove, etc.) are already natural human units
+  if (unit && unit !== 'g' && unit !== 'ml' && IMAC_UNIT[unit]) return null;
+  // Spices/seasonings measured "as needed"
+  const n = ingItem.toLowerCase().replace(/\s*\([^)]*\)/g,'').trim();
+  if (/\b(salt|pepper(?! flake)|paprika(?! —)|cumin|oregano|thyme(?! and)|rosemary(?! or)|basil(?! leaves)|seasoning|garlic powder|onion powder|chili powder|curry|cayenne|turmeric|nutmeg|cardamom|coriander|allspice|smoked paprika|red pepper flake|taco seasoning|black pepper|white pepper|italian herb|italian seasoning)\b/.test(n)) return null;
+  // Name-based lookup with fallbacks (mirrors IMAC lookup strategy)
+  const key = n;
+  let e = ING_KITCHEN[key]
+       || ING_KITCHEN[key.split(',')[0].trim()]
+       || ING_KITCHEN[key.split(' ').slice(0,3).join(' ')]
+       || ING_KITCHEN[key.split(' ').slice(0,2).join(' ')]
+       || ING_KITCHEN[key.split(' ')[0]];
+  if (e) return { unit: e[0], factor: e[1] };
+  // Pattern-based fallbacks for common categories
+  if (/chicken(?! broth)|ground\s+(beef|turkey|pork|chicken)|salmon(?! oil)|shrimp|cod|tilapia|halibut|mahi|tuna|steak|sirloin|flank|tenderloin|pork(?! rinds)|lamb|duck|lobster|ribs|turkey\s+(breast|bacon|sausage|ham)|beef(?! broth)/.test(n)) return { unit:'oz', factor:28.35 };
+  if (/\boil\b/.test(n)) return { unit:'tbsp', factor:14 };
+  if (/vinegar/.test(n)) return { unit:'tbsp', factor:15 };
+  if (/broth|stock/.test(n)) return { unit:'cup', factor:240 };
+  if (/milk\b/.test(n)) return { unit:'cup', factor:240 };
+  if (/\bsauce\b/.test(n)) return { unit:'tbsp', factor:16 };
+  if (/\brice\b/.test(n) && !/cauliflower/.test(n)) return { unit:'cup', factor:185 };
+  if (/pasta|noodle|spaghetti|linguine|penne|fettuccine/.test(n)) return { unit:'cup', factor:100 };
+  return null;
+}
+
+// Round n to nearest common kitchen fraction and return as Unicode string
+function fmtFraction(n) {
+  const snaps = [[0,''],[1/8,'⅛'],[1/4,'¼'],[1/3,'⅓'],[1/2,'½'],[2/3,'⅔'],[3/4,'¾'],[7/8,'⅞'],[1,'']];
+  const whole = Math.floor(n);
+  const rem = n - whole;
+  let bestFrac = '', bestDiff = Infinity, carry = 0;
+  for (const [val,sym] of snaps) {
+    const d = Math.abs(rem - val);
+    if (d < bestDiff) { bestDiff = d; bestFrac = sym; carry = val === 1 ? 1 : 0; }
+  }
+  const w = whole + carry;
+  if (w === 0) return bestFrac || '0';
+  return bestFrac ? `${w}${bestFrac}` : `${w}`;
+}
+
+// Format an accumulated kitchen-unit amount as a readable string
+function fmtKitchenAmt(amount, unit, label) {
+  if (!amount || amount < 0.02) return null;
+  if (unit === 'cup') {
+    if (amount < 0.08) return null;
+    const pl = amount >= 1.875 ? 'cups' : 'cup';
+    return `${fmtFraction(amount)} ${pl}`;
+  }
+  if (unit === 'tbsp') {
+    if (amount < 0.2) {
+      const tsp = amount * 3;
+      if (tsp < 0.1) return null;
+      return `${fmtFraction(tsp)} tsp`;
+    }
+    return `${fmtFraction(amount)} tbsp`;
+  }
+  if (unit === 'tsp') {
+    if (amount < 0.1) return null;
+    return `${fmtFraction(amount)} tsp`;
+  }
+  if (unit === 'oz') {
+    const lbs = amount / 16;
+    if (lbs <= 0.2)  return `~${Math.round(amount)} oz`;
+    if (lbs <= 0.33) return '~¼ lb';
+    if (lbs <= 0.6)  return '~½ lb';
+    if (lbs <= 0.85) return '~¾ lb';
+    if (lbs <= 1.15) return '~1 lb';
+    if (lbs <= 1.6)  return '~1½ lb';
+    if (lbs <= 2.1)  return '~2 lb';
+    return `~${Math.round(lbs)} lb`;
+  }
+  if (unit === 'scoop') {
+    const sc = Math.ceil(amount);
+    return `${sc} scoop${sc !== 1 ? 's' : ''}`;
+  }
+  if (unit === 'each') {
+    if (amount >= 0.875) {
+      const ct = Math.ceil(amount);
+      const lbl = label || 'piece';
+      return `${ct} ${lbl}${ct !== 1 && !lbl.endsWith('s') ? 's' : ''}`;
+    }
+    const frac = fmtFraction(amount);
+    return `${frac} ${label || 'of one'}`;
+  }
+  return null;
+}
+
+// Convert a raw ingredient to a kitchen measure string (for recipe display)
+function toKitchenMeasure(ingItem, amount, unit) {
+  const kinfo = getKitchenInfo(ingItem, unit);
+  if (!kinfo) return null;
+  const label = kinfo.unit === 'each'
+    ? ingItem.toLowerCase().replace(/,.*$/,'').replace(/\s*\([^)]*\)/g,'').trim()
+    : undefined;
+  return fmtKitchenAmt(amount / kinfo.factor, kinfo.unit, label);
+}
+
 function ingMacros(ing, scale) {
   const n = ing.amount * scale;
   const u = ing.unit;
@@ -1902,7 +2121,8 @@ function fmtAmt(n, u) {
 // ─── Scale a single ingredient — returns display object with macros ───
 function scaleIngredient(ing, scale) {
   const m = ingMacros(ing, scale);
-  return { item: ing.item, amount: fmtAmt(ing.amount * scale, ing.unit), ...( m || {}) };
+  const km = toKitchenMeasure(ing.item, ing.amount * scale, ing.unit);
+  return { item: ing.item, amount: fmtAmt(ing.amount * scale, ing.unit), unit: ing.unit, kitchenAmt: km, ...( m || {}) };
 }
 
 // ─── Compute recipe base macros from ingredient lookup table ───
@@ -2648,10 +2868,11 @@ function renderRecipeCard(meal, slotId) {
       <ul class="ingredient-list">
         ${meal.ingredients.map(ing => {
           const hasMacros = ing.cal !== undefined;
+          const kmStr = ing.kitchenAmt ? `<span style="color:var(--text-3);font-weight:400;margin-left:4px">· ${ing.kitchenAmt}</span>` : '';
           return `<li>
             <div class="ing-row">
               <span class="ing-name">${ing.item}</span>
-              <span class="ingredient-amount">${ing.amount}</span>
+              <span class="ingredient-amount">${ing.amount}${kmStr}</span>
             </div>
             ${hasMacros ? `<div class="ing-macros">
               <span class="ing-mac-chip imc-cal">${IC.flame} ${ing.cal} cal</span>
@@ -4057,10 +4278,17 @@ function renderGroceryList(dates) {
     split.forEach(ing => {
       const canonical = canonicalizeIngredient(ing.item);
       const key = canonical.toLowerCase();
-      if (!grouped[key]) grouped[key] = { item: canonical, amounts: {}, meals: [] };
+      if (!grouped[key]) grouped[key] = { item: canonical, amounts: {}, kitchenAmts: {}, meals: [] };
       const unit = ing.unit || '';
       if (!grouped[key].amounts[unit]) grouped[key].amounts[unit] = 0;
-      grouped[key].amounts[unit] += parseFloat(ing.amount) || 0;
+      const rawAmt = parseFloat(ing.amount) || 0;
+      grouped[key].amounts[unit] += rawAmt;
+      // Accumulate kitchen-unit totals (skip count-based and 'each' produce — handled by toGroceryQuantity)
+      const kinfo = getKitchenInfo(ing.item, unit);
+      if (kinfo && kinfo.unit !== 'each' && rawAmt > 0) {
+        if (!grouped[key].kitchenAmts[kinfo.unit]) grouped[key].kitchenAmts[kinfo.unit] = 0;
+        grouped[key].kitchenAmts[kinfo.unit] += rawAmt / kinfo.factor;
+      }
       const useLabel = `${ing.day} – ${ing.meal}`;
       if (!grouped[key].meals.includes(useLabel)) grouped[key].meals.push(useLabel);
     });
@@ -4214,7 +4442,17 @@ function renderGroceryList(dates) {
       </div>
       ${byCategory[cat].map(item => {
         const i = itemIndex++;
-        const amtStr = toGroceryQuantity(item.item, item.amounts, item.category);
+        // Prefer kitchen-unit totals (cups, tbsp, oz) over abstract store sizes
+        let amtStr;
+        if (item.kitchenAmts && Object.keys(item.kitchenAmts).length > 0) {
+          const parts = Object.entries(item.kitchenAmts)
+            .filter(([,v]) => v > 0.04)
+            .map(([u,v]) => fmtKitchenAmt(v, u))
+            .filter(Boolean);
+          amtStr = parts.length > 0 ? parts.join(' + ') : toGroceryQuantity(item.item, item.amounts, item.category);
+        } else {
+          amtStr = toGroceryQuantity(item.item, item.amounts, item.category);
+        }
         const displayName = item.item.charAt(0).toUpperCase() + item.item.slice(1);
         const isAsNeeded = amtStr === 'as needed';
         const qtyPrefix = (!isAsNeeded && amtStr) ? `<span style="color:var(--text-2);font-weight:500;margin-right:6px">${amtStr}</span>` : '';
