@@ -251,6 +251,9 @@ a{color:inherit;text-decoration:none}
 .badge-gray{background:var(--surface-2);color:var(--text-2)}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;z-index:999;animation:toastIn .3s ease;white-space:nowrap}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes savedPulse{0%{box-shadow:0 0 0 0 rgba(22,163,74,.45)}70%{box-shadow:0 0 0 8px rgba(22,163,74,0)}100%{box-shadow:0 0 0 0 rgba(22,163,74,0)}}
+.btn-week-saved{background:#16a34a!important;color:#fff!important;border-color:#16a34a!important}
+.btn-week-saved-pulse{animation:savedPulse 1.2s ease-out}
 
 /* ── Responsive ── */
 @media(min-width:500px){.week-grid{grid-template-columns:repeat(4,1fr)}.form-row{grid-template-columns:1fr 1fr 1fr}}
@@ -3392,6 +3395,7 @@ let weekState = { activeDay: null, groceryMode: false };
 let pwIngredientsList = [];
 let pwSelectedCuisines = [];
 let _planWeekSnapshot = null;
+let _weekPlanSaved = false;
 let pwImportedMealIds = new Set();
 
 function renderWeek() {
@@ -3406,7 +3410,7 @@ function renderWeek() {
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
         <button class="btn btn-secondary btn-sm" onclick="resetWeeklyPlan()" style="color:#ef4444;border-color:#fecaca">${IC.refresh} Reset week</button>
-        <button class="btn btn-secondary btn-sm" onclick="saveAsWeeklyTemplate()">${IC.bookmark} Save as template</button>
+        <button class="btn btn-secondary btn-sm${_weekPlanSaved ? ' btn-week-saved' : ''}" id="save-meal-plan-btn" onclick="saveMealPlan()">${_weekPlanSaved ? '✓ Saved' : `${IC.bookmark} Save meal plan`}</button>
         <button class="btn btn-secondary btn-sm" onclick="showPlanWeekModal()" id="plan-week-btn">${IC.sparkle} Plan Week</button>
       </div>
     </div>
@@ -3497,8 +3501,7 @@ function renderWeekDayDetail(dateStr) {
         </div>
         <div style="display:flex;gap:4px;flex-shrink:0">
           ${slot.meal ? `
-            <button class="btn btn-secondary btn-sm" id="wgen-${slot.id}" onclick="weekGenerateSlot('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px" title="Regenerate">${IC.sparkle}</button>
-            <button class="btn btn-secondary btn-sm" onclick="weekShowUseSaved('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px" title="Add from saved">${IC.bookmark} Saved</button>
+            <button class="btn btn-secondary btn-sm" onclick="showWeekSlotReplaceMenu(this,'${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px">⟳ Replace</button>
             <button class="btn btn-danger btn-sm" onclick="clearWeekSlot('${dateStr}','${slot.id}')" style="padding:4px 7px">✕</button>
           ` : `
             <button class="btn btn-secondary btn-sm" id="wgen-${slot.id}" onclick="weekGenerateSlot('${dateStr}','${slot.id}')" style="font-size:11px;padding:4px 7px">${IC.sparkle} Generate</button>
@@ -3523,7 +3526,7 @@ function selectWeekDay(dateStr) {
 function clearWeekSlot(dateStr, slotId) {
   const plan = STATE.dailyPlans[dateStr];
   const slot = plan?.slots.find(s=>s.id===slotId);
-  if (slot) { slot.meal = null; saveState(); render(); }
+  if (slot) { slot.meal = null; _weekPlanSaved = false; saveState(); render(); }
 }
 
 function weekAddSlot(dateStr, type) {
@@ -3532,6 +3535,7 @@ function weekAddSlot(dateStr, type) {
   const count = plan.slots.filter(s => s.category === cat || s.type === type).length + 1;
   const label = type === 'snack' ? `Snack ${count}` : `Meal ${count}`;
   plan.slots.push({ id: uid(), type, category: cat, label, preference: '', meal: null, open: false, seenNames: [] });
+  _weekPlanSaved = false;
   saveState();
   render();
 }
@@ -3580,6 +3584,7 @@ async function weekGenerateSlot(dateStr, slotId) {
       excludeNames: weekExclude
     });
     slot.meal = recipe;
+    _weekPlanSaved = false;
     saveState();
     render();
   } catch(e) {
@@ -3638,6 +3643,7 @@ function weekUseSavedMeal(dateStr, slotId, mealId) {
   const meal = STATE.savedMeals.find(m => m.id === mealId);
   if (!slot || !meal) return;
   slot.meal = { ...meal };
+  _weekPlanSaved = false;
   saveState();
   document.getElementById('week-saved-modal')?.remove();
   render();
@@ -4306,6 +4312,48 @@ function discardWeekPlan() {
   document.getElementById('week-plan-summary-modal')?.remove();
 }
 
+function applyAndSaveWeekPlan() {
+  saveAsWeeklyTemplate();
+  _weekPlanSaved = true;
+  document.getElementById('week-plan-summary-modal').remove();
+  render();
+  setTimeout(() => {
+    const btn = document.getElementById('save-meal-plan-btn');
+    if (btn) btn.classList.add('btn-week-saved-pulse');
+  }, 50);
+}
+
+function saveMealPlan() {
+  saveAsWeeklyTemplate();
+  _weekPlanSaved = true;
+  render();
+  setTimeout(() => {
+    const btn = document.getElementById('save-meal-plan-btn');
+    if (btn) btn.classList.add('btn-week-saved-pulse');
+  }, 50);
+}
+
+function showWeekSlotReplaceMenu(btn, dateStr, slotId) {
+  document.getElementById('week-replace-menu')?.remove();
+  const rect = btn.getBoundingClientRect();
+  const top = rect.bottom + window.scrollY + 4;
+  const right = window.innerWidth - rect.right;
+  const hasSaved = STATE.savedMeals.length > 0;
+  const html = `<div id="week-replace-menu" style="position:absolute;top:${top}px;right:${right}px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);z-index:2000;min-width:160px;overflow:hidden">
+    <button onclick="document.getElementById('week-replace-menu').remove();weekGenerateSlot('${dateStr}','${slotId}')" style="display:block;width:100%;text-align:left;padding:10px 14px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-1)">↺ Regenerate</button>
+    ${hasSaved ? `<button onclick="document.getElementById('week-replace-menu').remove();weekShowUseSaved('${dateStr}','${slotId}')" style="display:block;width:100%;text-align:left;padding:10px 14px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-1);border-top:1px solid var(--border)">${IC.bookmark} Add from saved</button>` : ''}
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  setTimeout(() => {
+    document.addEventListener('click', function closeMenu(e) {
+      if (!document.getElementById('week-replace-menu')?.contains(e.target)) {
+        document.getElementById('week-replace-menu')?.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+    });
+  }, 10);
+}
+
 function showWeekPlanSummary(results, totalFilled, totalErrors, target, snapshot) {
   target = target || STATE.profile;
   const rows = results.map(r => {
@@ -4331,7 +4379,6 @@ function showWeekPlanSummary(results, totalFilled, totalErrors, target, snapshot
           <span style="font-size:12px;color:var(--text);cursor:pointer;text-decoration:underline;text-decoration-color:var(--border)" onclick="document.getElementById('week-plan-summary-modal').remove();weekState.activeDay='${r.date}';render();setTimeout(()=>showWeekMealDetail('${r.date}','${s.id}'),50)" title="View recipe">${s.meal.name}</span>
           <span style="font-size:11px;color:var(--text-3);margin-left:4px">${s.meal.calories} cal · ${s.meal.protein}g P · ${s.meal.carbs}g C · ${s.meal.fat}g F</span>
         </div>
-        ${STATE.savedMeals.length ? `<button class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 7px;flex-shrink:0" onclick="document.getElementById('week-plan-summary-modal').remove();weekState.activeDay='${r.date}';render();setTimeout(()=>weekShowUseSaved('${r.date}','${s.id}'),50)">${IC.bookmark} Saved</button>` : ''}
       </div>`).join('') : '';
     return `
       <div style="padding:10px 0;border-bottom:1px solid var(--border)">
@@ -4391,7 +4438,7 @@ function showWeekPlanSummary(results, totalFilled, totalErrors, target, snapshot
       </div>
       <div style="margin-bottom:12px">${rows}</div>
       <div class="modal-actions">
-        <button class="btn btn-primary" style="flex:1" onclick="saveAsWeeklyTemplate();document.getElementById('week-plan-summary-modal').remove()">Apply &amp; Save Plan</button>
+        <button class="btn btn-primary" style="flex:1" onclick="applyAndSaveWeekPlan()">Apply &amp; Save Plan</button>
       </div>
     </div>
   </div>`;
@@ -5564,6 +5611,7 @@ function resetWeeklyPlan() {
     STATE.dailyPlans[d] = { slots: defaultSlots(), approved: false, loggedFoods };
   });
   STATE.weeklyTemplate = null;
+  _weekPlanSaved = false;
   saveState();
   render();
   showToast('Weekly plan reset');
