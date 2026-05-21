@@ -3948,7 +3948,13 @@ async function planWholeWeek(opts = {}) {
         carbs:    Math.max(0, targets.carbs    - fixedTotals.carbs),
         fat:      Math.max(0, targets.fat      - fixedTotals.fat)
       };
-      const roughWt = weightedSlotTarget(slots[0].slot, roughRemaining, slots.map(s => s.slot));
+      // Use one day's full slot distribution for weight calculation, not all 7 days of a
+      // single category — otherwise totalWeight is inflated 7x and each pool meal gets
+      // only 1/7 of its correct calorie allocation.
+      const firstDayPlan = getOrCreatePlan(slots[0].dateStr);
+      const firstDayEmptySlots = firstDayPlan.slots.filter(s => !s.meal);
+      const roughWtSlots = firstDayEmptySlots.length > 0 ? firstDayEmptySlots : [slots[0].slot];
+      const roughWt = weightedSlotTarget(slots[0].slot, roughRemaining, roughWtSlots);
       for (let i = 0; i < desired; i++) {
         try {
           const recipe = await generateRecipe({
