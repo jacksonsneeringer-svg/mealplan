@@ -3393,6 +3393,7 @@ let weekState = { activeDay: null, groceryMode: false };
 let pwIngredientsList = [];
 let pwSelectedCuisines = [];
 let _planWeekSnapshot = null;
+let pwImportedMealIds = new Set();
 
 function renderWeek() {
   const dates = getWeekDates();
@@ -3780,6 +3781,11 @@ function pwToggleCuisine(cuisine) {
   }
 }
 
+function pwToggleImportMeal(mealId) {
+  if (pwImportedMealIds.has(mealId)) pwImportedMealIds.delete(mealId);
+  else pwImportedMealIds.add(mealId);
+}
+
 function pwToggleDayMeal(meal, dayIdx) {
   const btn = document.getElementById(`pw-toggle-${meal}-${dayIdx}`);
   if (!btn) return;
@@ -3822,6 +3828,7 @@ function showPlanWeekModal() {
   const p = STATE.profile;
   pwIngredientsList = [];
   pwSelectedCuisines = [];
+  pwImportedMealIds = new Set();
 
   // Compute default slot structure from calorie profile
   const defCal = p.calories;
@@ -3878,6 +3885,30 @@ function showPlanWeekModal() {
       <button onclick="pwCopyDayToAll(${i})" title="Copy to all days" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;padding:0;line-height:1">⤓</button>
     </div>`).join('');
 
+  const _importCatNames = { breakfast: 'Breakfasts', lunch: 'Lunches', dinner: 'Dinners', snack: 'Snacks', dessert: 'Desserts' };
+  const _savedByCategory = {};
+  (STATE.savedMeals || []).forEach(m => {
+    const cat = m.category;
+    if (!cat || !_importCatNames[cat]) return;
+    if (!_savedByCategory[cat]) _savedByCategory[cat] = [];
+    _savedByCategory[cat].push(m);
+  });
+  const _importCatOrder = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert'];
+  const _hasSaved = _importCatOrder.some(c => (_savedByCategory[c] || []).length > 0);
+  const importBodyHtml = _hasSaved
+    ? _importCatOrder.filter(cat => (_savedByCategory[cat] || []).length > 0).map(cat => `
+        <div style="margin-bottom:10px">
+          <div style="font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:4px">${_importCatNames[cat]}</div>
+          ${_savedByCategory[cat].map(m => `
+            <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer">
+              <input type="checkbox" id="pw-import-${m.id}" onchange="pwToggleImportMeal('${m.id}')" style="cursor:pointer;width:14px;height:14px;accent-color:var(--primary)">
+              <span style="font-size:12px;color:var(--text-1);flex:1">${m.name}</span>
+              <span style="font-size:11px;color:var(--text-3);white-space:nowrap">${m.calories} kcal</span>
+            </label>
+          `).join('')}
+        </div>`).join('')
+    : '<span style="font-size:12px;color:var(--text-3);font-style:italic">No saved meals yet. Save meals from your daily or weekly plan to import them here.</span>';
+
   document.getElementById('plan-week-modal')?.remove();
   const html = `<div class="modal-overlay" id="plan-week-modal" onclick="if(event.target.id==='plan-week-modal')this.remove()">
     <div class="modal-sheet" style="max-height:90vh;overflow-y:auto">
@@ -3911,9 +3942,9 @@ function showPlanWeekModal() {
       <div style="${sectionStyle}">
         <div style="${headerStyle}" onclick="pwToggleSection('pw-structure')">
           <span style="font-size:13px;font-weight:600">Meals per day <span style="font-size:11px;font-weight:400;color:var(--text-3)">(per day)</span></span>
-          <span id="pw-structure-arrow" style="${arrowStyle};transform:rotate(180deg)">▼</span>
+          <span id="pw-structure-arrow" style="${arrowStyle}">▼</span>
         </div>
-        <div id="pw-structure-body" style="padding:10px 14px">
+        <div id="pw-structure-body" style="display:none;padding:10px 14px">
           <div style="display:grid;grid-template-columns:34px 1fr 1fr 1fr 56px 56px 24px;gap:4px;margin-bottom:2px">
             <div></div>
             <div style="font-size:10px;color:var(--text-3);text-align:center">Breakfast</div>
@@ -3970,6 +4001,17 @@ function showPlanWeekModal() {
         </div>
       </div>
 
+      <div style="${sectionStyle}">
+        <div style="${headerStyle}" onclick="pwToggleSection('pw-import')">
+          <span style="font-size:13px;font-weight:600">Import saved meals <span style="font-size:11px;font-weight:400;color:var(--text-3)">(optional)</span></span>
+          <span id="pw-import-arrow" style="${arrowStyle}">▼</span>
+        </div>
+        <div id="pw-import-body" style="display:none;padding:12px 14px">
+          <div style="font-size:11px;color:var(--text-3);margin-bottom:10px">Select meals from your saved list to use in this week's plan. Checked meals are added to the generation pool — if you import fewer meals than your variety setting, the rest are AI-generated.</div>
+          ${importBodyHtml}
+        </div>
+      </div>
+
       <div class="modal-actions">
         <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('plan-week-modal').remove()">Cancel</button>
         <button class="btn btn-primary" style="flex:1" onclick="submitPlanWeek()">${IC.sparkle} Generate</button>
@@ -4003,12 +4045,19 @@ function submitPlanWeek() {
     snacks:    Math.max(0, Math.min(5, parseInt(document.getElementById(`pw-snacks-${i}`)?.value) || 0)),
     desserts:  Math.max(0, Math.min(3, parseInt(document.getElementById(`pw-desserts-${i}`)?.value) || 0))
   }));
+  const importedMeals = {};
+  pwImportedMealIds.forEach(id => {
+    const meal = (STATE.savedMeals || []).find(m => m.id === id);
+    if (!meal || !meal.category) return;
+    if (!importedMeals[meal.category]) importedMeals[meal.category] = [];
+    importedMeals[meal.category].push(meal);
+  });
   document.getElementById('plan-week-modal').remove();
-  planWholeWeek({ targets, ingredientsToUse, cuisinePrefs, mealCounts, perDayStructures });
+  planWholeWeek({ targets, ingredientsToUse, cuisinePrefs, mealCounts, perDayStructures, importedMeals });
 }
 
 async function planWholeWeek(opts = {}) {
-  const { targets: customTargets, ingredientsToUse = '', cuisinePrefs = [], mealCounts = {}, slotStructure, perDayStructures } = opts;
+  const { targets: customTargets, ingredientsToUse = '', cuisinePrefs = [], mealCounts = {}, slotStructure, perDayStructures, importedMeals = {} } = opts;
   // Save snapshot before making any changes so the X button can revert
   _planWeekSnapshot = JSON.parse(JSON.stringify(STATE.dailyPlans));
   const targets = customTargets || STATE.profile;
@@ -4057,46 +4106,58 @@ async function planWholeWeek(opts = {}) {
     });
   });
 
-  // Pre-generate meal pools for categories with limited variety
+  // Pre-generate meal pools for categories with limited variety or imported meals
   const mealPools = {};
   for (const [cat, slots] of Object.entries(categorySlots)) {
+    const imported = (importedMeals[cat] || []);
     const desired = mealCounts[cat] != null ? Math.max(1, Math.min(slots.length, mealCounts[cat])) : null;
-    if (desired !== null && desired < slots.length) {
+    const poolTargetSize = desired !== null ? desired : slots.length;
+    const needsPool = imported.length > 0 || (desired !== null && desired < slots.length);
+    if (needsPool) {
       if (btn) btn.innerHTML = `<span class="spinner spinner-dark"></span> Building ${cat} pool...`;
       mealPools[cat] = [];
       const poolExclude = [];
-      const { totals: fixedTotals } = getActiveFixedTotals(slots[0].dateStr);
-      const roughRemaining = {
-        calories: Math.max(0, targets.calories - fixedTotals.calories),
-        protein:  Math.max(0, targets.protein  - fixedTotals.protein),
-        carbs:    Math.max(0, targets.carbs    - fixedTotals.carbs),
-        fat:      Math.max(0, targets.fat      - fixedTotals.fat)
-      };
-      // Use one day's full slot distribution for weight calculation, not all 7 days of a
-      // single category — otherwise totalWeight is inflated 7x and each pool meal gets
-      // only 1/7 of its correct calorie allocation.
-      const firstDayPlan = getOrCreatePlan(slots[0].dateStr);
-      const firstDayEmptySlots = firstDayPlan.slots.filter(s => !s.meal);
-      const roughWtSlots = firstDayEmptySlots.length > 0 ? firstDayEmptySlots : [slots[0].slot];
-      const roughWt = weightedSlotTarget(slots[0].slot, roughRemaining, roughWtSlots);
-      for (let i = 0; i < desired; i++) {
-        try {
-          const recipe = await generateRecipe({
-            preference: (slots[0].slot.preference || '') + ingSuffix + cuisineSuffix,
-            targetCal:   Math.round(Math.max(100, roughWt.cal)),
-            targetProt:  Math.round(roughWt.prot),
-            targetCarbs: Math.round(roughWt.carbs),
-            targetFat:   Math.round(roughWt.fat),
-            mealType: cat,
-            excludeNames: poolExclude,
-            cuisineFilter: cuisinePrefs,
-            allergyFilter: STATE.allergies || [],
-            dietaryFilter: STATE.dietaryRestrictions || []
-          });
-          mealPools[cat].push(recipe);
-          poolExclude.push(recipe.name);
-        } catch(e) { /* skip failed pool entries */ }
+      // Seed pool with imported meals first
+      imported.forEach(m => {
+        mealPools[cat].push({ ...m });
+        poolExclude.push(m.name);
+      });
+      const toGenerate = Math.max(0, poolTargetSize - imported.length);
+      if (toGenerate > 0) {
+        const { totals: fixedTotals } = getActiveFixedTotals(slots[0].dateStr);
+        const roughRemaining = {
+          calories: Math.max(0, targets.calories - fixedTotals.calories),
+          protein:  Math.max(0, targets.protein  - fixedTotals.protein),
+          carbs:    Math.max(0, targets.carbs    - fixedTotals.carbs),
+          fat:      Math.max(0, targets.fat      - fixedTotals.fat)
+        };
+        // Use one day's full slot distribution for weight calculation, not all 7 days of a
+        // single category — otherwise totalWeight is inflated 7x and each pool meal gets
+        // only 1/7 of its correct calorie allocation.
+        const firstDayPlan = getOrCreatePlan(slots[0].dateStr);
+        const firstDayEmptySlots = firstDayPlan.slots.filter(s => !s.meal);
+        const roughWtSlots = firstDayEmptySlots.length > 0 ? firstDayEmptySlots : [slots[0].slot];
+        const roughWt = weightedSlotTarget(slots[0].slot, roughRemaining, roughWtSlots);
+        for (let i = 0; i < toGenerate; i++) {
+          try {
+            const recipe = await generateRecipe({
+              preference: (slots[0].slot.preference || '') + ingSuffix + cuisineSuffix,
+              targetCal:   Math.round(Math.max(100, roughWt.cal)),
+              targetProt:  Math.round(roughWt.prot),
+              targetCarbs: Math.round(roughWt.carbs),
+              targetFat:   Math.round(roughWt.fat),
+              mealType: cat,
+              excludeNames: poolExclude,
+              cuisineFilter: cuisinePrefs,
+              allergyFilter: STATE.allergies || [],
+              dietaryFilter: STATE.dietaryRestrictions || []
+            });
+            mealPools[cat].push(recipe);
+            poolExclude.push(recipe.name);
+          } catch(e) { /* skip failed pool entries */ }
+        }
       }
+      if (mealPools[cat].length === 0) delete mealPools[cat];
     }
   }
 
