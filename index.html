@@ -243,6 +243,15 @@ a{color:inherit;text-decoration:none}
 .modal-actions{display:flex;gap:10px;margin-top:20px}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;background:var(--surface-2);color:var(--text-2);border:2px solid var(--border);cursor:pointer;transition:all .2s}
 .pill:hover,.pill.active{border-color:var(--primary);background:var(--primary-light);color:var(--primary)}
+.cuisine-chip{display:inline-flex;align-items:center;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;background:var(--surface-2);color:var(--text-2);border:2px solid var(--border);cursor:pointer;transition:all .2s}
+.cuisine-chip:hover{border-color:var(--primary);background:var(--primary-light);color:var(--primary)}
+.cuisine-chip.active{border-color:var(--primary);background:var(--primary-light);color:var(--primary)}
+.input-mic-wrap{display:flex;align-items:center;gap:6px}
+.input-mic-wrap .form-input,.input-mic-wrap .pref-input{flex:1}
+.btn-mic{width:46px;height:46px;border-radius:var(--radius-sm);background:var(--surface-2);border:2px solid var(--border);color:var(--text-3);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;padding:0;line-height:1}
+.btn-mic:hover{border-color:var(--primary);background:var(--primary-light);color:var(--primary)}
+.btn-mic.listening{border-color:var(--primary);background:var(--primary);color:#fff;animation:micPulse .8s ease-in-out infinite}
+@keyframes micPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(126,200,168,.5)}50%{opacity:.8;box-shadow:0 0 0 8px rgba(126,200,168,0)}}
 .empty-state{text-align:center;padding:40px 20px;color:var(--text-3)}
 .empty-state .icon{font-size:40px;margin-bottom:8px}
 .empty-state p{font-size:14px}
@@ -2363,7 +2372,10 @@ function renderOB1() {
     <div class="step-sub">Tell us a bit about yourself so we can personalize your nutrition plan.</div>
     <div class="form-group">
       <label class="form-label">Your name</label>
-      <input class="form-input" id="ob-name" placeholder="e.g. Jackson" value="${p.name||''}">
+      <div class="input-mic-wrap">
+        <input class="form-input" id="ob-name" placeholder="e.g. Jackson" value="${p.name||''}">
+        <button type="button" class="btn-mic" data-mic-for="ob-name" onclick="startSpeech('ob-name')" title="Speak">🎤</button>
+      </div>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -2488,17 +2500,7 @@ function renderOB4() {
     <div id="fixed-items-list">
       ${items.length ? items.map(it => renderFixedItemRow(it)).join('') : '<p style="color:var(--text-3);font-size:14px;margin-bottom:16px">No items yet — add one below!</p>'}
     </div>
-    <div class="card" style="margin-bottom:16px">
-      <div class="card-title" style="margin-bottom:12px;font-size:14px">Add item</div>
-      <div class="form-group"><input class="form-input" id="fi-name" placeholder="Name (e.g. Protein Shake)"></div>
-      <div class="form-row-3">
-        <div><label class="form-label" style="font-size:11px">Calories</label><input class="form-input" id="fi-cal" type="number" placeholder="140"></div>
-        <div><label class="form-label" style="font-size:11px">Protein (g)</label><input class="form-input" id="fi-prot" type="number" placeholder="30"></div>
-        <div><label class="form-label" style="font-size:11px">Carbs (g)</label><input class="form-input" id="fi-carbs" type="number" placeholder="5"></div>
-      </div>
-      <div style="margin-top:10px"><label class="form-label" style="font-size:11px">Fat (g)</label><input class="form-input" id="fi-fat" type="number" placeholder="2" style="max-width:120px"></div>
-      <button class="btn btn-primary" id="fi-add" style="margin-top:12px;width:auto;padding:10px 20px">+ Add Item</button>
-    </div>
+    <button class="btn btn-secondary" onclick="showAddFixedWithLookupModal(true)" style="margin-bottom:20px">+ Add Item</button>
     <div class="nav-btns">
       <button class="btn btn-secondary" onclick="STATE.onboardingStep=3;render()">← Back</button>
       <button class="btn btn-primary" id="ob-next4" style="flex:1">Continue →</button>
@@ -2614,30 +2616,6 @@ function bindOnboarding() {
     });
   }
   if (s === 4) {
-    document.getElementById('fi-add')?.addEventListener('click', () => {
-      const name = document.getElementById('fi-name').value.trim();
-      if (!name) { showToast('Please enter a name'); return; }
-      const item = {
-        id: uid(),
-        name,
-        calories: parseFloat(document.getElementById('fi-cal').value)||0,
-        protein: parseFloat(document.getElementById('fi-prot').value)||0,
-        carbs: parseFloat(document.getElementById('fi-carbs').value)||0,
-        fat: parseFloat(document.getElementById('fi-fat').value)||0
-      };
-      STATE.fixedItems.push(item);
-      saveState();
-      const list = document.getElementById('fixed-items-list');
-      if (list) {
-        const empMsg = list.querySelector('p');
-        if (empMsg) empMsg.remove();
-        list.insertAdjacentHTML('beforeend', renderFixedItemRow(item));
-      }
-      ['fi-name','fi-cal','fi-prot','fi-carbs','fi-fat'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-    });
     document.getElementById('ob-next4')?.addEventListener('click', () => {
       STATE.onboardingStep = 5;
       saveState();
@@ -2837,7 +2815,10 @@ function renderMealSlot(slot, dateStr, remaining, allSlots) {
         <div class="slot-open-badge">${IC.unlock} Open slot — logged as flex<button style="background:none;border:none;cursor:pointer;margin-left:8px;color:#854d0e;font-size:12px" onclick="toggleSlotOpen('${dateStr}','${slot.id}')">Undo</button></div>
       ` : slot.meal ? renderRecipeCard(slot.meal, slot.id) : `
         <div class="slot-empty">
-          <input class="pref-input" id="pref-${slot.id}" placeholder="${(()=>{const cat=slot.category||slotMealType(slot);if(cat==='snack')return 'Snack idea? (e.g. chips and dip)';if(cat==='breakfast')return 'What sounds good? (e.g. overnight oats)';if(cat==='lunch')return 'What sounds good? (e.g. turkey wrap)';if(cat==='dinner')return 'What sounds good? (e.g. dumplings)';if(cat==='dessert')return 'Craving something? (e.g. brownies)';return 'What would you like?';})()}" value="${slot.preference||''}">
+          <div class="input-mic-wrap" style="flex:1">
+            <input class="pref-input" id="pref-${slot.id}" placeholder="${(()=>{const cat=slot.category||slotMealType(slot);if(cat==='snack')return 'Snack idea? (e.g. chips and dip)';if(cat==='breakfast')return 'What sounds good? (e.g. overnight oats)';if(cat==='lunch')return 'What sounds good? (e.g. turkey wrap)';if(cat==='dinner')return 'What sounds good? (e.g. dumplings)';if(cat==='dessert')return 'Craving something? (e.g. brownies)';return 'What would you like?';})()}" value="${slot.preference||''}">
+            <button type="button" class="btn-mic" style="height:42px;width:42px" data-mic-for="pref-${slot.id}" onclick="startSpeech('pref-${slot.id}')" title="Speak">🎤</button>
+          </div>
           <button class="btn-generate" id="gen-${slot.id}" onclick="generateSlot('${dateStr}','${slot.id}')">
             ${IC.sparkle} Generate
           </button>
@@ -5144,7 +5125,12 @@ function renderSettings() {
     <div class="settings-section">
       <div class="settings-section-title">Profile</div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="s-name" value="${p.name}"></div>
+        <div class="form-group"><label class="form-label">Name</label>
+          <div class="input-mic-wrap">
+            <input class="form-input" id="s-name" value="${p.name}">
+            <button type="button" class="btn-mic" data-mic-for="s-name" onclick="startSpeech('s-name')" title="Speak">🎤</button>
+          </div>
+        </div>
         <div class="form-group"><label class="form-label">Age</label><input class="form-input" id="s-age" type="number" value="${p.age}"></div>
       </div>
       <div class="form-row">
@@ -5189,7 +5175,7 @@ function renderSettings() {
     <div class="settings-section">
       <div class="section-header" style="margin-bottom:12px">
         <span class="settings-section-title" style="border:none;padding:0;margin:0">Pre-logged items</span>
-        <button class="pill" onclick="showAddFixedModal()">+ Add item</button>
+        <button class="pill" onclick="showAddFixedWithLookupModal(false)">+ Add item</button>
       </div>
       ${STATE.fixedItems.length ? STATE.fixedItems.map(it => `
         <div class="fixed-item-row">
@@ -5218,7 +5204,7 @@ function renderSettings() {
 <button class="btn btn-primary" id="save-settings-btn">Save Settings</button>
 
     <div class="settings-section" style="margin-top:16px">
-      <div class="settings-section-title">Weekly Template</div>
+      <div class="settings-section-title">Weekly Meal Plan</div>
       ${STATE.weeklyTemplate
         ? `<p style="font-size:14px;color:var(--text-2);margin-bottom:12px">A weekly template is active. Your daily meal plan will auto-update at midnight to match the template for that day of the week.</p>
            <button class="btn btn-danger btn-sm" onclick="clearWeeklyTemplate()">Remove template</button>`
@@ -5294,6 +5280,145 @@ function deleteFixedItemSettings(id) {
   const content = document.querySelector('.page-content');
   if (content) content.innerHTML = renderSettings();
   bindSettings();
+}
+
+function startSpeech(inputId) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { showToast('Speech recognition not supported in this browser'); return; }
+  const rec = new SR();
+  rec.lang = 'en-US';
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+  const btn = document.querySelector(`[data-mic-for="${inputId}"]`);
+  if (btn) btn.classList.add('listening');
+  rec.start();
+  rec.onresult = e => {
+    const text = e.results[0][0].transcript;
+    const input = document.getElementById(inputId);
+    if (input) { input.value = text; input.dispatchEvent(new Event('input')); }
+    if (btn) btn.classList.remove('listening');
+  };
+  rec.onerror = () => { if (btn) btn.classList.remove('listening'); showToast('Could not hear — try again'); };
+  rec.onend = () => { if (btn) btn.classList.remove('listening'); };
+}
+
+let fixedItemLookupState = { phase: 1, foodName: '', amount: '', found: false, macros: null, fromOB: false };
+
+function showAddFixedWithLookupModal(fromOB) {
+  fixedItemLookupState = { phase: 1, foodName: '', amount: '', found: false, macros: null, fromOB: !!fromOB };
+  renderAddFixedLookupModal();
+}
+
+function renderAddFixedLookupModal() {
+  document.getElementById('add-fixed-lookup-modal')?.remove();
+  const { phase, found, foodName, amount } = fixedItemLookupState;
+  let inner = '';
+  if (phase === 1) {
+    inner = `
+      <div class="form-group"><label class="form-label">Food name</label>
+        <div class="input-mic-wrap">
+          <input class="form-input" id="afl-name" placeholder="e.g. Protein Shake, banana, chicken breast" value="${foodName}">
+          <button type="button" class="btn-mic" data-mic-for="afl-name" onclick="startSpeech('afl-name')" title="Speak">🎤</button>
+        </div></div>
+      <div class="form-group"><label class="form-label">Amount</label>
+        <div class="input-mic-wrap">
+          <input class="form-input" id="afl-amount" placeholder="e.g. 100g, 1 scoop, 2oz" value="${amount}">
+          <button type="button" class="btn-mic" data-mic-for="afl-amount" onclick="startSpeech('afl-amount')" title="Speak">🎤</button>
+        </div></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('add-fixed-lookup-modal').remove()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1" onclick="lookupFixedFood()">Look up →</button>
+      </div>`;
+  } else {
+    const statusBanner = found
+      ? `<div style="background:#e5f8f0;border:1px solid var(--primary);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--primary-dark);margin-bottom:16px;display:flex;align-items:center;gap:6px">${IC.check} Found! Macros auto-filled — edit if needed.</div>`
+      : `<div style="background:#fff3ee;border:1px solid #f5a888;border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:#9a3412;margin-bottom:16px;display:flex;align-items:center;gap:6px">${IC.warn} Couldn't find this food — fill in the macros yourself.</div>`;
+    inner = `
+      ${statusBanner}
+      <div class="form-group"><label class="form-label">Name</label>
+        <input class="form-input" id="afl-confirm-name" value="${foodName}" placeholder="e.g. Protein Shake"></div>
+      <div class="form-row-3">
+        <div><label class="form-label" style="font-size:11px">Calories</label><input class="form-input" id="afl-cal" type="number" placeholder="0" min="0"></div>
+        <div><label class="form-label" style="font-size:11px">Protein (g)</label><input class="form-input" id="afl-prot" type="number" placeholder="0" min="0"></div>
+        <div><label class="form-label" style="font-size:11px">Carbs (g)</label><input class="form-input" id="afl-carbs" type="number" placeholder="0" min="0"></div>
+      </div>
+      <div style="margin-top:10px"><label class="form-label" style="font-size:11px">Fat (g)</label>
+        <input class="form-input" id="afl-fat" type="number" placeholder="0" min="0" style="max-width:120px"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" style="flex:1" onclick="fixedItemLookupState.phase=1;renderAddFixedLookupModal()">← Back</button>
+        <button class="btn btn-primary" style="flex:1" onclick="confirmAddFixedFromLookup()">Add Item ✓</button>
+      </div>`;
+  }
+  const html = `<div class="modal-overlay" id="add-fixed-lookup-modal" onclick="if(event.target.id==='add-fixed-lookup-modal')this.remove()">
+    <div class="modal-sheet">
+      <div class="modal-title">Add pre-logged item</div>
+      <div class="modal-sub">${phase === 1 ? 'Search for a food to auto-fill its macros.' : `${foodName} · ${amount}`}</div>
+      ${inner}
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  if (phase === 1) {
+    setTimeout(() => document.getElementById('afl-name')?.focus(), 80);
+    const nameEl = document.getElementById('afl-name');
+    const amtEl = document.getElementById('afl-amount');
+    if (nameEl && amtEl) {
+      nameEl.addEventListener('keydown', e => { if (e.key === 'Enter') amtEl.focus(); });
+      amtEl.addEventListener('keydown', e => { if (e.key === 'Enter') lookupFixedFood(); });
+    }
+  } else if (found && fixedItemLookupState.macros) {
+    setTimeout(() => {
+      const m = fixedItemLookupState.macros;
+      const el = id => document.getElementById(id);
+      if (el('afl-cal'))   el('afl-cal').value   = m.cal;
+      if (el('afl-prot'))  el('afl-prot').value  = m.p;
+      if (el('afl-carbs')) el('afl-carbs').value = m.c;
+      if (el('afl-fat'))   el('afl-fat').value   = m.f;
+    }, 50);
+  } else {
+    setTimeout(() => document.getElementById('afl-cal')?.focus(), 80);
+  }
+}
+
+function lookupFixedFood() {
+  const name = document.getElementById('afl-name')?.value.trim();
+  const amount = document.getElementById('afl-amount')?.value.trim();
+  if (!name) { showToast('Please enter a food name'); return; }
+  if (!amount) { showToast('Please enter an amount (e.g. 100g, 1 scoop)'); return; }
+  fixedItemLookupState.foodName = name;
+  fixedItemLookupState.amount = amount;
+  fixedItemLookupState.phase = 2;
+  const result = lookupFood(name, amount);
+  fixedItemLookupState.found = !!result;
+  fixedItemLookupState.macros = result;
+  renderAddFixedLookupModal();
+}
+
+function confirmAddFixedFromLookup() {
+  const name = document.getElementById('afl-confirm-name')?.value.trim() || fixedItemLookupState.foodName;
+  if (!name) { showToast('Please enter a name'); return; }
+  const item = {
+    id: uid(),
+    name,
+    calories: parseFloat(document.getElementById('afl-cal')?.value) || 0,
+    protein: parseFloat(document.getElementById('afl-prot')?.value) || 0,
+    carbs: parseFloat(document.getElementById('afl-carbs')?.value) || 0,
+    fat: parseFloat(document.getElementById('afl-fat')?.value) || 0
+  };
+  STATE.fixedItems.push(item);
+  saveState();
+  document.getElementById('add-fixed-lookup-modal')?.remove();
+  if (fixedItemLookupState.fromOB) {
+    const list = document.getElementById('fixed-items-list');
+    if (list) {
+      const empMsg = list.querySelector('p');
+      if (empMsg) empMsg.remove();
+      list.insertAdjacentHTML('beforeend', renderFixedItemRow(item));
+    }
+  } else {
+    const content = document.querySelector('.page-content');
+    if (content) { content.innerHTML = renderSettings(); bindSettings(); }
+  }
+  showToast('Item added ✓');
 }
 
 function showAddFixedModal() {
@@ -5479,9 +5604,15 @@ function renderLogFoodModal() {
   } else if (phase === 1) {
     inner = `
       <div class="form-group"><label class="form-label">Food name</label>
-        <input class="form-input" id="lf-name" placeholder="e.g. Cheez-Its, chicken breast, banana" value="${foodName}"></div>
+        <div class="input-mic-wrap">
+          <input class="form-input" id="lf-name" placeholder="e.g. Cheez-Its, chicken breast, banana" value="${foodName}">
+          <button type="button" class="btn-mic" data-mic-for="lf-name" onclick="startSpeech('lf-name')" title="Speak">🎤</button>
+        </div></div>
       <div class="form-group"><label class="form-label">Amount</label>
-        <input class="form-input" id="lf-amount" placeholder="e.g. 100g, 2oz, 150 g" value="${amount}"></div>
+        <div class="input-mic-wrap">
+          <input class="form-input" id="lf-amount" placeholder="e.g. 100g, 2oz, 150 g" value="${amount}">
+          <button type="button" class="btn-mic" data-mic-for="lf-amount" onclick="startSpeech('lf-amount')" title="Speak">🎤</button>
+        </div></div>
       <div class="modal-actions">
         <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('log-food-modal').remove()">Cancel</button>
         <button class="btn btn-primary" style="flex:1" onclick="lookupLogFood()">Look up →</button>
