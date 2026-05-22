@@ -3376,7 +3376,7 @@ function useSavedMeal(dateStr, slotId, mealId) {
 // ═══════════════════════════════════════════════════
 // WEEK VIEW
 // ═══════════════════════════════════════════════════
-let weekState = { activeDay: null, groceryMode: false };
+let weekState = { activeDay: null, groceryMode: false, mealPrepMode: false, prepChecked: {} };
 let pwIngredientsList = [];
 let pwSelectedCuisines = [];
 let _planWeekSnapshot = null;
@@ -3386,6 +3386,7 @@ let pwImportedMealIds = new Set();
 function renderWeek() {
   const dates = getWeekDates();
   if (weekState.groceryMode) return renderGroceryList(dates);
+  if (weekState.mealPrepMode) return renderMealPrep(dates);
 
   return `
     <div id="week-header-banner" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;padding:6px 8px;margin-left:-8px;margin-right:-8px;border-radius:var(--radius-sm)">
@@ -3396,7 +3397,10 @@ function renderWeek() {
       <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
         <button class="btn btn-secondary btn-sm" onclick="resetWeeklyPlan()" style="color:#ef4444;border-color:#fecaca">${IC.refresh} Reset week</button>
         <button class="btn btn-secondary btn-sm" id="save-meal-plan-btn" onclick="saveMealPlan()">${_weekPlanSaved ? `${IC.check} Saved` : `${IC.bookmark} Save meal plan`}</button>
-        <button class="btn btn-secondary btn-sm" onclick="showPlanWeekModal()" id="plan-week-btn">${IC.sparkle} Plan Week</button>
+        ${dates.some(d => STATE.dailyPlans[d] && getPlanTotals(STATE.dailyPlans[d]).calories > 0)
+          ? `<button class="btn btn-primary btn-sm" onclick="weekState.mealPrepMode=true;render()" style="gap:5px">🥘 Meal Prep</button>`
+          : `<button class="btn btn-secondary btn-sm" onclick="showPlanWeekModal()" id="plan-week-btn">${IC.sparkle} Plan Week</button>`
+        }
       </div>
     </div>
     ${STATE.weeklyTemplate ? `<div style="background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--primary-dark)">Weekly template active — meals auto-apply at midnight each day.</div>` : ''}
@@ -4477,6 +4481,8 @@ function renderGroceryList(dates) {
 
   function canonicalizeIngredient(name) {
     const lower = name.toLowerCase().trim();
+    if (/\bcorn tortilla/.test(lower)) return 'Corn Tortilla';
+    if (/\btortilla/.test(lower)) return 'Tortilla';
     if (/\b(white|basmati|jasmine|brown|long.grain|short.grain|arborio|wild|sushi|calrose)\s+rice\b/.test(lower)) return 'Rice';
     if (/\bromaine\b/.test(lower)) return 'Romaine lettuce';
     if (/butter lettuce/.test(lower)) return 'Butter lettuce';
@@ -4740,6 +4746,165 @@ function renderGroceryList(dates) {
       ${items.length ? categoryBlocks : '<p style="color:var(--text-3);text-align:center;padding:20px">No meals planned yet.</p>'}
     </div>
     <div style="margin-top:12px;font-size:12px;color:var(--text-3);text-align:center">${items.length} items from your weekly meal plan</div>
+  `;
+}
+
+function renderMealPrep(dates) {
+  const entries = [];
+  dates.forEach(d => {
+    const plan = STATE.dailyPlans[d];
+    if (!plan) return;
+    const dayFull = new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+    const dayShort = new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    plan.slots.forEach(slot => {
+      if (slot.meal) entries.push({ date:d, dayFull, dayShort, label:slot.label, category:slot.category, meal:slot.meal });
+    });
+  });
+
+  if (!entries.length) {
+    return `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <button class="btn btn-secondary btn-sm" onclick="weekState.mealPrepMode=false;render()">← Back to Week</button>
+        <div style="font-size:20px;font-weight:800;flex:1">Meal Prep Guide</div>
+      </div>
+      <p style="color:var(--text-3);text-align:center;padding:40px">No meals planned this week yet.</p>
+    `;
+  }
+
+  function parseMin(t) { const m=(t||'').match(/(\d+)/); return m?parseInt(m[1]):0; }
+  function fmtMin(n) { if(!n) return '0 min'; return n>=60?`${Math.floor(n/60)}h ${n%60>0?' '+n%60+'m':''}`.trim():`${n} min`; }
+
+  const totalPrepMin = entries.reduce((s,e)=>s+parseMin(e.meal.prepTime),0);
+  const totalCookMin = entries.reduce((s,e)=>s+parseMin(e.meal.cookTime),0);
+
+  const uniqueRecipes = [...new Map(entries.map(e=>[e.meal.name,e.meal])).values()]
+    .sort((a,b)=>parseMin(b.cookTime)-parseMin(a.cookTime));
+
+  const PROTEIN_RE = /\b(chicken breast|chicken|ground beef|ground turkey|beef|turkey|salmon|shrimp|pork|tuna)\b/;
+  const GRAIN_RE = /\b(white rice|brown rice|rice|quinoa|pasta|penne|spaghetti|fettuccine|oats|oatmeal)\b/;
+  const batchMap = {};
+  entries.forEach(e => {
+    (e.meal.ingredients||[]).forEach(ing => {
+      const n = ing.item.toLowerCase();
+      let key = '', type = '';
+      const pm = n.match(PROTEIN_RE);
+      const gm = n.match(GRAIN_RE);
+      if (pm) { key = pm[1].split(' ').map(w=>w[0].toUpperCase()+w.slice(1)).join(' '); type='protein'; }
+      else if (gm) { key = gm[1].split(' ').map(w=>w[0].toUpperCase()+w.slice(1)).join(' '); type='grain'; }
+      else return;
+      if (!batchMap[key]) batchMap[key] = { totalG:0, meals:[], type };
+      if (ing.unit==='g') batchMap[key].totalG += parseFloat(ing.amount)||0;
+      const label = `${e.dayShort} ${e.label}`;
+      if (!batchMap[key].meals.includes(label)) batchMap[key].meals.push(label);
+    });
+  });
+  const batchItems = Object.entries(batchMap)
+    .filter(([,v])=>v.meals.length>=2)
+    .sort((a,b)=>b[1].meals.length-a[1].meals.length);
+
+  const byDay = {};
+  entries.forEach(e=>{
+    if(!byDay[e.date]) byDay[e.date]={dayFull:e.dayFull,meals:[]};
+    byDay[e.date].meals.push(e);
+  });
+
+  if (!weekState.prepChecked) weekState.prepChecked = {};
+  const doneCount = uniqueRecipes.filter(r=>weekState.prepChecked[r.name]).length;
+
+  const batchSection = batchItems.length ? `
+    <div style="margin-bottom:20px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--text-1)">🔥 Batch Cooking Wins</div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        ${batchItems.map(([name,data],i)=>{
+          const icon = data.type==='protein'?'🍗':'🌾';
+          const totalStr = data.totalG>0?` · ${Math.round(data.totalG)}g total`:'';
+          return `<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;${i>0?'border-top:1px solid var(--border)':''}">
+            <span style="font-size:20px;flex-shrink:0">${icon}</span>
+            <div>
+              <div style="font-size:13px;font-weight:700">${name}${totalStr}</div>
+              <div style="font-size:12px;color:var(--text-2);margin-top:2px">Used in ${data.meals.length} meals: ${data.meals.join(', ')}</div>
+              <div style="font-size:12px;color:var(--primary);font-weight:600;margin-top:4px">💡 Prep once, use all week</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  const checklistSection = `
+    <div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;margin-bottom:10px">
+        <div style="font-size:14px;font-weight:700;color:var(--text-1)">📋 Recipe Prep Checklist</div>
+        <div style="margin-left:auto;font-size:12px;color:var(--text-2)">${doneCount} / ${uniqueRecipes.length} done</div>
+      </div>
+      ${doneCount===uniqueRecipes.length&&uniqueRecipes.length>0?`
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius);padding:10px 14px;margin-bottom:10px;font-size:13px;font-weight:600;color:#15803d">
+          ✅ All prepped and ready for the week!
+        </div>
+      `:''}
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        ${uniqueRecipes.map((recipe,i)=>{
+          const checked = !!weekState.prepChecked[recipe.name];
+          const prepMin = parseMin(recipe.prepTime);
+          const cookMin = parseMin(recipe.cookTime);
+          const safeName = recipe.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+          return `<label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;cursor:pointer;${i>0?'border-top:1px solid var(--border)':''}${checked?';opacity:0.55':''}">
+            <input type="checkbox" ${checked?'checked':''} onchange="weekState.prepChecked['${safeName}']=this.checked;render()" style="margin-top:3px;width:16px;height:16px;accent-color:var(--primary);cursor:pointer;flex-shrink:0">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:600;${checked?'text-decoration:line-through;color:var(--text-3)':''}">${recipe.name}</div>
+              <div style="font-size:11px;color:var(--text-2);margin-top:3px;display:flex;flex-wrap:wrap;gap:8px">
+                ${prepMin?`<span>${IC.clock} ${recipe.prepTime} prep</span>`:''}
+                ${cookMin?`<span>${IC.pan} ${recipe.cookTime} cook</span>`:''}
+                ${recipe.ingredients?.length?`<span>· ${recipe.ingredients.length} ingredients</span>`:''}
+              </div>
+            </div>
+          </label>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  const scheduleSection = `
+    <div style="margin-bottom:20px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--text-1)">📅 This Week's Schedule</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${Object.entries(byDay).map(([,{dayFull,meals}])=>`
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px">
+            <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px">${dayFull}</div>
+            ${meals.map(e=>`
+              <div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:13px">
+                <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-2);min-width:56px">${e.label}</span>
+                <span style="font-weight:500;flex:1">${e.meal.name}</span>
+                <span style="font-size:11px;color:var(--text-2)">${e.meal.calories} cal</span>
+              </div>`).join('')}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  return `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <button class="btn btn-secondary btn-sm" onclick="weekState.mealPrepMode=false;render()">← Back to Week</button>
+      <div style="font-size:20px;font-weight:800;flex:1">Meal Prep Guide</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--primary)">${entries.length}</div>
+        <div style="font-size:11px;color:var(--text-2);margin-top:1px">meals planned</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--primary)">${fmtMin(totalPrepMin+totalCookMin)}</div>
+        <div style="font-size:11px;color:var(--text-2);margin-top:1px">total cook time</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--primary)">${doneCount}/${uniqueRecipes.length}</div>
+        <div style="font-size:11px;color:var(--text-2);margin-top:1px">recipes prepped</div>
+      </div>
+    </div>
+    ${batchSection}
+    ${checklistSection}
+    ${scheduleSection}
   `;
 }
 
@@ -5803,7 +5968,7 @@ function resetApp() {
   if (!confirm('This will delete all your data including meal history and saved meals. Are you sure?')) return;
   localStorage.removeItem(STORAGE_KEY);
   STATE = defaultState();
-  weekState = { activeDay: null, groceryMode: false };
+  weekState = { activeDay: null, groceryMode: false, mealPrepMode: false, prepChecked: {} };
   savedFilters = { search:'', minCal:'', maxCal:'', minProtein:'' };
   tempMacros = {};
   render();
