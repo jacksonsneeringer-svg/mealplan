@@ -3014,20 +3014,20 @@ function renderApp() {
         ${LOGO_SVG}
         <span style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.5px">Nommie</span>
       </div>
-      ${['today','week','saved','settings'].map(tab => `
+      ${['today','week','saved','fastfood','settings'].map(tab => `
         <button class="nav-item ${v===tab?'active':''}" onclick="navigate('${tab}')">
           ${NAV_ICONS[tab]}
-          <span>${tab.charAt(0).toUpperCase()+tab.slice(1)}</span>
+          <span>${NAV_LABELS[tab]}</span>
         </button>
       `).join('')}
       <button class="hamburger-btn" onclick="toggleMobileMenu(event)" aria-label="Open menu">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <div class="mobile-nav-dropdown" id="mobile-nav-dropdown">
-        ${['today','week','saved','settings'].map(tab => `
+        ${['today','week','saved','fastfood','settings'].map(tab => `
           <button class="mobile-nav-item ${v===tab?'active':''}" onclick="navigate('${tab}')">
             ${NAV_ICONS[tab]}
-            <span>${tab.charAt(0).toUpperCase()+tab.slice(1)}</span>
+            <span>${NAV_LABELS[tab]}</span>
           </button>
         `).join('')}
       </div>
@@ -3036,6 +3036,7 @@ function renderApp() {
       ${v==='today' ? renderToday() : ''}
       ${v==='week' ? renderWeek() : ''}
       ${v==='saved' ? renderSaved() : ''}
+      ${v==='fastfood' ? renderFastFood() : ''}
       ${v==='settings' ? renderSettings() : ''}
     </div>
   `;
@@ -3045,8 +3046,11 @@ const NAV_ICONS = {
   today: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
   week:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`,
   saved: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
+  fastfood:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>`,
   settings:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`
 };
+
+const NAV_LABELS = { today: 'Today', week: 'Week', saved: 'Saved', fastfood: 'Fast Food', settings: 'Settings' };
 
 const IC = {
   flame:    `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-1px"><path d="M12 2c-.5 2.5-2 3.5-3 5-1 1.5-1 3 .5 4.5-.5-1 0-2.5 1-3 .5 2 2.5 3 2.5 5.5 1.5-1 2-3 1-5 1 1 1.5 2.5 1.5 4 1.5-1.5 2-4 .5-6.5C15 8.5 12.5 7 12 2z"/></svg>`,
@@ -6745,6 +6749,742 @@ function resetApp() {
   savedFilters = { search:'', minCal:'', maxCal:'', minProtein:'' };
   tempMacros = {};
   render();
+}
+
+// ═══════════════════════════════════════════════════
+// FAST FOOD EXPLORER
+// ═══════════════════════════════════════════════════
+let ffState = { restaurant: null, search: '', category: 'all', quickFilter: '', sort: 'default' };
+
+const FAST_FOOD_DB = [
+  {
+    id: 'mcdonalds', name: "McDonald's", emoji: '🍟', type: 'Burgers & More',
+    menu: [
+      { name: 'Big Mac', cat: 'Burgers', cal: 550, p: 25, c: 45, f: 29 },
+      { name: 'Quarter Pounder with Cheese', cat: 'Burgers', cal: 740, p: 42, c: 44, f: 45 },
+      { name: 'McDouble', cat: 'Burgers', cal: 390, p: 23, c: 34, f: 19 },
+      { name: 'Cheeseburger', cat: 'Burgers', cal: 300, p: 15, c: 32, f: 13 },
+      { name: 'Double Cheeseburger', cat: 'Burgers', cal: 440, p: 25, c: 34, f: 23 },
+      { name: 'Filet-O-Fish', cat: 'Sandwiches', cal: 390, p: 17, c: 39, f: 19 },
+      { name: 'McChicken', cat: 'Chicken', cal: 400, p: 14, c: 41, f: 20 },
+      { name: 'Crispy Chicken Sandwich', cat: 'Chicken', cal: 470, p: 26, c: 45, f: 20 },
+      { name: 'Spicy Crispy Chicken Sandwich', cat: 'Chicken', cal: 530, p: 26, c: 51, f: 23 },
+      { name: 'Chicken McNuggets 10pc', cat: 'Chicken', cal: 440, p: 27, c: 27, f: 26 },
+      { name: 'Chicken McNuggets 6pc', cat: 'Chicken', cal: 250, p: 15, c: 15, f: 15 },
+      { name: 'Egg McMuffin', cat: 'Breakfast', cal: 310, p: 17, c: 30, f: 13 },
+      { name: 'Sausage McMuffin with Egg', cat: 'Breakfast', cal: 480, p: 21, c: 30, f: 31 },
+      { name: 'Sausage Biscuit with Egg', cat: 'Breakfast', cal: 530, p: 20, c: 37, f: 33 },
+      { name: 'Hotcakes', cat: 'Breakfast', cal: 590, p: 9, c: 102, f: 14 },
+      { name: 'McGriddle (Sausage, Egg & Cheese)', cat: 'Breakfast', cal: 550, p: 20, c: 48, f: 29 },
+      { name: 'Medium World Famous Fries', cat: 'Sides', cal: 320, p: 4, c: 43, f: 15 },
+      { name: 'Large World Famous Fries', cat: 'Sides', cal: 490, p: 6, c: 66, f: 22 },
+      { name: 'Side Salad', cat: 'Salads', cal: 15, p: 1, c: 3, f: 0 },
+      { name: 'Southwest Grilled Chicken Salad', cat: 'Salads', cal: 350, p: 37, c: 27, f: 11 },
+      { name: 'Apple Slices', cat: 'Sides', cal: 15, p: 0, c: 4, f: 0 },
+      { name: 'Hot Fudge Sundae', cat: 'Desserts', cal: 330, p: 8, c: 54, f: 9 },
+      { name: 'McFlurry Oreo (Medium)', cat: 'Desserts', cal: 690, p: 16, c: 104, f: 21 },
+      { name: 'Apple Pie', cat: 'Desserts', cal: 250, p: 2, c: 33, f: 13 },
+      { name: 'Vanilla Shake (Medium)', cat: 'Drinks', cal: 490, p: 12, c: 73, f: 16 },
+      { name: 'Chocolate Shake (Medium)', cat: 'Drinks', cal: 530, p: 13, c: 78, f: 17 },
+    ]
+  },
+  {
+    id: 'burgerking', name: 'Burger King', emoji: '👑', type: 'Burgers & More',
+    menu: [
+      { name: 'Whopper', cat: 'Burgers', cal: 660, p: 28, c: 49, f: 40 },
+      { name: 'Double Whopper', cat: 'Burgers', cal: 920, p: 52, c: 49, f: 59 },
+      { name: 'Whopper Jr.', cat: 'Burgers', cal: 310, p: 14, c: 26, f: 18 },
+      { name: 'Cheeseburger', cat: 'Burgers', cal: 300, p: 17, c: 27, f: 14 },
+      { name: 'Bacon King', cat: 'Burgers', cal: 1150, p: 67, c: 49, f: 79 },
+      { name: 'Impossible Whopper', cat: 'Burgers', cal: 630, p: 25, c: 58, f: 34 },
+      { name: 'Original Chicken Sandwich', cat: 'Chicken', cal: 660, p: 24, c: 65, f: 35 },
+      { name: 'Spicy Ch\'King Sandwich', cat: 'Chicken', cal: 700, p: 28, c: 65, f: 37 },
+      { name: 'Chicken Fries 9pc', cat: 'Chicken', cal: 290, p: 22, c: 24, f: 11 },
+      { name: 'Crispy Chicken Sandwich', cat: 'Chicken', cal: 660, p: 24, c: 65, f: 35 },
+      { name: 'Croissan\'wich (Sausage, Egg & Cheese)', cat: 'Breakfast', cal: 550, p: 21, c: 32, f: 37 },
+      { name: 'French Toast Sticks (5pc)', cat: 'Breakfast', cal: 380, p: 6, c: 51, f: 17 },
+      { name: 'Pancakes', cat: 'Breakfast', cal: 500, p: 11, c: 81, f: 16 },
+      { name: 'Medium French Fries', cat: 'Sides', cal: 380, p: 4, c: 52, f: 17 },
+      { name: 'Medium Onion Rings', cat: 'Sides', cal: 320, p: 4, c: 41, f: 16 },
+      { name: 'Garden Side Salad', cat: 'Salads', cal: 60, p: 4, c: 6, f: 2 },
+      { name: 'Chocolate Shake (Medium)', cat: 'Drinks', cal: 720, p: 15, c: 102, f: 27 },
+      { name: 'Vanilla Shake (Medium)', cat: 'Drinks', cal: 680, p: 15, c: 100, f: 26 },
+      { name: 'Dutch Apple Pie', cat: 'Desserts', cal: 340, p: 3, c: 51, f: 14 },
+    ]
+  },
+  {
+    id: 'wendys', name: "Wendy's", emoji: '🦰', type: 'Burgers & More',
+    menu: [
+      { name: "Dave's Single", cat: 'Burgers', cal: 590, p: 30, c: 40, f: 34 },
+      { name: "Dave's Double", cat: 'Burgers', cal: 800, p: 49, c: 41, f: 50 },
+      { name: "Dave's Triple", cat: 'Burgers', cal: 1090, p: 71, c: 42, f: 73 },
+      { name: 'Baconator', cat: 'Burgers', cal: 950, p: 58, c: 43, f: 62 },
+      { name: 'Jr. Cheeseburger', cat: 'Burgers', cal: 280, p: 16, c: 26, f: 12 },
+      { name: 'Classic Chicken Sandwich', cat: 'Chicken', cal: 490, p: 29, c: 40, f: 23 },
+      { name: 'Spicy Chicken Sandwich', cat: 'Chicken', cal: 500, p: 29, c: 43, f: 24 },
+      { name: 'Grilled Chicken Sandwich', cat: 'Chicken', cal: 380, p: 34, c: 37, f: 9 },
+      { name: 'Chicken Nuggets 10pc', cat: 'Chicken', cal: 430, p: 27, c: 27, f: 24 },
+      { name: 'Spicy Chicken Nuggets 10pc', cat: 'Chicken', cal: 430, p: 27, c: 27, f: 24 },
+      { name: 'Breakfast Baconator', cat: 'Breakfast', cal: 730, p: 39, c: 38, f: 47 },
+      { name: 'Classic Bacon, Egg & Cheese Sandwich', cat: 'Breakfast', cal: 500, p: 26, c: 39, f: 25 },
+      { name: 'Medium French Fries', cat: 'Sides', cal: 400, p: 6, c: 55, f: 18 },
+      { name: 'Baked Potato (plain)', cat: 'Sides', cal: 270, p: 7, c: 61, f: 0 },
+      { name: 'Chili (Small)', cat: 'Sides', cal: 170, p: 15, c: 16, f: 5 },
+      { name: 'Apple Pecan Chicken Salad (full)', cat: 'Salads', cal: 570, p: 41, c: 44, f: 24 },
+      { name: 'Southwest Avocado Chicken Salad (full)', cat: 'Salads', cal: 600, p: 45, c: 29, f: 34 },
+      { name: 'Frosty Vanilla (Medium)', cat: 'Desserts', cal: 370, p: 10, c: 60, f: 10 },
+      { name: 'Frosty Chocolate (Medium)', cat: 'Desserts', cal: 360, p: 10, c: 60, f: 10 },
+      { name: 'Frosty-ccino (Small)', cat: 'Drinks', cal: 250, p: 7, c: 39, f: 9 },
+    ]
+  },
+  {
+    id: 'chickfila', name: 'Chick-fil-A', emoji: '🐔', type: 'Chicken',
+    menu: [
+      { name: 'Original Chicken Sandwich', cat: 'Chicken', cal: 450, p: 28, c: 41, f: 19 },
+      { name: 'Spicy Chicken Sandwich', cat: 'Chicken', cal: 460, p: 29, c: 41, f: 20 },
+      { name: 'Spicy Deluxe Sandwich', cat: 'Chicken', cal: 570, p: 38, c: 43, f: 26 },
+      { name: 'Grilled Chicken Sandwich', cat: 'Chicken', cal: 320, p: 29, c: 38, f: 5 },
+      { name: 'Grilled Chicken Club', cat: 'Chicken', cal: 430, p: 43, c: 31, f: 13 },
+      { name: 'Chicken Nuggets 8pc', cat: 'Chicken', cal: 250, p: 28, c: 11, f: 11 },
+      { name: 'Grilled Nuggets 8pc', cat: 'Chicken', cal: 140, p: 25, c: 2, f: 3 },
+      { name: 'Chicken Strips 3pc', cat: 'Chicken', cal: 350, p: 29, c: 20, f: 17 },
+      { name: 'Grilled Cool Wrap', cat: 'Chicken', cal: 350, p: 43, c: 29, f: 9 },
+      { name: 'Chicken Biscuit', cat: 'Breakfast', cal: 450, p: 17, c: 48, f: 22 },
+      { name: 'Egg White Grill', cat: 'Breakfast', cal: 290, p: 26, c: 29, f: 7 },
+      { name: 'Hash Brown Scramble Bowl', cat: 'Breakfast', cal: 710, p: 32, c: 53, f: 41 },
+      { name: 'Medium Waffle Fries', cat: 'Sides', cal: 400, p: 4, c: 55, f: 18 },
+      { name: 'Medium Mac & Cheese', cat: 'Sides', cal: 430, p: 17, c: 37, f: 25 },
+      { name: 'Medium Kale Crunch Side', cat: 'Sides', cal: 120, p: 3, c: 11, f: 8 },
+      { name: 'Side Salad', cat: 'Salads', cal: 80, p: 6, c: 5, f: 4 },
+      { name: 'Market Salad with Grilled Chicken', cat: 'Salads', cal: 340, p: 29, c: 28, f: 12 },
+      { name: 'Cobb Salad with Grilled Chicken', cat: 'Salads', cal: 400, p: 40, c: 18, f: 19 },
+      { name: 'Chicken Noodle Soup (Medium)', cat: 'Sides', cal: 150, p: 13, c: 14, f: 4 },
+      { name: 'Ice Dream Cone', cat: 'Desserts', cal: 170, p: 4, c: 29, f: 5 },
+      { name: 'Cookies & Cream Milkshake (Large)', cat: 'Drinks', cal: 820, p: 17, c: 119, f: 32 },
+      { name: 'Chocolate Milkshake (Large)', cat: 'Drinks', cal: 700, p: 16, c: 100, f: 27 },
+    ]
+  },
+  {
+    id: 'tacobell', name: 'Taco Bell', emoji: '🌮', type: 'Mexican',
+    menu: [
+      { name: 'Crunchy Taco', cat: 'Tacos', cal: 170, p: 8, c: 13, f: 9 },
+      { name: 'Soft Taco (Beef)', cat: 'Tacos', cal: 180, p: 9, c: 19, f: 8 },
+      { name: 'Doritos Locos Taco (Nacho Cheese)', cat: 'Tacos', cal: 170, p: 8, c: 13, f: 9 },
+      { name: 'Crunchwrap Supreme', cat: 'Wraps & Burritos', cal: 530, p: 18, c: 65, f: 21 },
+      { name: 'Burrito Supreme (Beef)', cat: 'Wraps & Burritos', cal: 450, p: 18, c: 52, f: 17 },
+      { name: 'Bean Burrito', cat: 'Wraps & Burritos', cal: 360, p: 14, c: 54, f: 9 },
+      { name: 'Cheesy Gordita Crunch', cat: 'Specialties', cal: 500, p: 20, c: 45, f: 27 },
+      { name: 'Chalupa Supreme (Beef)', cat: 'Specialties', cal: 350, p: 14, c: 37, f: 16 },
+      { name: 'Quesadilla (Chicken)', cat: 'Specialties', cal: 510, p: 27, c: 40, f: 25 },
+      { name: 'Mexican Pizza', cat: 'Specialties', cal: 710, p: 24, c: 62, f: 39 },
+      { name: 'Nacho Fries', cat: 'Sides', cal: 320, p: 6, c: 44, f: 14 },
+      { name: 'Nachos BellGrande', cat: 'Sides', cal: 760, p: 23, c: 79, f: 39 },
+      { name: 'Loaded Nachos', cat: 'Sides', cal: 540, p: 16, c: 60, f: 27 },
+      { name: 'Power Bowl (Chicken)', cat: 'Bowls', cal: 470, p: 27, c: 49, f: 19 },
+      { name: 'Power Bowl (Veggie)', cat: 'Bowls', cal: 430, p: 12, c: 55, f: 18 },
+      { name: 'Breakfast Crunchwrap', cat: 'Breakfast', cal: 660, p: 21, c: 65, f: 35 },
+      { name: 'Breakfast Soft Taco (Egg & Cheese)', cat: 'Breakfast', cal: 170, p: 7, c: 17, f: 9 },
+      { name: 'Cinnabon Delights 2pc', cat: 'Desserts', cal: 160, p: 2, c: 22, f: 8 },
+      { name: 'Cinnabon Delights 12pc', cat: 'Desserts', cal: 960, p: 12, c: 134, f: 46 },
+    ]
+  },
+  {
+    id: 'subway', name: 'Subway', emoji: '🥖', type: 'Subs & Sandwiches',
+    menu: [
+      { name: 'Turkey Breast (6-inch)', cat: 'Subs', cal: 280, p: 18, c: 40, f: 4 },
+      { name: 'Roast Beef (6-inch)', cat: 'Subs', cal: 320, p: 24, c: 40, f: 7 },
+      { name: 'Black Forest Ham (6-inch)', cat: 'Subs', cal: 290, p: 18, c: 40, f: 5 },
+      { name: 'Italian BMT (6-inch)', cat: 'Subs', cal: 410, p: 22, c: 40, f: 17 },
+      { name: 'Spicy Italian (6-inch)', cat: 'Subs', cal: 480, p: 21, c: 40, f: 24 },
+      { name: 'Tuna (6-inch)', cat: 'Subs', cal: 480, p: 21, c: 40, f: 24 },
+      { name: 'Meatball Marinara (6-inch)', cat: 'Subs', cal: 480, p: 23, c: 55, f: 18 },
+      { name: 'Steak & Cheese (6-inch)', cat: 'Subs', cal: 380, p: 26, c: 40, f: 12 },
+      { name: 'Chicken & Bacon Ranch Melt (6-inch)', cat: 'Subs', cal: 570, p: 38, c: 40, f: 25 },
+      { name: 'Rotisserie-Style Chicken (6-inch)', cat: 'Subs', cal: 320, p: 25, c: 40, f: 6 },
+      { name: 'Veggie Delite (6-inch)', cat: 'Subs', cal: 230, p: 9, c: 40, f: 2 },
+      { name: 'Cold Cut Combo (6-inch)', cat: 'Subs', cal: 330, p: 18, c: 40, f: 10 },
+      { name: 'Chicken Teriyaki (6-inch)', cat: 'Subs', cal: 370, p: 26, c: 50, f: 6 },
+      { name: 'Turkey Breast (Footlong)', cat: 'Subs', cal: 560, p: 36, c: 80, f: 8 },
+      { name: 'Rotisserie Chicken (Footlong)', cat: 'Subs', cal: 640, p: 50, c: 80, f: 12 },
+      { name: 'Veggie Wrap', cat: 'Wraps', cal: 340, p: 11, c: 47, f: 13 },
+      { name: 'Turkey Wrap', cat: 'Wraps', cal: 380, p: 22, c: 47, f: 11 },
+      { name: 'Chocolate Chip Cookie', cat: 'Desserts', cal: 220, p: 2, c: 30, f: 10 },
+      { name: 'Oatmeal Raisin Cookie', cat: 'Desserts', cal: 200, p: 2, c: 30, f: 8 },
+    ]
+  },
+  {
+    id: 'chipotle', name: 'Chipotle', emoji: '🫔', type: 'Mexican',
+    menu: [
+      { name: 'Chicken Burrito Bowl (rice, black beans, fresh salsa)', cat: 'Bowls', cal: 685, p: 44, c: 73, f: 20 },
+      { name: 'Steak Burrito Bowl (rice, pinto beans, cheese)', cat: 'Bowls', cal: 745, p: 44, c: 77, f: 23 },
+      { name: 'Barbacoa Bowl (rice, black beans, guac)', cat: 'Bowls', cal: 835, p: 43, c: 78, f: 37 },
+      { name: 'Carnitas Bowl (rice, veggies, sour cream)', cat: 'Bowls', cal: 760, p: 40, c: 77, f: 29 },
+      { name: 'Sofritas Bowl (vegan, rice, black beans)', cat: 'Bowls', cal: 630, p: 20, c: 82, f: 22 },
+      { name: 'Chicken Burrito', cat: 'Wraps & Burritos', cal: 1000, p: 55, c: 100, f: 35 },
+      { name: 'Steak Burrito', cat: 'Wraps & Burritos', cal: 975, p: 50, c: 99, f: 33 },
+      { name: 'Chicken Soft Tacos (3)', cat: 'Tacos', cal: 470, p: 33, c: 46, f: 14 },
+      { name: 'Steak Soft Tacos (3)', cat: 'Tacos', cal: 455, p: 29, c: 45, f: 14 },
+      { name: 'Chicken Crispy Tacos (3)', cat: 'Tacos', cal: 510, p: 28, c: 51, f: 20 },
+      { name: 'Chicken Salad Bowl', cat: 'Salads', cal: 495, p: 42, c: 19, f: 27 },
+      { name: 'Steak Salad Bowl', cat: 'Salads', cal: 480, p: 38, c: 18, f: 27 },
+      { name: 'Chicken Quesadilla', cat: 'Specialties', cal: 850, p: 54, c: 55, f: 47 },
+      { name: 'Chips & Guacamole', cat: 'Sides', cal: 770, p: 9, c: 89, f: 43 },
+      { name: 'Chips & Fresh Salsa', cat: 'Sides', cal: 570, p: 7, c: 78, f: 26 },
+      { name: 'Side of Guacamole', cat: 'Sides', cal: 230, p: 3, c: 13, f: 22 },
+      { name: 'Kid\'s Quesadilla (cheese)', cat: 'Specialties', cal: 500, p: 21, c: 49, f: 23 },
+    ]
+  },
+  {
+    id: 'kfc', name: 'KFC', emoji: '🍗', type: 'Chicken',
+    menu: [
+      { name: 'Original Recipe Chicken Breast', cat: 'Chicken', cal: 390, p: 39, c: 11, f: 21 },
+      { name: 'Extra Crispy Chicken Breast', cat: 'Chicken', cal: 530, p: 37, c: 24, f: 34 },
+      { name: 'Grilled Chicken Breast', cat: 'Chicken', cal: 210, p: 38, c: 0, f: 7 },
+      { name: 'Original Recipe Chicken Thigh', cat: 'Chicken', cal: 280, p: 19, c: 9, f: 18 },
+      { name: 'Grilled Chicken Thigh', cat: 'Chicken', cal: 170, p: 22, c: 1, f: 9 },
+      { name: 'KFC Chicken Sandwich', cat: 'Sandwiches', cal: 650, p: 29, c: 66, f: 31 },
+      { name: 'Spicy Chicken Sandwich', cat: 'Sandwiches', cal: 650, p: 29, c: 67, f: 29 },
+      { name: 'Popcorn Chicken (Large)', cat: 'Chicken', cal: 560, p: 34, c: 41, f: 28 },
+      { name: 'Famous Bowl', cat: 'Bowls', cal: 720, p: 31, c: 80, f: 29 },
+      { name: 'KFC Famous Chicken Bowl (No Gravy)', cat: 'Bowls', cal: 560, p: 29, c: 73, f: 16 },
+      { name: 'Hot Wings 6pc', cat: 'Chicken', cal: 510, p: 36, c: 19, f: 34 },
+      { name: 'Mashed Potatoes & Gravy', cat: 'Sides', cal: 160, p: 3, c: 26, f: 5 },
+      { name: 'Mac & Cheese', cat: 'Sides', cal: 140, p: 5, c: 20, f: 5 },
+      { name: 'Coleslaw', cat: 'Sides', cal: 160, p: 1, c: 19, f: 9 },
+      { name: 'Corn on the Cob', cat: 'Sides', cal: 70, p: 3, c: 13, f: 2 },
+      { name: 'Green Beans', cat: 'Sides', cal: 25, p: 1, c: 5, f: 0 },
+      { name: 'Biscuit', cat: 'Sides', cal: 180, p: 4, c: 22, f: 8 },
+      { name: 'Chocolate Chip Cake', cat: 'Desserts', cal: 370, p: 5, c: 53, f: 17 },
+    ]
+  },
+  {
+    id: 'popeyes', name: 'Popeyes', emoji: '🍳', type: 'Chicken',
+    menu: [
+      { name: 'Classic Chicken Sandwich', cat: 'Sandwiches', cal: 699, p: 28, c: 50, f: 42 },
+      { name: 'Spicy Chicken Sandwich', cat: 'Sandwiches', cal: 699, p: 28, c: 50, f: 42 },
+      { name: 'Blackened Chicken Sandwich', cat: 'Sandwiches', cal: 479, p: 35, c: 36, f: 20 },
+      { name: 'Chicken Tenders 3pc', cat: 'Chicken', cal: 370, p: 28, c: 25, f: 19 },
+      { name: 'Spicy Chicken Breast', cat: 'Chicken', cal: 440, p: 33, c: 18, f: 27 },
+      { name: 'Mild Chicken Thigh', cat: 'Chicken', cal: 300, p: 18, c: 11, f: 21 },
+      { name: 'Shrimp Tackle Box', cat: 'Seafood', cal: 470, p: 24, c: 58, f: 15 },
+      { name: 'Red Beans & Rice', cat: 'Sides', cal: 230, p: 8, c: 31, f: 9 },
+      { name: 'Cajun Fries (Medium)', cat: 'Sides', cal: 310, p: 4, c: 42, f: 14 },
+      { name: 'Coleslaw', cat: 'Sides', cal: 250, p: 2, c: 30, f: 13 },
+      { name: 'Biscuit', cat: 'Sides', cal: 260, p: 4, c: 26, f: 15 },
+      { name: 'Mac & Cheese', cat: 'Sides', cal: 200, p: 8, c: 17, f: 10 },
+      { name: 'Mashed Potatoes (with gravy)', cat: 'Sides', cal: 110, p: 2, c: 18, f: 4 },
+      { name: 'Cinnamon Apple Pie', cat: 'Desserts', cal: 290, p: 2, c: 48, f: 10 },
+    ]
+  },
+  {
+    id: 'pandaexpress', name: 'Panda Express', emoji: '🐼', type: 'Chinese-American',
+    menu: [
+      { name: 'Orange Chicken', cat: 'Entrees', cal: 490, p: 23, c: 51, f: 23 },
+      { name: 'Beijing Beef', cat: 'Entrees', cal: 660, p: 20, c: 78, f: 30 },
+      { name: 'Kung Pao Chicken', cat: 'Entrees', cal: 290, p: 24, c: 23, f: 12 },
+      { name: 'Broccoli Beef', cat: 'Entrees', cal: 150, p: 9, c: 13, f: 7 },
+      { name: 'Grilled Teriyaki Chicken', cat: 'Entrees', cal: 300, p: 36, c: 8, f: 13 },
+      { name: 'String Bean Chicken Breast', cat: 'Entrees', cal: 190, p: 14, c: 15, f: 9 },
+      { name: 'Black Pepper Angus Steak', cat: 'Entrees', cal: 180, p: 9, c: 14, f: 10 },
+      { name: 'Honey Walnut Shrimp', cat: 'Entrees', cal: 430, p: 14, c: 35, f: 27 },
+      { name: 'Mushroom Chicken', cat: 'Entrees', cal: 220, p: 14, c: 12, f: 14 },
+      { name: 'Chow Mein', cat: 'Sides', cal: 510, p: 14, c: 80, f: 19 },
+      { name: 'Fried Rice', cat: 'Sides', cal: 520, p: 12, c: 85, f: 16 },
+      { name: 'Steamed White Rice', cat: 'Sides', cal: 380, p: 8, c: 87, f: 0 },
+      { name: 'Super Greens', cat: 'Sides', cal: 90, p: 7, c: 13, f: 2 },
+      { name: 'Chicken Egg Roll', cat: 'Appetizers', cal: 200, p: 8, c: 20, f: 10 },
+      { name: 'Cream Cheese Rangoon 3pc', cat: 'Appetizers', cal: 190, p: 5, c: 28, f: 6 },
+      { name: 'Spring Roll 2pc', cat: 'Appetizers', cal: 190, p: 3, c: 26, f: 8 },
+      { name: 'Apple Pie Roll 2pc', cat: 'Desserts', cal: 300, p: 2, c: 50, f: 11 },
+    ]
+  },
+  {
+    id: 'fiveguys', name: 'Five Guys', emoji: '5️⃣', type: 'Burgers',
+    menu: [
+      { name: 'Little Hamburger', cat: 'Burgers', cal: 560, p: 27, c: 39, f: 32 },
+      { name: 'Hamburger', cat: 'Burgers', cal: 700, p: 40, c: 39, f: 43 },
+      { name: 'Little Cheeseburger', cat: 'Burgers', cal: 620, p: 32, c: 40, f: 38 },
+      { name: 'Cheeseburger', cat: 'Burgers', cal: 770, p: 45, c: 40, f: 49 },
+      { name: 'Bacon Cheeseburger', cat: 'Burgers', cal: 920, p: 51, c: 40, f: 60 },
+      { name: 'Double Bacon Cheeseburger', cat: 'Burgers', cal: 1060, p: 65, c: 40, f: 73 },
+      { name: 'Grilled Cheese', cat: 'Sandwiches', cal: 430, p: 14, c: 41, f: 24 },
+      { name: 'BLT', cat: 'Sandwiches', cal: 500, p: 17, c: 39, f: 30 },
+      { name: 'Hot Dog', cat: 'Sandwiches', cal: 470, p: 18, c: 40, f: 27 },
+      { name: 'Veggie Sandwich', cat: 'Sandwiches', cal: 440, p: 17, c: 60, f: 15 },
+      { name: 'Grilled Chicken Sandwich', cat: 'Sandwiches', cal: 440, p: 43, c: 39, f: 13 },
+      { name: 'Regular Fries', cat: 'Sides', cal: 953, p: 13, c: 131, f: 41 },
+      { name: 'Little Fries', cat: 'Sides', cal: 530, p: 7, c: 66, f: 25 },
+      { name: 'Cajun Fries (Regular)', cat: 'Sides', cal: 953, p: 13, c: 131, f: 41 },
+    ]
+  },
+  {
+    id: 'innout', name: 'In-N-Out Burger', emoji: '🌴', type: 'Burgers',
+    menu: [
+      { name: 'Hamburger', cat: 'Burgers', cal: 390, p: 16, c: 37, f: 19 },
+      { name: 'Cheeseburger', cat: 'Burgers', cal: 480, p: 22, c: 39, f: 27 },
+      { name: 'Double-Double', cat: 'Burgers', cal: 700, p: 37, c: 40, f: 41 },
+      { name: '3×3', cat: 'Burgers', cal: 1000, p: 53, c: 41, f: 67 },
+      { name: '4×4', cat: 'Burgers', cal: 1290, p: 69, c: 42, f: 93 },
+      { name: 'Double-Double Protein Style (lettuce wrap)', cat: 'Burgers', cal: 520, p: 33, c: 11, f: 39 },
+      { name: 'Hamburger Protein Style', cat: 'Burgers', cal: 240, p: 13, c: 11, f: 17 },
+      { name: 'Grilled Cheese', cat: 'Sandwiches', cal: 380, p: 9, c: 40, f: 22 },
+      { name: 'French Fries', cat: 'Sides', cal: 395, p: 7, c: 54, f: 18 },
+      { name: 'Animal Style Fries', cat: 'Sides', cal: 720, p: 17, c: 61, f: 45 },
+      { name: 'Vanilla Milkshake', cat: 'Drinks', cal: 580, p: 9, c: 83, f: 25 },
+      { name: 'Chocolate Milkshake', cat: 'Drinks', cal: 590, p: 9, c: 86, f: 25 },
+      { name: 'Strawberry Milkshake', cat: 'Drinks', cal: 590, p: 9, c: 86, f: 25 },
+    ]
+  },
+  {
+    id: 'shakeshack', name: 'Shake Shack', emoji: '🍔', type: 'Burgers',
+    menu: [
+      { name: 'ShackBurger', cat: 'Burgers', cal: 530, p: 26, c: 40, f: 29 },
+      { name: 'SmokeShack', cat: 'Burgers', cal: 590, p: 30, c: 40, f: 34 },
+      { name: 'Double ShackBurger', cat: 'Burgers', cal: 800, p: 46, c: 41, f: 50 },
+      { name: "'Shroom Burger (veggie)", cat: 'Burgers', cal: 530, p: 19, c: 43, f: 31 },
+      { name: 'Chick\'n Shack', cat: 'Chicken', cal: 570, p: 34, c: 44, f: 26 },
+      { name: 'Grilled Chicken Sandwich', cat: 'Chicken', cal: 440, p: 37, c: 36, f: 16 },
+      { name: 'Avocado Bacon Burger', cat: 'Burgers', cal: 780, p: 40, c: 42, f: 51 },
+      { name: 'Crinkle Cut Fries', cat: 'Sides', cal: 420, p: 6, c: 50, f: 21 },
+      { name: 'Cheese Fries', cat: 'Sides', cal: 470, p: 15, c: 43, f: 27 },
+      { name: 'Vanilla Milkshake', cat: 'Drinks', cal: 570, p: 11, c: 79, f: 24 },
+      { name: 'Chocolate Milkshake', cat: 'Drinks', cal: 610, p: 12, c: 88, f: 24 },
+      { name: 'Strawberry Milkshake', cat: 'Drinks', cal: 560, p: 11, c: 79, f: 23 },
+      { name: 'Concrete (Chocolate Fudge Brownie)', cat: 'Desserts', cal: 790, p: 16, c: 110, f: 33 },
+    ]
+  },
+  {
+    id: 'dominos', name: "Domino's", emoji: '🍕', type: 'Pizza',
+    menu: [
+      { name: 'Cheese (Large Hand Tossed, 1 slice)', cat: 'Pizza', cal: 290, p: 12, c: 37, f: 10 },
+      { name: 'Pepperoni (Large Hand Tossed, 1 slice)', cat: 'Pizza', cal: 320, p: 14, c: 37, f: 13 },
+      { name: 'Meat Lovers (Large Hand Tossed, 1 slice)', cat: 'Pizza', cal: 390, p: 18, c: 38, f: 18 },
+      { name: 'Veggie (Large Hand Tossed, 1 slice)', cat: 'Pizza', cal: 290, p: 11, c: 38, f: 10 },
+      { name: 'BBQ Chicken (Large Hand Tossed, 1 slice)', cat: 'Pizza', cal: 320, p: 15, c: 40, f: 11 },
+      { name: 'Buffalo Chicken (Large Hand Tossed, 1 slice)', cat: 'Pizza', cal: 310, p: 15, c: 37, f: 11 },
+      { name: 'Cheese (Thin Crust, 1 slice)', cat: 'Pizza', cal: 200, p: 9, c: 20, f: 9 },
+      { name: 'Pepperoni (Thin Crust, 1 slice)', cat: 'Pizza', cal: 230, p: 11, c: 20, f: 12 },
+      { name: 'Cheese (Pan, 1 slice)', cat: 'Pizza', cal: 350, p: 14, c: 43, f: 13 },
+      { name: 'Pepperoni (Pan, 1 slice)', cat: 'Pizza', cal: 380, p: 16, c: 43, f: 16 },
+      { name: 'Chicken Wings (8pc, Plain)', cat: 'Chicken', cal: 490, p: 50, c: 2, f: 31 },
+      { name: 'Boneless Chicken (8pc)', cat: 'Chicken', cal: 500, p: 33, c: 37, f: 23 },
+      { name: 'Garlic Breadsticks (2pc)', cat: 'Sides', cal: 180, p: 6, c: 30, f: 4 },
+      { name: 'Cheesy Bread (2pc)', cat: 'Sides', cal: 210, p: 8, c: 27, f: 8 },
+      { name: 'Pasta (Chicken Alfredo)', cat: 'Pasta', cal: 990, p: 50, c: 99, f: 40 },
+      { name: 'Pasta (Italian Sausage Marinara)', cat: 'Pasta', cal: 840, p: 40, c: 108, f: 24 },
+      { name: 'Lava Cake', cat: 'Desserts', cal: 370, p: 4, c: 56, f: 16 },
+    ]
+  },
+  {
+    id: 'pizzahut', name: 'Pizza Hut', emoji: '🍕', type: 'Pizza',
+    menu: [
+      { name: 'Cheese (Original Pan, 1 slice)', cat: 'Pizza', cal: 280, p: 12, c: 28, f: 14 },
+      { name: 'Pepperoni (Original Pan, 1 slice)', cat: 'Pizza', cal: 310, p: 13, c: 29, f: 16 },
+      { name: 'Meat Lovers (Original Pan, 1 slice)', cat: 'Pizza', cal: 390, p: 18, c: 29, f: 22 },
+      { name: 'Veggie Lovers (Original Pan, 1 slice)', cat: 'Pizza', cal: 270, p: 11, c: 31, f: 11 },
+      { name: 'Supreme (Original Pan, 1 slice)', cat: 'Pizza', cal: 330, p: 14, c: 31, f: 16 },
+      { name: 'Cheese (Thin N Crispy, 1 slice)', cat: 'Pizza', cal: 190, p: 9, c: 22, f: 8 },
+      { name: 'Pepperoni (Thin N Crispy, 1 slice)', cat: 'Pizza', cal: 220, p: 10, c: 22, f: 10 },
+      { name: 'Stuffed Crust Cheese (1 slice)', cat: 'Pizza', cal: 360, p: 17, c: 43, f: 14 },
+      { name: 'Bone-In Honey Garlic Wings (2pc)', cat: 'Chicken', cal: 200, p: 17, c: 2, f: 14 },
+      { name: 'Breadsticks (2pc)', cat: 'Sides', cal: 340, p: 10, c: 58, f: 7 },
+      { name: 'Gluten-Free Cheese Pizza (1 slice)', cat: 'Pizza', cal: 150, p: 6, c: 18, f: 6 },
+      { name: 'Cinnamon Sticks (2pc)', cat: 'Desserts', cal: 230, p: 5, c: 37, f: 7 },
+    ]
+  },
+  {
+    id: 'arbys', name: "Arby's", emoji: '🥩', type: 'Roast Beef & More',
+    menu: [
+      { name: 'Classic Roast Beef', cat: 'Sandwiches', cal: 360, p: 23, c: 37, f: 14 },
+      { name: 'Beef \'n Cheddar', cat: 'Sandwiches', cal: 450, p: 23, c: 44, f: 20 },
+      { name: 'Double Beef \'n Cheddar', cat: 'Sandwiches', cal: 630, p: 36, c: 46, f: 32 },
+      { name: 'Smokehouse Brisket Sandwich', cat: 'Sandwiches', cal: 610, p: 34, c: 49, f: 29 },
+      { name: 'Turkey Ranch & Bacon Sandwich', cat: 'Sandwiches', cal: 470, p: 33, c: 36, f: 21 },
+      { name: 'Crispy Chicken Sandwich', cat: 'Chicken', cal: 560, p: 25, c: 55, f: 26 },
+      { name: 'Chicken Club Sandwich', cat: 'Chicken', cal: 550, p: 32, c: 51, f: 22 },
+      { name: 'Buffalo Chicken Sandwich', cat: 'Chicken', cal: 490, p: 27, c: 46, f: 21 },
+      { name: 'Fish Sandwich', cat: 'Sandwiches', cal: 580, p: 25, c: 59, f: 28 },
+      { name: 'Medium Curly Fries', cat: 'Sides', cal: 550, p: 7, c: 66, f: 29 },
+      { name: 'Loaded Curly Fries', cat: 'Sides', cal: 880, p: 17, c: 75, f: 56 },
+      { name: 'Mozzarella Sticks 4pc', cat: 'Sides', cal: 460, p: 21, c: 41, f: 23 },
+      { name: 'Jamocha Shake (Medium)', cat: 'Drinks', cal: 620, p: 13, c: 93, f: 22 },
+      { name: 'Apple Turnover', cat: 'Desserts', cal: 420, p: 5, c: 56, f: 20 },
+    ]
+  },
+  {
+    id: 'sonic', name: 'Sonic', emoji: '🚗', type: 'Burgers & Drive-In',
+    menu: [
+      { name: 'Sonic Cheeseburger', cat: 'Burgers', cal: 610, p: 30, c: 43, f: 36 },
+      { name: 'Double Sonic Cheeseburger', cat: 'Burgers', cal: 820, p: 44, c: 44, f: 55 },
+      { name: 'Jr. Deluxe Cheeseburger', cat: 'Burgers', cal: 390, p: 19, c: 31, f: 21 },
+      { name: 'Sonic Chicken Sandwich', cat: 'Chicken', cal: 530, p: 27, c: 48, f: 24 },
+      { name: 'Crispy Chicken Strips 3pc', cat: 'Chicken', cal: 440, p: 27, c: 31, f: 22 },
+      { name: 'Hot Dog (All-American)', cat: 'Dogs', cal: 260, p: 9, c: 23, f: 15 },
+      { name: 'Corn Dog', cat: 'Dogs', cal: 220, p: 6, c: 27, f: 10 },
+      { name: 'Breakfast Burrito', cat: 'Breakfast', cal: 430, p: 18, c: 31, f: 26 },
+      { name: 'Medium Tots', cat: 'Sides', cal: 390, p: 4, c: 47, f: 20 },
+      { name: 'Medium Onion Rings', cat: 'Sides', cal: 350, p: 4, c: 49, f: 15 },
+      { name: 'Cherry Limeade (Medium)', cat: 'Drinks', cal: 210, p: 0, c: 54, f: 0 },
+      { name: 'Vanilla Shake (Medium)', cat: 'Drinks', cal: 670, p: 14, c: 98, f: 24 },
+      { name: 'Oreo Cheesecake Shake (Medium)', cat: 'Drinks', cal: 870, p: 19, c: 134, f: 29 },
+    ]
+  },
+  {
+    id: 'dairyqueen', name: 'Dairy Queen', emoji: '🍦', type: 'Burgers & Ice Cream',
+    menu: [
+      { name: 'Original Cheeseburger', cat: 'Burgers', cal: 390, p: 20, c: 37, f: 17 },
+      { name: 'Bacon Cheese GrillBurger (1/4 lb)', cat: 'Burgers', cal: 650, p: 34, c: 38, f: 38 },
+      { name: 'Double Cheeseburger', cat: 'Burgers', cal: 590, p: 34, c: 37, f: 28 },
+      { name: 'Chicken Strip Basket 4pc', cat: 'Chicken', cal: 1050, p: 41, c: 102, f: 49 },
+      { name: 'Grilled Chicken BLT Salad', cat: 'Salads', cal: 340, p: 30, c: 25, f: 14 },
+      { name: 'Medium French Fries', cat: 'Sides', cal: 350, p: 5, c: 48, f: 16 },
+      { name: 'Oreo Cookie Blizzard (Medium)', cat: 'Desserts', cal: 690, p: 16, c: 96, f: 26 },
+      { name: 'Reese\'s Peanut Butter Cup Blizzard (Medium)', cat: 'Desserts', cal: 870, p: 22, c: 110, f: 40 },
+      { name: 'Snickers Blizzard (Medium)', cat: 'Desserts', cal: 770, p: 17, c: 107, f: 30 },
+      { name: 'Dipped Cone (Medium)', cat: 'Desserts', cal: 490, p: 8, c: 60, f: 24 },
+      { name: 'Vanilla Soft Serve Cone', cat: 'Desserts', cal: 270, p: 7, c: 39, f: 9 },
+      { name: 'Chocolate Sundae (Small)', cat: 'Desserts', cal: 290, p: 6, c: 49, f: 9 },
+      { name: 'Misty Slush (Medium)', cat: 'Drinks', cal: 280, p: 0, c: 69, f: 0 },
+    ]
+  },
+  {
+    id: 'panerabread', name: 'Panera Bread', emoji: '🥐', type: 'Bakery & Cafe',
+    menu: [
+      { name: 'Fuji Apple Chicken Salad (Full)', cat: 'Salads', cal: 580, p: 28, c: 70, f: 23 },
+      { name: 'Green Goddess Cobb Salad (Full)', cat: 'Salads', cal: 570, p: 37, c: 37, f: 28 },
+      { name: 'Caesar Salad with Chicken (Full)', cat: 'Salads', cal: 540, p: 40, c: 23, f: 32 },
+      { name: 'Broccoli Cheddar Soup (Cup)', cat: 'Soups', cal: 290, p: 11, c: 27, f: 16 },
+      { name: 'French Onion Soup (Cup)', cat: 'Soups', cal: 260, p: 11, c: 24, f: 13 },
+      { name: 'Cream of Chicken & Wild Rice (Cup)', cat: 'Soups', cal: 170, p: 8, c: 21, f: 7 },
+      { name: 'Turkey Sandwich (Whole)', cat: 'Sandwiches', cal: 720, p: 42, c: 73, f: 27 },
+      { name: 'BLT Sandwich (Whole)', cat: 'Sandwiches', cal: 580, p: 25, c: 49, f: 31 },
+      { name: 'Chipotle Chicken Avocado Melt (Whole)', cat: 'Sandwiches', cal: 1000, p: 55, c: 81, f: 47 },
+      { name: 'Toasted Frontega Chicken Panini (Whole)', cat: 'Sandwiches', cal: 860, p: 53, c: 80, f: 32 },
+      { name: 'Plain Bagel', cat: 'Bakery', cal: 290, p: 11, c: 56, f: 2 },
+      { name: 'Cinnamon Crunch Bagel', cat: 'Bakery', cal: 420, p: 10, c: 72, f: 10 },
+      { name: 'Blueberry Muffin', cat: 'Bakery', cal: 470, p: 7, c: 69, f: 20 },
+      { name: 'Bear Claw Pastry', cat: 'Bakery', cal: 530, p: 9, c: 66, f: 26 },
+      { name: 'Chocolate Chip Cookie', cat: 'Bakery', cal: 440, p: 5, c: 60, f: 22 },
+      { name: 'Mac & Cheese Bowl', cat: 'Pasta', cal: 790, p: 31, c: 83, f: 36 },
+    ]
+  },
+  {
+    id: 'wingstop', name: 'Wingstop', emoji: '🍗', type: 'Wings',
+    menu: [
+      { name: 'Classic Wings 6pc', cat: 'Wings', cal: 420, p: 36, c: 0, f: 30 },
+      { name: 'Classic Wings 10pc', cat: 'Wings', cal: 700, p: 60, c: 0, f: 50 },
+      { name: 'Boneless Wings 6pc', cat: 'Wings', cal: 380, p: 22, c: 24, f: 21 },
+      { name: 'Boneless Wings 10pc', cat: 'Wings', cal: 634, p: 37, c: 40, f: 35 },
+      { name: 'Chicken Tenders 3pc', cat: 'Chicken', cal: 320, p: 29, c: 17, f: 13 },
+      { name: 'Chicken Tenders 5pc', cat: 'Chicken', cal: 530, p: 48, c: 28, f: 21 },
+      { name: 'Seasoned Fries (Medium)', cat: 'Sides', cal: 290, p: 5, c: 38, f: 13 },
+      { name: 'Cajun Fried Corn', cat: 'Sides', cal: 390, p: 5, c: 51, f: 19 },
+      { name: 'Corn on the Cob', cat: 'Sides', cal: 70, p: 3, c: 14, f: 1 },
+      { name: 'Coleslaw', cat: 'Sides', cal: 190, p: 1, c: 27, f: 8 },
+      { name: 'Chocolate Brownie', cat: 'Desserts', cal: 350, p: 4, c: 52, f: 16 },
+    ]
+  },
+  {
+    id: 'raisingcanes', name: "Raising Cane's", emoji: '🐓', type: 'Chicken',
+    menu: [
+      { name: '3-Finger Combo (tenders, fries, slaw, toast, sauce)', cat: 'Combos', cal: 896, p: 42, c: 90, f: 36 },
+      { name: 'Box Combo 4-Finger (tenders, fries, slaw, toast, 2 sauces)', cat: 'Combos', cal: 1116, p: 52, c: 112, f: 46 },
+      { name: 'Caniac Combo 6-Finger', cat: 'Combos', cal: 1441, p: 71, c: 139, f: 62 },
+      { name: 'Chicken Sandwich Combo', cat: 'Combos', cal: 1120, p: 50, c: 108, f: 48 },
+      { name: 'Chicken Tenders 3pc (only)', cat: 'Chicken', cal: 330, p: 34, c: 8, f: 18 },
+      { name: 'Chicken Tenders 4pc (only)', cat: 'Chicken', cal: 440, p: 45, c: 11, f: 24 },
+      { name: 'Crinkle-Cut Fries', cat: 'Sides', cal: 420, p: 5, c: 54, f: 20 },
+      { name: 'Cane\'s Sauce', cat: 'Sides', cal: 190, p: 0, c: 0, f: 21 },
+      { name: 'Coleslaw', cat: 'Sides', cal: 130, p: 1, c: 19, f: 5 },
+      { name: 'Texas Toast', cat: 'Sides', cal: 150, p: 4, c: 26, f: 4 },
+    ]
+  },
+  {
+    id: 'whataburger', name: 'Whataburger', emoji: '🤠', type: 'Burgers',
+    menu: [
+      { name: 'Whataburger (Original)', cat: 'Burgers', cal: 590, p: 26, c: 61, f: 26 },
+      { name: 'Double Meat Whataburger', cat: 'Burgers', cal: 850, p: 46, c: 62, f: 44 },
+      { name: 'Avocado Bacon Burger', cat: 'Burgers', cal: 670, p: 31, c: 46, f: 41 },
+      { name: 'Whataburger Jr.', cat: 'Burgers', cal: 280, p: 13, c: 30, f: 12 },
+      { name: 'Patty Melt', cat: 'Burgers', cal: 890, p: 46, c: 65, f: 50 },
+      { name: 'Spicy Chicken Sandwich', cat: 'Chicken', cal: 490, p: 27, c: 47, f: 22 },
+      { name: 'Honey Butter Chicken Biscuit', cat: 'Breakfast', cal: 680, p: 29, c: 76, f: 29 },
+      { name: 'Breakfast On A Bun (Bacon, Egg & Cheese)', cat: 'Breakfast', cal: 430, p: 23, c: 29, f: 25 },
+      { name: 'Whatachick\'n Strips 3pc', cat: 'Chicken', cal: 510, p: 33, c: 36, f: 24 },
+      { name: 'Medium French Fries', cat: 'Sides', cal: 380, p: 5, c: 48, f: 18 },
+      { name: 'Medium Onion Rings', cat: 'Sides', cal: 450, p: 6, c: 50, f: 24 },
+      { name: 'Apple & Cranberry Chicken Salad', cat: 'Salads', cal: 330, p: 25, c: 36, f: 10 },
+      { name: 'Chocolate Chunk Cookie', cat: 'Desserts', cal: 230, p: 3, c: 31, f: 11 },
+    ]
+  },
+  {
+    id: 'dunkin', name: "Dunkin'", emoji: '☕', type: 'Coffee & Bakery',
+    menu: [
+      { name: 'Bacon, Egg & Cheese Croissant', cat: 'Breakfast', cal: 500, p: 18, c: 43, f: 29 },
+      { name: 'Bacon, Egg & Cheese English Muffin', cat: 'Breakfast', cal: 360, p: 17, c: 36, f: 16 },
+      { name: 'Sausage, Egg & Cheese Wake-Up Wrap', cat: 'Breakfast', cal: 320, p: 12, c: 19, f: 21 },
+      { name: 'Veggie Egg White Flatbread', cat: 'Breakfast', cal: 340, p: 18, c: 44, f: 10 },
+      { name: 'Chicken Bacon Ranch Wrap', cat: 'Sandwiches', cal: 560, p: 27, c: 50, f: 26 },
+      { name: 'Hash Browns', cat: 'Sides', cal: 200, p: 2, c: 22, f: 11 },
+      { name: 'Glazed Donut', cat: 'Bakery', cal: 260, p: 4, c: 33, f: 13 },
+      { name: 'Boston Kreme Donut', cat: 'Bakery', cal: 300, p: 4, c: 41, f: 13 },
+      { name: 'Blueberry Muffin', cat: 'Bakery', cal: 460, p: 7, c: 68, f: 18 },
+      { name: 'Everything Bagel with Cream Cheese', cat: 'Bakery', cal: 490, p: 18, c: 65, f: 19 },
+      { name: 'Vanilla Latte (Medium)', cat: 'Drinks', cal: 230, p: 10, c: 35, f: 6 },
+      { name: 'Caramel Macchiato (Medium)', cat: 'Drinks', cal: 290, p: 10, c: 44, f: 8 },
+      { name: 'Hot Coffee (Medium)', cat: 'Drinks', cal: 5, p: 0, c: 1, f: 0 },
+      { name: 'Cold Brew (Medium)', cat: 'Drinks', cal: 5, p: 0, c: 1, f: 0 },
+      { name: 'Frozen Chocolate (Medium)', cat: 'Drinks', cal: 680, p: 9, c: 105, f: 22 },
+    ]
+  },
+  {
+    id: 'jerseymikes', name: "Jersey Mike's", emoji: '🥪', type: 'Subs',
+    menu: [
+      { name: 'The Original Italian (Regular)', cat: 'Subs', cal: 670, p: 35, c: 61, f: 31 },
+      { name: 'Club Supreme (Regular)', cat: 'Subs', cal: 590, p: 41, c: 61, f: 20 },
+      { name: 'Turkey & Provolone (Regular)', cat: 'Subs', cal: 540, p: 34, c: 62, f: 17 },
+      { name: 'Roast Beef & Provolone (Regular)', cat: 'Subs', cal: 580, p: 40, c: 61, f: 19 },
+      { name: 'BLT (Regular)', cat: 'Subs', cal: 490, p: 18, c: 61, f: 20 },
+      { name: 'Veggie (Regular)', cat: 'Subs', cal: 450, p: 19, c: 66, f: 13 },
+      { name: 'Big Kahuna Cheesesteak (Regular)', cat: 'Cheesesteaks', cal: 730, p: 46, c: 64, f: 30 },
+      { name: 'Chipotle Chicken Cheesesteak (Regular)', cat: 'Cheesesteaks', cal: 750, p: 45, c: 64, f: 32 },
+      { name: 'Philly Chicken Cheese Steak (Regular)', cat: 'Cheesesteaks', cal: 680, p: 45, c: 64, f: 23 },
+      { name: '#2 Jersey Shore\'s Favorite (Regular)', cat: 'Subs', cal: 620, p: 32, c: 61, f: 26 },
+      { name: 'Chicken Bacon Ranch (Regular)', cat: 'Subs', cal: 790, p: 51, c: 61, f: 36 },
+      { name: 'Brownie (Double Chocolate Chunk)', cat: 'Desserts', cal: 460, p: 5, c: 64, f: 23 },
+    ]
+  },
+  {
+    id: 'jackinthebox', name: 'Jack in the Box', emoji: '🎪', type: 'Burgers & More',
+    menu: [
+      { name: 'Classic Buttery Jack', cat: 'Burgers', cal: 780, p: 40, c: 50, f: 47 },
+      { name: 'Sourdough Jack', cat: 'Burgers', cal: 690, p: 32, c: 36, f: 47 },
+      { name: 'Jumbo Jack', cat: 'Burgers', cal: 560, p: 25, c: 45, f: 32 },
+      { name: 'Jumbo Jack with Cheese', cat: 'Burgers', cal: 660, p: 30, c: 46, f: 40 },
+      { name: 'Double Jack', cat: 'Burgers', cal: 900, p: 53, c: 39, f: 62 },
+      { name: 'Spicy Chicken Sandwich', cat: 'Chicken', cal: 600, p: 25, c: 57, f: 30 },
+      { name: 'Chicken Strips 3pc', cat: 'Chicken', cal: 410, p: 26, c: 29, f: 22 },
+      { name: 'Regular Tacos 2pc', cat: 'Tacos', cal: 340, p: 16, c: 30, f: 18 },
+      { name: 'Egg Roll 3pc', cat: 'Sides', cal: 190, p: 7, c: 25, f: 7 },
+      { name: 'Medium Curly Fries', cat: 'Sides', cal: 430, p: 6, c: 52, f: 22 },
+      { name: 'Breakfast Jack', cat: 'Breakfast', cal: 290, p: 15, c: 30, f: 12 },
+      { name: 'Loaded Breakfast Sandwich', cat: 'Breakfast', cal: 720, p: 35, c: 51, f: 41 },
+      { name: 'Hash Rounds (Medium)', cat: 'Sides', cal: 320, p: 4, c: 35, f: 17 },
+    ]
+  },
+];
+
+function addFastFoodToLog(name, cal, p, c, f) {
+  const dateStr = today();
+  const plan = getOrCreatePlan(dateStr);
+  if (!plan.loggedFoods) plan.loggedFoods = [];
+  plan.loggedFoods.push({ id: uid(), name, calories: cal, protein: p, carbs: c, fat: f });
+  saveState();
+  if (STATE.currentView === 'today') renderTodayInPlace(dateStr);
+  const toast = document.getElementById('ff-toast');
+  if (toast) {
+    toast.textContent = `Added "${name}" to today's log`;
+    toast.style.opacity = '1';
+    setTimeout(() => { if (toast) toast.style.opacity = '0'; }, 2200);
+  }
+}
+
+function renderFastFood() {
+  const restaurant = ffState.restaurant;
+  if (restaurant) return renderFastFoodMenu(restaurant);
+
+  return `
+    <div style="padding-bottom:8px">
+      <h1 style="font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px">Fast Food Explorer</h1>
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:20px">Browse menus & filter by macros</p>
+      <input
+        class="form-input"
+        placeholder="🔍 Search restaurants..."
+        style="margin-bottom:16px;font-size:15px"
+        value="${(ffState.restaurantSearch||'').replace(/"/g,'&quot;')}"
+        oninput="ffState.restaurantSearch=this.value;renderFastFoodInPlace()"
+      >
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        ${FAST_FOOD_DB
+          .filter(r => {
+            const q = (ffState.restaurantSearch||'').toLowerCase();
+            return !q || r.name.toLowerCase().includes(q) || r.type.toLowerCase().includes(q);
+          })
+          .map(r => `
+          <button
+            onclick="ffState.restaurant='${r.id}';ffState.search='';ffState.category='all';ffState.quickFilter='';ffState.sort='default';renderFastFoodInPlace()"
+            style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 12px;text-align:left;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:6px"
+            onmouseover="this.style.borderColor='var(--primary)';this.style.background='var(--primary-light)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"
+          >
+            <span style="font-size:28px">${r.emoji}</span>
+            <span style="font-size:14px;font-weight:700;color:var(--text);line-height:1.2">${r.name}</span>
+            <span style="font-size:11px;color:var(--text-3);font-weight:500">${r.type}</span>
+            <span style="font-size:11px;color:var(--text-3)">${r.menu.length} items</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderFastFoodMenu(restaurantId) {
+  const r = FAST_FOOD_DB.find(x => x.id === restaurantId);
+  if (!r) return renderFastFood();
+
+  const { search, category, quickFilter, sort } = ffState;
+
+  // Collect categories
+  const cats = ['all', ...new Set(r.menu.map(i => i.cat))];
+
+  // Filter items
+  let items = r.menu.filter(item => {
+    if (search && !item.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (category !== 'all' && item.cat !== category) return false;
+    if (quickFilter === 'lowcal' && item.cal >= 400) return false;
+    if (quickFilter === 'highprotein' && item.p < 25) return false;
+    if (quickFilter === 'lowcarb' && item.c >= 30) return false;
+    if (quickFilter === 'lowfat' && item.f >= 15) return false;
+    return true;
+  });
+
+  // Sort
+  if (sort === 'cal_asc') items = [...items].sort((a,b) => a.cal - b.cal);
+  else if (sort === 'cal_desc') items = [...items].sort((a,b) => b.cal - a.cal);
+  else if (sort === 'protein_desc') items = [...items].sort((a,b) => b.p - a.p);
+  else if (sort === 'carbs_asc') items = [...items].sort((a,b) => a.c - b.c);
+
+  const qfOpts = [
+    { id: 'lowcal', label: '🟢 Low Cal', sub: '<400 cal' },
+    { id: 'highprotein', label: '💪 High Protein', sub: '≥25g protein' },
+    { id: 'lowcarb', label: '🥩 Low Carb', sub: '<30g carbs' },
+    { id: 'lowfat', label: '✨ Low Fat', sub: '<15g fat' },
+  ];
+
+  return `
+    <div id="ff-toast" style="position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <button onclick="ffState.restaurant=null;renderFastFoodInPlace()" style="background:var(--surface-2);border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer">← Back</button>
+      <div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-0.5px">${r.emoji} ${r.name}</div>
+        <div style="font-size:12px;color:var(--text-3)">${r.type} · ${r.menu.length} menu items</div>
+      </div>
+    </div>
+
+    <!-- Search & Sort -->
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input
+        class="form-input"
+        placeholder="🔍 Search menu..."
+        style="flex:1;font-size:14px;padding:10px 12px"
+        value="${search.replace(/"/g,'&quot;')}"
+        oninput="ffState.search=this.value;renderFastFoodInPlace()"
+      >
+      <select
+        class="form-input"
+        style="width:auto;font-size:13px;padding:10px 10px;cursor:pointer"
+        onchange="ffState.sort=this.value;renderFastFoodInPlace()"
+      >
+        <option value="default" ${sort==='default'?'selected':''}>Default</option>
+        <option value="cal_asc" ${sort==='cal_asc'?'selected':''}>Cal ↑</option>
+        <option value="cal_desc" ${sort==='cal_desc'?'selected':''}>Cal ↓</option>
+        <option value="protein_desc" ${sort==='protein_desc'?'selected':''}>Protein ↓</option>
+        <option value="carbs_asc" ${sort==='carbs_asc'?'selected':''}>Carbs ↑</option>
+      </select>
+    </div>
+
+    <!-- Quick Filters -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      ${qfOpts.map(q => `
+        <button
+          onclick="ffState.quickFilter=ffState.quickFilter==='${q.id}'?'':'${q.id}';renderFastFoodInPlace()"
+          style="padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid;transition:all .15s;${quickFilter===q.id?'background:var(--primary);color:#fff;border-color:var(--primary)':'background:var(--surface);color:var(--text-2);border-color:var(--border)'}"
+        >${q.label} <span style="opacity:.75;font-weight:400">${q.sub}</span></button>
+      `).join('')}
+    </div>
+
+    <!-- Category Tabs -->
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:none">
+      ${cats.map(cat => `
+        <button
+          onclick="ffState.category='${cat.replace(/'/g,"\\'")}';renderFastFoodInPlace()"
+          style="flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid;white-space:nowrap;transition:all .15s;${category===cat?'background:var(--text);color:#fff;border-color:var(--text)':'background:var(--surface);color:var(--text-2);border-color:var(--border)'}"
+        >${cat === 'all' ? 'All Items' : cat}</button>
+      `).join('')}
+    </div>
+
+    <!-- Results count -->
+    <div style="font-size:12px;color:var(--text-3);font-weight:500;margin-bottom:10px">${items.length} item${items.length!==1?'s':''} found</div>
+
+    <!-- Menu Items -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${items.length === 0 ? `
+        <div style="text-align:center;padding:40px 20px;color:var(--text-3)">
+          <div style="font-size:36px;margin-bottom:8px">🔍</div>
+          <div style="font-weight:600">No items match your filters</div>
+          <div style="font-size:13px;margin-top:4px">Try adjusting your search or filters</div>
+        </div>
+      ` : items.map(item => {
+        const maxMacro = Math.max(item.p * 4, item.c * 4, item.f * 9, 1);
+        const pPct = Math.min(100, Math.round(item.p * 4 / item.cal * 100));
+        const cPct = Math.min(100, Math.round(item.c * 4 / item.cal * 100));
+        const fPct = Math.min(100, Math.round(item.f * 9 / item.cal * 100));
+        const isLowCal = item.cal < 400;
+        const isHighP = item.p >= 25;
+        const isLowC = item.c < 30;
+        const isLowF = item.f < 15;
+        return `
+        <div class="card" style="padding:14px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px">
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:14px;line-height:1.3;margin-bottom:4px">${item.name}</div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap">
+                <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--surface-2);color:var(--text-2)">${item.cat}</span>
+                ${isLowCal ? '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#dcfce7;color:#166534">Low Cal</span>' : ''}
+                ${isHighP ? '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#ede9fe;color:#4c1d95">High Protein</span>' : ''}
+                ${isLowC ? '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#fef9c3;color:#713f12">Low Carb</span>' : ''}
+                ${isLowF ? '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#fce7f3;color:#831843">Low Fat</span>' : ''}
+              </div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:20px;font-weight:800;color:var(--primary);line-height:1">${item.cal}</div>
+              <div style="font-size:10px;color:var(--text-3);font-weight:600">cal</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px">
+            <div style="background:var(--surface-2);border-radius:8px;padding:6px 8px;text-align:center">
+              <div style="font-size:15px;font-weight:800;color:var(--protein)">${item.p}g</div>
+              <div style="font-size:10px;color:var(--text-3);font-weight:600">Protein</div>
+            </div>
+            <div style="background:var(--surface-2);border-radius:8px;padding:6px 8px;text-align:center">
+              <div style="font-size:15px;font-weight:800;color:var(--carbs)">${item.c}g</div>
+              <div style="font-size:10px;color:var(--text-3);font-weight:600">Carbs</div>
+            </div>
+            <div style="background:var(--surface-2);border-radius:8px;padding:6px 8px;text-align:center">
+              <div style="font-size:15px;font-weight:800;color:var(--fat)">${item.f}g</div>
+              <div style="font-size:10px;color:var(--text-3);font-weight:600">Fat</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:3px;height:4px;border-radius:4px;overflow:hidden;margin-bottom:10px;background:var(--border)">
+            <div style="width:${pPct}%;background:var(--protein);border-radius:4px 0 0 4px"></div>
+            <div style="width:${cPct}%;background:var(--carbs)"></div>
+            <div style="width:${fPct}%;background:var(--fat);border-radius:0 4px 4px 0"></div>
+          </div>
+          <button
+            onclick="addFastFoodToLog('${item.name.replace(/'/g,"\\'")}',${item.cal},${item.p},${item.c},${item.f})"
+            style="width:100%;padding:8px;border-radius:8px;font-size:13px;font-weight:700;background:var(--primary-light);color:var(--primary-dark);border:1.5px solid var(--primary);cursor:pointer;transition:all .15s"
+            onmouseover="this.style.background='var(--primary)';this.style.color='#fff'"
+            onmouseout="this.style.background='var(--primary-light)';this.style.color='var(--primary-dark)'"
+          >+ Add to Today's Log</button>
+        </div>
+      `}).join('')}
+    </div>
+  `;
+}
+
+function renderFastFoodInPlace() {
+  const content = document.querySelector('.page-content');
+  if (content) content.innerHTML = renderFastFood();
 }
 
 // ═══════════════════════════════════════════════════
