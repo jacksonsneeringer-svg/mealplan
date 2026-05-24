@@ -6754,7 +6754,7 @@ function resetApp() {
 // ═══════════════════════════════════════════════════
 // FAST FOOD EXPLORER
 // ═══════════════════════════════════════════════════
-let ffState = { restaurant: null, search: '', category: 'all', quickFilter: '', sort: 'default' };
+let ffState = { restaurant: null, search: '', category: 'all', quickFilter: '', sort: 'default', chipotleBase: null, chipotleRice: null, chipotleBeans: null, chipotleProtein: null, chipotleExtras: [], chipotleMode: 'build' };
 
 const FAST_FOOD_DB = [
   {
@@ -6786,6 +6786,11 @@ const FAST_FOOD_DB = [
       { name: 'Apple Pie', cat: 'Desserts', cal: 250, p: 2, c: 33, f: 13 },
       { name: 'Vanilla Shake (Medium)', cat: 'Drinks', cal: 490, p: 12, c: 73, f: 16 },
       { name: 'Chocolate Shake (Medium)', cat: 'Drinks', cal: 530, p: 13, c: 78, f: 17 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -6810,6 +6815,11 @@ const FAST_FOOD_DB = [
       { name: 'Chocolate Shake (Medium)', cat: 'Drinks', cal: 720, p: 15, c: 102, f: 27 },
       { name: 'Vanilla Shake (Medium)', cat: 'Drinks', cal: 680, p: 15, c: 100, f: 26 },
       { name: 'Dutch Apple Pie', cat: 'Desserts', cal: 340, p: 3, c: 51, f: 14 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -6835,6 +6845,11 @@ const FAST_FOOD_DB = [
       { name: 'Frosty Vanilla (Medium)', cat: 'Desserts', cal: 370, p: 10, c: 60, f: 10 },
       { name: 'Frosty Chocolate (Medium)', cat: 'Desserts', cal: 360, p: 10, c: 60, f: 10 },
       { name: 'Frosty-ccino (Small)', cat: 'Drinks', cal: 250, p: 7, c: 39, f: 9 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -6862,6 +6877,11 @@ const FAST_FOOD_DB = [
       { name: 'Ice Dream Cone', cat: 'Desserts', cal: 170, p: 4, c: 29, f: 5 },
       { name: 'Cookies & Cream Milkshake (Large)', cat: 'Drinks', cal: 820, p: 17, c: 119, f: 32 },
       { name: 'Chocolate Milkshake (Large)', cat: 'Drinks', cal: 700, p: 16, c: 100, f: 27 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -6886,6 +6906,11 @@ const FAST_FOOD_DB = [
       { name: 'Breakfast Soft Taco (Egg & Cheese)', cat: 'Breakfast', cal: 170, p: 7, c: 17, f: 9 },
       { name: 'Cinnabon Delights 2pc', cat: 'Desserts', cal: 160, p: 2, c: 22, f: 8 },
       { name: 'Cinnabon Delights 12pc', cat: 'Desserts', cal: 960, p: 12, c: 134, f: 46 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -6910,28 +6935,64 @@ const FAST_FOOD_DB = [
       { name: 'Turkey Wrap', cat: 'Wraps', cal: 380, p: 22, c: 47, f: 11 },
       { name: 'Chocolate Chip Cookie', cat: 'Desserts', cal: 220, p: 2, c: 30, f: 10 },
       { name: 'Oatmeal Raisin Cookie', cat: 'Desserts', cal: 200, p: 2, c: 30, f: 8 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
     id: 'chipotle', name: 'Chipotle', emoji: '🫔', type: 'Mexican',
+    buildYourOwn: true,
+    ingredients: {
+      base: [
+        { name: 'Burrito Bowl', cal: 0, p: 0, c: 0, f: 0 },
+        { name: 'Burrito (Flour Tortilla)', cal: 320, p: 8, c: 50, f: 10 },
+        { name: 'Soft Tacos (3)', cal: 195, p: 6, c: 39, f: 4 },
+        { name: 'Crispy Tacos (3)', cal: 230, p: 4, c: 33, f: 10 },
+        { name: 'Salad Bowl', cal: 15, p: 1, c: 3, f: 0 },
+        { name: 'Quesadilla', cal: 320, p: 12, c: 48, f: 10 },
+      ],
+      rice: [
+        { name: 'White Rice', cal: 210, p: 4, c: 40, f: 3 },
+        { name: 'Brown Rice', cal: 215, p: 5, c: 41, f: 4 },
+        { name: 'No Rice', cal: 0, p: 0, c: 0, f: 0 },
+      ],
+      beans: [
+        { name: 'Black Beans', cal: 130, p: 8, c: 22, f: 2 },
+        { name: 'Pinto Beans', cal: 130, p: 8, c: 22, f: 2 },
+        { name: 'No Beans', cal: 0, p: 0, c: 0, f: 0 },
+      ],
+      protein: [
+        { name: 'Chicken', cal: 180, p: 32, c: 2, f: 7 },
+        { name: 'Steak', cal: 150, p: 21, c: 2, f: 7 },
+        { name: 'Barbacoa', cal: 170, p: 24, c: 2, f: 7 },
+        { name: 'Carnitas', cal: 210, p: 23, c: 0, f: 12 },
+        { name: 'Sofritas (vegan)', cal: 150, p: 8, c: 9, f: 10 },
+        { name: 'No Meat', cal: 0, p: 0, c: 0, f: 0 },
+      ],
+      extras: [
+        { name: 'Fajita Veggies', cal: 20, p: 1, c: 5, f: 1 },
+        { name: 'Fresh Tomato Salsa', cal: 25, p: 1, c: 4, f: 1 },
+        { name: 'Roasted Chili-Corn Salsa', cal: 80, p: 3, c: 15, f: 1 },
+        { name: 'Tomatillo Green-Chili Salsa', cal: 15, p: 0, c: 4, f: 0 },
+        { name: 'Tomatillo Red-Chili Salsa', cal: 25, p: 1, c: 4, f: 1 },
+        { name: 'Cheese', cal: 110, p: 6, c: 1, f: 9 },
+        { name: 'Sour Cream', cal: 120, p: 2, c: 2, f: 10 },
+        { name: 'Guacamole', cal: 230, p: 3, c: 13, f: 22 },
+        { name: 'Queso Blanco', cal: 120, p: 5, c: 4, f: 10 },
+        { name: 'Lettuce', cal: 5, p: 0, c: 1, f: 0 },
+      ]
+    },
     menu: [
-      { name: 'Chicken Burrito Bowl (rice, black beans, fresh salsa)', cat: 'Bowls', cal: 685, p: 44, c: 73, f: 20 },
-      { name: 'Steak Burrito Bowl (rice, pinto beans, cheese)', cat: 'Bowls', cal: 745, p: 44, c: 77, f: 23 },
-      { name: 'Barbacoa Bowl (rice, black beans, guac)', cat: 'Bowls', cal: 835, p: 43, c: 78, f: 37 },
-      { name: 'Carnitas Bowl (rice, veggies, sour cream)', cat: 'Bowls', cal: 760, p: 40, c: 77, f: 29 },
-      { name: 'Sofritas Bowl (vegan, rice, black beans)', cat: 'Bowls', cal: 630, p: 20, c: 82, f: 22 },
-      { name: 'Chicken Burrito', cat: 'Wraps & Burritos', cal: 1000, p: 55, c: 100, f: 35 },
-      { name: 'Steak Burrito', cat: 'Wraps & Burritos', cal: 975, p: 50, c: 99, f: 33 },
-      { name: 'Chicken Soft Tacos (3)', cat: 'Tacos', cal: 470, p: 33, c: 46, f: 14 },
-      { name: 'Steak Soft Tacos (3)', cat: 'Tacos', cal: 455, p: 29, c: 45, f: 14 },
-      { name: 'Chicken Crispy Tacos (3)', cat: 'Tacos', cal: 510, p: 28, c: 51, f: 20 },
-      { name: 'Chicken Salad Bowl', cat: 'Salads', cal: 495, p: 42, c: 19, f: 27 },
-      { name: 'Steak Salad Bowl', cat: 'Salads', cal: 480, p: 38, c: 18, f: 27 },
-      { name: 'Chicken Quesadilla', cat: 'Specialties', cal: 850, p: 54, c: 55, f: 47 },
-      { name: 'Chips & Guacamole', cat: 'Sides', cal: 770, p: 9, c: 89, f: 43 },
-      { name: 'Chips & Fresh Salsa', cat: 'Sides', cal: 570, p: 7, c: 78, f: 26 },
-      { name: 'Side of Guacamole', cat: 'Sides', cal: 230, p: 3, c: 13, f: 22 },
-      { name: 'Kid\'s Quesadilla (cheese)', cat: 'Specialties', cal: 500, p: 21, c: 49, f: 23 },
+      { name: 'Kid\'s Quesadilla (cheese)', cat: 'Kid\'s Meals', cal: 500, p: 21, c: 49, f: 23 },
+      { name: 'Kid\'s Chicken Bowl', cat: 'Kid\'s Meals', cal: 310, p: 16, c: 40, f: 8 },
+      { name: 'Kid\'s Chicken Tacos (2)', cat: 'Kid\'s Meals', cal: 275, p: 15, c: 32, f: 8 },
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -6955,6 +7016,11 @@ const FAST_FOOD_DB = [
       { name: 'Green Beans', cat: 'Sides', cal: 25, p: 1, c: 5, f: 0 },
       { name: 'Biscuit', cat: 'Sides', cal: 180, p: 4, c: 22, f: 8 },
       { name: 'Chocolate Chip Cake', cat: 'Desserts', cal: 370, p: 5, c: 53, f: 17 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -6974,6 +7040,11 @@ const FAST_FOOD_DB = [
       { name: 'Mac & Cheese', cat: 'Sides', cal: 200, p: 8, c: 17, f: 10 },
       { name: 'Mashed Potatoes (with gravy)', cat: 'Sides', cal: 110, p: 2, c: 18, f: 4 },
       { name: 'Cinnamon Apple Pie', cat: 'Desserts', cal: 290, p: 2, c: 48, f: 10 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -6996,6 +7067,11 @@ const FAST_FOOD_DB = [
       { name: 'Cream Cheese Rangoon 3pc', cat: 'Appetizers', cal: 190, p: 5, c: 28, f: 6 },
       { name: 'Spring Roll 2pc', cat: 'Appetizers', cal: 190, p: 3, c: 26, f: 8 },
       { name: 'Apple Pie Roll 2pc', cat: 'Desserts', cal: 300, p: 2, c: 50, f: 11 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7015,6 +7091,11 @@ const FAST_FOOD_DB = [
       { name: 'Regular Fries', cat: 'Sides', cal: 953, p: 13, c: 131, f: 41 },
       { name: 'Little Fries', cat: 'Sides', cal: 530, p: 7, c: 66, f: 25 },
       { name: 'Cajun Fries (Regular)', cat: 'Sides', cal: 953, p: 13, c: 131, f: 41 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7033,6 +7114,11 @@ const FAST_FOOD_DB = [
       { name: 'Vanilla Milkshake', cat: 'Drinks', cal: 580, p: 9, c: 83, f: 25 },
       { name: 'Chocolate Milkshake', cat: 'Drinks', cal: 590, p: 9, c: 86, f: 25 },
       { name: 'Strawberry Milkshake', cat: 'Drinks', cal: 590, p: 9, c: 86, f: 25 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7051,6 +7137,11 @@ const FAST_FOOD_DB = [
       { name: 'Chocolate Milkshake', cat: 'Drinks', cal: 610, p: 12, c: 88, f: 24 },
       { name: 'Strawberry Milkshake', cat: 'Drinks', cal: 560, p: 11, c: 79, f: 23 },
       { name: 'Concrete (Chocolate Fudge Brownie)', cat: 'Desserts', cal: 790, p: 16, c: 110, f: 33 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7073,6 +7164,11 @@ const FAST_FOOD_DB = [
       { name: 'Pasta (Chicken Alfredo)', cat: 'Pasta', cal: 990, p: 50, c: 99, f: 40 },
       { name: 'Pasta (Italian Sausage Marinara)', cat: 'Pasta', cal: 840, p: 40, c: 108, f: 24 },
       { name: 'Lava Cake', cat: 'Desserts', cal: 370, p: 4, c: 56, f: 16 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7090,6 +7186,11 @@ const FAST_FOOD_DB = [
       { name: 'Breadsticks (2pc)', cat: 'Sides', cal: 340, p: 10, c: 58, f: 7 },
       { name: 'Gluten-Free Cheese Pizza (1 slice)', cat: 'Pizza', cal: 150, p: 6, c: 18, f: 6 },
       { name: 'Cinnamon Sticks (2pc)', cat: 'Desserts', cal: 230, p: 5, c: 37, f: 7 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7109,6 +7210,11 @@ const FAST_FOOD_DB = [
       { name: 'Mozzarella Sticks 4pc', cat: 'Sides', cal: 460, p: 21, c: 41, f: 23 },
       { name: 'Jamocha Shake (Medium)', cat: 'Drinks', cal: 620, p: 13, c: 93, f: 22 },
       { name: 'Apple Turnover', cat: 'Desserts', cal: 420, p: 5, c: 56, f: 20 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7127,6 +7233,11 @@ const FAST_FOOD_DB = [
       { name: 'Cherry Limeade (Medium)', cat: 'Drinks', cal: 210, p: 0, c: 54, f: 0 },
       { name: 'Vanilla Shake (Medium)', cat: 'Drinks', cal: 670, p: 14, c: 98, f: 24 },
       { name: 'Oreo Cheesecake Shake (Medium)', cat: 'Drinks', cal: 870, p: 19, c: 134, f: 29 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7145,6 +7256,11 @@ const FAST_FOOD_DB = [
       { name: 'Vanilla Soft Serve Cone', cat: 'Desserts', cal: 270, p: 7, c: 39, f: 9 },
       { name: 'Chocolate Sundae (Small)', cat: 'Desserts', cal: 290, p: 6, c: 49, f: 9 },
       { name: 'Misty Slush (Medium)', cat: 'Drinks', cal: 280, p: 0, c: 69, f: 0 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7166,6 +7282,11 @@ const FAST_FOOD_DB = [
       { name: 'Bear Claw Pastry', cat: 'Bakery', cal: 530, p: 9, c: 66, f: 26 },
       { name: 'Chocolate Chip Cookie', cat: 'Bakery', cal: 440, p: 5, c: 60, f: 22 },
       { name: 'Mac & Cheese Bowl', cat: 'Pasta', cal: 790, p: 31, c: 83, f: 36 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7182,6 +7303,11 @@ const FAST_FOOD_DB = [
       { name: 'Corn on the Cob', cat: 'Sides', cal: 70, p: 3, c: 14, f: 1 },
       { name: 'Coleslaw', cat: 'Sides', cal: 190, p: 1, c: 27, f: 8 },
       { name: 'Chocolate Brownie', cat: 'Desserts', cal: 350, p: 4, c: 52, f: 16 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7197,6 +7323,11 @@ const FAST_FOOD_DB = [
       { name: 'Cane\'s Sauce', cat: 'Sides', cal: 190, p: 0, c: 0, f: 21 },
       { name: 'Coleslaw', cat: 'Sides', cal: 130, p: 1, c: 19, f: 5 },
       { name: 'Texas Toast', cat: 'Sides', cal: 150, p: 4, c: 26, f: 4 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7215,6 +7346,11 @@ const FAST_FOOD_DB = [
       { name: 'Medium Onion Rings', cat: 'Sides', cal: 450, p: 6, c: 50, f: 24 },
       { name: 'Apple & Cranberry Chicken Salad', cat: 'Salads', cal: 330, p: 25, c: 36, f: 10 },
       { name: 'Chocolate Chunk Cookie', cat: 'Desserts', cal: 230, p: 3, c: 31, f: 11 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7252,6 +7388,11 @@ const FAST_FOOD_DB = [
       { name: '#2 Jersey Shore\'s Favorite (Regular)', cat: 'Subs', cal: 620, p: 32, c: 61, f: 26 },
       { name: 'Chicken Bacon Ranch (Regular)', cat: 'Subs', cal: 790, p: 51, c: 61, f: 36 },
       { name: 'Brownie (Double Chocolate Chunk)', cat: 'Desserts', cal: 460, p: 5, c: 64, f: 23 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
   {
@@ -7270,6 +7411,11 @@ const FAST_FOOD_DB = [
       { name: 'Breakfast Jack', cat: 'Breakfast', cal: 290, p: 15, c: 30, f: 12 },
       { name: 'Loaded Breakfast Sandwich', cat: 'Breakfast', cal: 720, p: 35, c: 51, f: 41 },
       { name: 'Hash Rounds (Medium)', cat: 'Sides', cal: 320, p: 4, c: 35, f: 17 },
+
+      { name: 'Fountain Drink (Small, 16oz)', cat: 'Drinks', cal: 190, p: 0, c: 52, f: 0 },
+      { name: 'Fountain Drink (Medium, 21oz)', cat: 'Drinks', cal: 250, p: 0, c: 69, f: 0 },
+      { name: 'Fountain Drink (Large, 30oz)', cat: 'Drinks', cal: 360, p: 0, c: 99, f: 0 },
+      { name: 'Diet Soda (any size)', cat: 'Drinks', cal: 0, p: 0, c: 0, f: 0 },
     ]
   },
 ];
@@ -7320,7 +7466,7 @@ function renderFastFood() {
             <span style="font-size:28px">${r.emoji}</span>
             <span style="font-size:14px;font-weight:700;color:var(--text);line-height:1.2">${r.name}</span>
             <span style="font-size:11px;color:var(--text-3);font-weight:500">${r.type}</span>
-            <span style="font-size:11px;color:var(--text-3)">${r.menu.length} items</span>
+            <span style="font-size:11px;color:var(--text-3)">${r.buildYourOwn ? 'Build Your Own' : `${r.menu.length} items`}</span>
           </button>
         `).join('')}
       </div>
@@ -7331,6 +7477,7 @@ function renderFastFood() {
 function renderFastFoodMenu(restaurantId) {
   const r = FAST_FOOD_DB.find(x => x.id === restaurantId);
   if (!r) return renderFastFood();
+  if (r.buildYourOwn) return renderChipotleBuilder(r);
 
   const { search, category, quickFilter, sort } = ffState;
 
@@ -7479,6 +7626,118 @@ function renderFastFoodMenu(restaurantId) {
         </div>
       `}).join('')}
     </div>
+  `;
+}
+
+function renderChipotleBuilder(r) {
+  const mode    = ffState.chipotleMode || 'build';
+  const ing     = r.ingredients;
+  const base    = ing.base.find(b => b.name === ffState.chipotleBase) || null;
+  const rice    = ing.rice.find(b => b.name === ffState.chipotleRice) || null;
+  const beans   = ing.beans.find(b => b.name === ffState.chipotleBeans) || null;
+  const protein = ing.protein.find(b => b.name === ffState.chipotleProtein) || null;
+  const extras  = (ffState.chipotleExtras || []).map(n => ing.extras.find(e => e.name === n)).filter(Boolean);
+  const parts   = [base, rice, beans, protein, ...extras];
+  const T = {
+    cal: parts.reduce((s, x) => s + (x ? x.cal : 0), 0),
+    p:   parts.reduce((s, x) => s + (x ? x.p   : 0), 0),
+    c:   parts.reduce((s, x) => s + (x ? x.c   : 0), 0),
+    f:   parts.reduce((s, x) => s + (x ? x.f   : 0), 0),
+  };
+  const canAdd   = !!(base && protein);
+  const pText    = protein && protein.name !== 'No Meat' ? protein.name : 'Veggie';
+  const mealName = base
+    ? 'Chipotle ' + base.name + (protein ? ' (' + pText + ')' : '')
+    : 'Chipotle Order';
+
+  const chipBtn = (label, active, setter) =>
+    `<button onclick="${setter};renderFastFoodInPlace()" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid;transition:all .15s;${active ? 'background:var(--primary);color:#fff;border-color:var(--primary)' : 'background:var(--surface);color:var(--text-2);border-color:var(--border)'}">${label}</button>`;
+
+  const calTag = cal => cal > 0 ? ` (+${cal})` : '';
+
+  const stepCard = (num, title, req, btns) => `
+    <div class="card" style="padding:14px 16px;margin-bottom:12px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:10px">${num}. ${title} <span style="color:var(--text-3);font-weight:400;font-size:12px">(${req ? 'required' : 'optional'})</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">${btns}</div>
+    </div>`;
+
+  const header = `
+    <div id="ff-toast" style="position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <button onclick="ffState.restaurant=null;renderFastFoodInPlace()" style="background:var(--surface-2);border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer">← Back</button>
+      <div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-0.5px">🫔 Chipotle</div>
+        <div style="font-size:12px;color:var(--text-3)">Mexican · Build Your Own</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <button onclick="ffState.chipotleMode='build';renderFastFoodInPlace()" style="flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid;transition:all .15s;${mode === 'build' ? 'background:var(--primary);color:#fff;border-color:var(--primary)' : 'background:var(--surface);color:var(--text-2);border-color:var(--border)'}">🌯 Build Your Own</button>
+      <button onclick="ffState.chipotleMode='kids';renderFastFoodInPlace()" style="flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid;transition:all .15s;${mode === 'kids' ? 'background:var(--primary);color:#fff;border-color:var(--primary)' : 'background:var(--surface);color:var(--text-2);border-color:var(--border)'}">🧒 Kid's Meals</button>
+    </div>`;
+
+  if (mode === 'kids') {
+    return header + `
+      <div style="font-size:12px;color:var(--text-3);font-weight:500;margin-bottom:12px">${r.menu.length} item${r.menu.length !== 1 ? 's' : ''}</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        ${r.menu.map(item => {
+          const pPct = Math.min(100, item.cal > 0 ? Math.round(item.p * 4 / item.cal * 100) : 0);
+          const cPct = Math.min(100, item.cal > 0 ? Math.round(item.c * 4 / item.cal * 100) : 0);
+          const fPct = Math.min(100, item.cal > 0 ? Math.round(item.f * 9 / item.cal * 100) : 0);
+          return `
+          <div class="card" style="padding:14px 16px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px">
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:700;font-size:14px;line-height:1.3;margin-bottom:4px">${item.name}</div>
+                <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--surface-2);color:var(--text-2)">${item.cat}</span>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div style="font-size:20px;font-weight:800;color:var(--primary);line-height:1">${item.cal}</div>
+                <div style="font-size:10px;color:var(--text-3);font-weight:600">cal</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px">
+              <div style="background:var(--surface-2);border-radius:8px;padding:6px 8px;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--protein)">${item.p}g</div><div style="font-size:10px;color:var(--text-3);font-weight:600">Protein</div></div>
+              <div style="background:var(--surface-2);border-radius:8px;padding:6px 8px;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--carbs)">${item.c}g</div><div style="font-size:10px;color:var(--text-3);font-weight:600">Carbs</div></div>
+              <div style="background:var(--surface-2);border-radius:8px;padding:6px 8px;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--fat)">${item.f}g</div><div style="font-size:10px;color:var(--text-3);font-weight:600">Fat</div></div>
+            </div>
+            <div style="display:flex;gap:3px;height:4px;border-radius:4px;overflow:hidden;margin-bottom:10px;background:var(--border)">
+              <div style="width:${pPct}%;background:var(--protein);border-radius:4px 0 0 4px"></div>
+              <div style="width:${cPct}%;background:var(--carbs)"></div>
+              <div style="width:${fPct}%;background:var(--fat);border-radius:0 4px 4px 0"></div>
+            </div>
+            <button onclick="addFastFoodToLog('${item.name.replace(/'/g,"\\'")}',${item.cal},${item.p},${item.c},${item.f})" style="width:100%;padding:8px;border-radius:8px;font-size:13px;font-weight:700;background:var(--primary-light);color:var(--primary-dark);border:1.5px solid var(--primary);cursor:pointer;transition:all .15s" onmouseover="this.style.background='var(--primary)';this.style.color='#fff'" onmouseout="this.style.background='var(--primary-light)';this.style.color='var(--primary-dark)'">+ Add to Today's Log</button>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  return header + `
+    <div class="card" style="padding:12px 16px;margin-bottom:16px;border:1.5px solid var(--primary);background:var(--primary-light)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-weight:700;font-size:13px;color:var(--primary-dark)">Your Order Total</div>
+        <div style="font-size:24px;font-weight:800;color:var(--primary);line-height:1">${T.cal} <span style="font-size:12px;color:var(--text-3)">cal</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:5px 8px;text-align:center"><div style="font-size:14px;font-weight:800;color:var(--protein)">${T.p}g</div><div style="font-size:10px;color:var(--text-3);font-weight:600">Protein</div></div>
+        <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:5px 8px;text-align:center"><div style="font-size:14px;font-weight:800;color:var(--carbs)">${T.c}g</div><div style="font-size:10px;color:var(--text-3);font-weight:600">Carbs</div></div>
+        <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:5px 8px;text-align:center"><div style="font-size:14px;font-weight:800;color:var(--fat)">${T.f}g</div><div style="font-size:10px;color:var(--text-3);font-weight:600">Fat</div></div>
+      </div>
+    </div>
+    ${stepCard('1', 'Choose Your Base', true, ing.base.map(b => chipBtn(b.name + calTag(b.cal), ffState.chipotleBase === b.name, `ffState.chipotleBase='${b.name}'`)).join(''))}
+    ${stepCard('2', 'Rice', false, ing.rice.map(b => chipBtn(b.name + calTag(b.cal), ffState.chipotleRice === b.name, `ffState.chipotleRice='${b.name}'`)).join(''))}
+    ${stepCard('3', 'Beans', false, ing.beans.map(b => chipBtn(b.name + calTag(b.cal), ffState.chipotleBeans === b.name, `ffState.chipotleBeans='${b.name}'`)).join(''))}
+    ${stepCard('4', 'Protein', true, ing.protein.map(b => chipBtn(b.name + calTag(b.cal), ffState.chipotleProtein === b.name, `ffState.chipotleProtein='${b.name}'`)).join(''))}
+    ${stepCard('5', 'Toppings & Extras', false, ing.extras.map(e => {
+      const sel = (ffState.chipotleExtras || []).includes(e.name);
+      const esc = e.name.replace(/'/g, "\\'");
+      return chipBtn(e.name + calTag(e.cal), sel, `ffState.chipotleExtras=(ffState.chipotleExtras||[]).includes('${esc}')?ffState.chipotleExtras.filter(x=>x!=='${esc}'):[...(ffState.chipotleExtras||[]),'${esc}']`);
+    }).join(''))}
+    <button
+      onclick="${canAdd ? `addFastFoodToLog('${mealName}',${T.cal},${T.p},${T.c},${T.f})` : ''}"
+      ${canAdd ? '' : 'disabled'}
+      style="width:100%;padding:14px;border-radius:10px;font-size:14px;font-weight:700;border:1.5px solid ${canAdd ? 'var(--primary)' : 'var(--border)'};background:${canAdd ? 'var(--primary)' : 'var(--surface-2)'};color:${canAdd ? '#fff' : 'var(--text-3)'};cursor:${canAdd ? 'pointer' : 'not-allowed'};transition:all .2s;margin-bottom:16px"
+    >${canAdd ? '+ Add to Today\'s Log' : 'Select a base & protein to continue'}</button>
   `;
 }
 
